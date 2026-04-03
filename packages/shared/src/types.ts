@@ -1,7 +1,47 @@
 import { z } from 'zod';
 
 export const serviceTypeOptions = ['AIRPORT_TRANSFER', 'TRIP', 'RENTAL'] as const;
+export const vehicleStatusOptions = ['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RESERVED'] as const;
+
 export const serviceTypeSchema = z.enum(serviceTypeOptions);
+export const vehicleStatusSchema = z.enum(vehicleStatusOptions);
+
+export const vehicleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  status: vehicleStatusSchema,
+  location: z.string(),
+  capacity: z.number().int().positive(),
+  luggage: z.number().int().nonnegative().nullable().optional(),
+  color: z.string(),
+  imageUrl: z.string().url().optional(),
+  description: z.string().optional(),
+  services: z.array(serviceTypeSchema).min(1),
+  minimumHours: z.number().int().positive().nullable().optional(),
+  pricing: z.object({
+    airportTransfer: z.number().nonnegative(),
+    sixHours: z.number().nonnegative(),
+    twelveHours: z.number().nonnegative(),
+    perHour: z.number().nonnegative(),
+  }),
+});
+
+export type Vehicle = z.infer<typeof vehicleSchema>;
+
+export const vehiclesResponseSchema = z.object({
+  data: z.array(vehicleSchema),
+  filters: z.object({
+    status: z.string().optional(),
+    serviceType: serviceTypeSchema.optional(),
+    limit: z.number().optional(),
+  }),
+  meta: z.object({
+    total: z.number().int().nonnegative(),
+    source: z.string(),
+  }),
+});
 
 export const vehiclesFilterSchema = z.object({
   status: z.string().optional(),
@@ -20,6 +60,31 @@ export const bookingQuoteSchema = z.object({
 });
 
 export type BookingQuoteInput = z.infer<typeof bookingQuoteSchema>;
+
+export const bookingQuoteRequestSchema = z.object({
+  vehicleId: z.string().min(1),
+  serviceType: serviceTypeSchema,
+  hours: z.number().min(1),
+  additionalHours: z.number().int().nonnegative().default(0),
+});
+
+export type BookingQuoteRequest = z.infer<typeof bookingQuoteRequestSchema>;
+
+export const bookingQuoteResponseSchema = z.object({
+  vehicleId: z.string(),
+  vehicleName: z.string(),
+  serviceType: serviceTypeSchema,
+  totalAmount: z.number().nonnegative(),
+  depositAmount: z.number().nonnegative(),
+  pricingUsed: z.object({
+    airportTransfer: z.number().nonnegative(),
+    sixHours: z.number().nonnegative(),
+    twelveHours: z.number().nonnegative(),
+    perHour: z.number().nonnegative(),
+  }),
+});
+
+export type BookingQuoteResponse = z.infer<typeof bookingQuoteResponseSchema>;
 
 export const createBookingSchema = z.object({
   customerName: z.string().min(2),
@@ -48,18 +113,39 @@ export function computeBookingQuote(input: BookingQuoteInput) {
   if (input.serviceType === 'AIRPORT_TRANSFER') {
     base = input.priceAirportTransfer;
   } else if (input.serviceType === 'TRIP') {
-    base = input.hours <= 6 ? input.price6Hours : input.price6Hours + Math.max(0, input.hours - 6) * input.pricePerHour;
+    base = input.hours <= 6
+      ? input.price6Hours
+      : input.price6Hours + Math.max(0, input.hours - 6) * input.pricePerHour;
+  } else if (input.hours >= 12) {
+    base = input.price12Hours + input.additionalHours * input.pricePerHour;
+  } else if (input.hours >= 6) {
+    base = input.price6Hours + input.additionalHours * input.pricePerHour;
   } else {
-    if (input.hours >= 12) {
-      base = input.price12Hours + input.additionalHours * input.pricePerHour;
-    } else if (input.hours >= 6) {
-      base = input.price6Hours + input.additionalHours * input.pricePerHour;
-    } else {
-      base = input.hours * input.pricePerHour;
-    }
+    base = input.hours * input.pricePerHour;
   }
 
   const totalAmount = Number(base.toFixed(2));
   const depositAmount = Number((totalAmount * 0.2).toFixed(2));
   return { totalAmount, depositAmount };
+}
+
+export function buildVehicleQuote(vehicle: Vehicle, request: BookingQuoteRequest): BookingQuoteResponse {
+  const quote = computeBookingQuote({
+    serviceType: request.serviceType,
+    hours: request.hours,
+    priceAirportTransfer: vehicle.pricing.airportTransfer,
+    price6Hours: vehicle.pricing.sixHours,
+    price12Hours: vehicle.pricing.twelveHours,
+    pricePerHour: vehicle.pricing.perHour,
+    additionalHours: request.additionalHours,
+  });
+
+  return bookingQuoteResponseSchema.parse({
+    vehicleId: vehicle.id,
+    vehicleName: vehicle.name,
+    serviceType: request.serviceType,
+    totalAmount: quote.totalAmount,
+    depositAmount: quote.depositAmount,
+    pricingUsed: vehicle.pricing,
+  });
 }
