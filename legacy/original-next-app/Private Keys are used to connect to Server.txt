@@ -1,0 +1,23 @@
+Private Keys are used to connect to your servers without passwords.
+You should not use passphrase protected keys.
+Generate new ED25519 SSH Key
+Generate new RSA SSH Key
+Name
+*
+wild-worm-rww04kc80cocg0o4ckg8cgww
+Description
+Created by Aws
+Private Key
+*
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACABcIGyDMjZteo49PAdY0XvCjxjPiuXnhBGxwrRH8cu8gAAAKAvcYAoL3GA
+KAAAAAtzc2gtZWQyNTUxOQAAACABcIGyDMjZteo49PAdY0XvCjxjPiuXnhBGxwrRH8cu8g
+AAAECnb6W34vbR9lkrEdDd5+rnBW3rBB7gM1BWx6gPRx+M4wFwgbIMyNm16jj08B1jRe8K
+PGM+K5eeEEbHCtEfxy7yAAAAF3BocHNlY2xpYi1nZW5lcmF0ZWQta2V5AQIDBAUG
+-----END OPENSSH PRIVATE KEY-----
+
+Public Key
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAFwgbIMyNm16jj08B1jRe8KPGM+K5eeEEbHCtEfxy7y coolify-generated-ssh-key
+ACTION REQUIRED: Copy the 'Public Key' to your server's ~/.ssh/authorized_keys file
+Continue

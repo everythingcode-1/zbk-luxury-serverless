@@ -1,0 +1,14 @@
+# Quick Database Setup
+# Replace YOUR_DATABASE_URL with actual URL from your chosen provider
+
+# For Supabase:
+# DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+
+# For Railway:
+# DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST]:[PORT]/railway"
+
+# For Neon:
+# DATABASE_URL="postgresql://[USERNAME]:[PASSWORD]@[HOST]/[DATABASE]?sslmode=require"
+
+# For Local PostgreSQL:
+# DATABASE_URL="postgresql://postgres:password@localhost:5432/zbk_luxury"

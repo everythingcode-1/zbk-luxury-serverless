@@ -1,0 +1,28 @@
+# ZBK Luxury Transport - Environment Configuration
+# Copy content ini ke file .env.local Anda
+
+# Database Configuration (Direct PostgreSQL)
+DATABASE_URL="postgres://4512f0696eb059aedde102543b5bea0b49754b96861dc136f0f48fab8141ed7d:sk_FFgsWYYn3L_IkLhkJaDj2@db.prisma.io:5432/postgres?sslmode=require&pool=true"
+
+# Dashboard API URL
+NEXT_PUBLIC_DASHBOARD_API_URL=http://localhost:3000
+
+# NextAuth Configuration (Optional - untuk authentication nanti)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here
+
+# Email Configuration (Optional - untuk booking notifications)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# Upload Configuration (Optional - untuk file uploads)
+UPLOAD_DIR=./public/uploads
+MAX_FILE_SIZE=5242880
+
+# Instructions:
+# 1. Copy content di atas ke file .env.local
+# 2. Jalankan: npm run db:generate
+# 3. Jalankan: npm run db:push
+# 4. Test connection dengan: npm run test:db

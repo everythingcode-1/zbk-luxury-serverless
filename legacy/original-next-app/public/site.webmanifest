@@ -1,0 +1,25 @@
+{
+  "name": "ZBK Limo Tours - Premium Luxury Transportation",
+  "short_name": "ZBK Limo",
+  "description": "Premium Toyota Alphard & Hiace rental for Airport Transfers, City Tours, and Special Events",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#D4AF37",
+  "background_color": "#1a1a2e",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "portrait-primary"
+}

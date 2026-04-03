@@ -1,0 +1,36 @@
+Jam Ganti di tab anak -> hitungan itu fix perbulan 
+
+
+Rules->  Penentuan Jadwal Re-eve berdasrkan jam program minimal 1 jam per program yg di ambil 
+
+File File (Multy type File)
+
+
+Observasi Video -> Admin -> Upload  
+
+
+Penambahan Header dan Footer Kedalam Database UNTUK Re-Evaluasi 
+
+
+1 Panel Laporan Kesimpulan Re-Evaluasi per terapis / per program
+
+
+log dan re-send
+
+
+RPT HARUS DI REVIEW BARU BISA DI KERJAKAN
+
+RE-EVE HARUS DI REVEIEW SAMA SVP
+
+
+HARGA HARUS MEMILIKI CARD YANG BERBEDA DAN DI KAITKAN KE ANAK SERTA KE PAYMENT TERAPIS 
+
+
+
+Dropdown Serach Anak Aktif/tidakaktif/observasi
+
+
+Sent Kirim Admin untuk invociec orang tua 
+
+
+Bagian Progres -> 

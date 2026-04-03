@@ -1,0 +1,22 @@
+{
+  "name": "@zbk/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:dry": "wrangler deploy --dry-run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.0",
+    "hono": "^4.9.8",
+    "zod": "^3.25.76",
+    "@zbk/shared": "file:../../packages/shared"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260329.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.8.0"
+  }
+}

@@ -1,0 +1,66 @@
+import { NextRequest, NextResponse } from 'next/server'
+import jwt from 'jsonwebtoken'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'zbk-luxury-secret-key-2024'
+
+export function middleware(request: NextRequest) {
+  console.log('Middleware called for:', request.nextUrl.pathname) // Debug log
+  
+  // TEMPORARILY DISABLED - Allow direct access to admin without authentication
+  console.log('🚫 Authentication middleware disabled - allowing direct access')
+  
+  // For all routes, continue normally without authentication check
+  return NextResponse.next()
+  
+  /* ORIGINAL AUTH CODE - DISABLED
+  // Only protect admin routes
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    console.log('Admin route detected, checking auth...') // Debug log
+    
+    // Try to get token from cookies first
+    let token = request.cookies.get('auth-token')?.value
+    
+    // If no cookie token, try Authorization header
+    if (!token) {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7)
+        console.log('Token found in Authorization header') // Debug log
+      }
+    } else {
+      console.log('Token found in cookies') // Debug log
+    }
+
+    if (!token) {
+      console.log('No token found, redirecting to login') // Debug log
+      // Redirect to new login page if no token
+      return NextResponse.redirect(new URL('/login/admin', request.url))
+    }
+
+    try {
+      // Verify JWT token
+      jwt.verify(token, JWT_SECRET)
+      console.log('Token valid, allowing access') // Debug log
+      // Token is valid, continue to the requested page
+      return NextResponse.next()
+    } catch (error) {
+      console.log('Token invalid, redirecting to login') // Debug log
+      // Invalid token, redirect to login
+      const response = NextResponse.redirect(new URL('/login/admin', request.url))
+      // Clear invalid token
+      response.cookies.set('auth-token', '', { maxAge: 0 })
+      return response
+    }
+  }
+
+  // For all other routes, continue normally
+  return NextResponse.next()
+  */
+}
+
+export const config = {
+  matcher: [
+    // '/admin/:path*' // DISABLED - No middleware for admin routes
+    '/api/disabled-middleware' // Dummy matcher that won't match any real routes
+  ]
+}

@@ -1,0 +1,10 @@
+node_modules
+.dist
+.vite
+.wrangler
+.env
+.env.*
+!.env.example
+legacy/original-next-app/node_modules
+legacy/original-next-app/.next
+legacy/original-next-app/dev.db

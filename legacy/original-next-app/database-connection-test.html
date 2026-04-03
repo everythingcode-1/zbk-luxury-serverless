@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZBK Luxury - Database Connection Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-connected { background-color: #28a745; }
+        .status-disconnected { background-color: #dc3545; }
+        .status-testing { background-color: #ffc107; animation: pulse 1s infinite; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .test-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #495057;
+            border-bottom: 2px solid #D4AF37;
+            padding-bottom: 10px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #D4AF37, #F4D03F);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .info {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #D4AF37;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #D4AF37;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #D4AF37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .connection-info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .connection-info h3 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: rgba(255,255,255,0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #1565c0;
+        }
+        
+        .troubleshooting {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .troubleshooting h3 {
+            margin-top: 0;
+            color: #e65100;
+        }
+        
+        .troubleshooting ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .troubleshooting li {
+            margin: 5px 0;
+            color: #bf360c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗄️ Database Connection Test</h1>
+        
+        <!-- Connection Status -->
+        <div class="test-section">
+            <h2><span id="statusIndicator" class="status-indicator status-disconnected"></span>Connection Status</h2>
+            <p id="statusText">Not tested yet</p>
+            <button onclick="testConnection()">Test Connection</button>
+            <button onclick="forceReconnect()">Force Reconnect</button>
+            <div id="connectionResult"></div>
+        </div>
+
+        <!-- Database Information -->
+        <div class="test-section">
+            <h2>📊 Database Information</h2>
+            <button onclick="getDatabaseInfo()">Get Database Info</button>
+            <div id="databaseInfo"></div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="test-section">
+            <h2>📈 Quick Statistics</h2>
+            <button onclick="getQuickStats()">Refresh Stats</button>
+            <div id="quickStats"></div>
+        </div>
+
+        <!-- Environment Check -->
+        <div class="test-section">
+            <h2>⚙️ Environment Check</h2>
+            <button onclick="checkEnvironment()">Check Environment</button>
+            <div id="environmentCheck"></div>
+        </div>
+
+        <!-- Comprehensive Test -->
+        <div class="test-section">
+            <h2>🎯 Run All Tests</h2>
+            <button onclick="runAllTests()">Run Complete Test Suite</button>
+            <div id="allTestsResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let connectionStatus = 'unknown';
+
+        function updateStatusIndicator(status) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            indicator.className = 'status-indicator';
+            
+            switch(status) {
+                case 'connected':
+                    indicator.classList.add('status-connected');
+                    statusText.textContent = 'Database Connected ✅';
+                    statusText.style.color = '#28a745';
+                    break;
+                case 'disconnected':
+                    indicator.classList.add('status-disconnected');
+                    statusText.textContent = 'Database Disconnected ❌';
+                    statusText.style.color = '#dc3545';
+                    break;
+                case 'testing':
+                    indicator.classList.add('status-testing');
+                    statusText.textContent = 'Testing Connection... ⏳';
+                    statusText.style.color = '#ffc107';
+                    break;
+            }
+            connectionStatus = status;
+        }
+
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<div class="loading"></div> Loading...';
+        }
+
+        function showResult(elementId, result, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${type}">${JSON.stringify(result, null, 2)}</div>`;
+        }
+
+        async function testConnection() {
+            updateStatusIndicator('testing');
+            showLoading('connectionResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/test-connection`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatusIndicator('connected');
+                    
+                    // Show connection info
+                    const connectionInfo = `
+                        <div class="connection-info">
+                            <h3>✅ Connection Successful!</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Database:</div>
+                                    <div>${data.database.name}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Version:</div>
+                                    <div>${data.database.version}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">User:</div>
+                                    <div>${data.database.user}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Connection Time:</div>
+                                    <div>${data.connectionTime}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result success">${JSON.stringify(data, null, 2)}</div>
+                    `;
+                    document.getElementById('connectionResult').innerHTML = connectionInfo;
+                } else {
+                    updateStatusIndicator('disconnected');
+                    
+                    // Show troubleshooting info
+                    const troubleshootingInfo = `
+                        <div class="troubleshooting">
+                            <h3>❌ Connection Failed</h3>
+                            <h4>Checklist:</h4>
+                            <ul>
+                                ${data.troubleshooting?.checkList?.map(item => `<li>${item}</li>`).join('') || ''}
+                            </ul>
+                            <h4>Common Issues:</h4>
+                            <ul>
+                                ${data.troubleshooting?.commonIssues?.map(item => `<li>${item}</li>`).join('') || ''}
+                            </ul>
+                        </div>
+                        <div class="result error">${JSON.stringify(data, null, 2)}</div>
+                    `;
+                    document.getElementById('connectionResult').innerHTML = troubleshootingInfo;
+                }
+            } catch (error) {
+                updateStatusIndicator('disconnected');
+                showResult('connectionResult', { 
+                    error: 'Network error or server not running',
+                    details: error.message,
+                    suggestion: 'Make sure the development server is running: npm run dev'
+                }, 'error');
+            }
+        }
+
+        async function forceReconnect() {
+            updateStatusIndicator('testing');
+            showLoading('connectionResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/test-connection`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatusIndicator('connected');
+                    showResult('connectionResult', data, 'success');
+                } else {
+                    updateStatusIndicator('disconnected');
+                    showResult('connectionResult', data, 'error');
+                }
+            } catch (error) {
+                updateStatusIndicator('disconnected');
+                showResult('connectionResult', { error: error.message }, 'error');
+            }
+        }
+
+        async function getDatabaseInfo() {
+            showLoading('databaseInfo');
+            
+            try {
+                const response = await fetch(`${API_BASE}/test-connection`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const infoHtml = `
+                        <div class="connection-info">
+                            <h3>Database Details</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Database Name:</div>
+                                    <div>${data.database.name}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">PostgreSQL Version:</div>
+                                    <div>${data.database.version}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Current User:</div>
+                                    <div>${data.database.user}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Server Host:</div>
+                                    <div>${data.database.host}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Server Port:</div>
+                                    <div>${data.database.port}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Total Tables:</div>
+                                    <div>${data.tables.length}</div>
+                                </div>
+                            </div>
+                            <h4>Tables:</h4>
+                            <div class="result info">${data.tables.map(t => `${t.name} (${t.type})`).join('\n')}</div>
+                        </div>
+                    `;
+                    document.getElementById('databaseInfo').innerHTML = infoHtml;
+                } else {
+                    showResult('databaseInfo', data, 'error');
+                }
+            } catch (error) {
+                showResult('databaseInfo', { error: error.message }, 'error');
+            }
+        }
+
+        async function getQuickStats() {
+            showLoading('quickStats');
+            
+            try {
+                const response = await fetch(`${API_BASE}/test-connection`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const statsHtml = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.vehicles}</div>
+                                <div class="stat-label">Vehicles</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.bookings}</div>
+                                <div class="stat-label">Bookings</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.blogPosts}</div>
+                                <div class="stat-label">Blog Posts</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.users}</div>
+                                <div class="stat-label">Users</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.totalRecords}</div>
+                                <div class="stat-label">Total Records</div>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('quickStats').innerHTML = statsHtml;
+                } else {
+                    showResult('quickStats', data, 'error');
+                }
+            } catch (error) {
+                showResult('quickStats', { error: error.message }, 'error');
+            }
+        }
+
+        async function checkEnvironment() {
+            showLoading('environmentCheck');
+            
+            const checks = {
+                serverRunning: false,
+                databaseConnected: false,
+                prismaGenerated: false,
+                envConfigured: false
+            };
+            
+            try {
+                // Check if server is running
+                const serverResponse = await fetch(`${API_BASE}/test-connection`);
+                checks.serverRunning = serverResponse.ok;
+                
+                if (checks.serverRunning) {
+                    const data = await serverResponse.json();
+                    checks.databaseConnected = data.success;
+                    checks.prismaGenerated = data.success; // If DB works, Prisma is generated
+                    checks.envConfigured = data.success; // If DB works, env is configured
+                }
+            } catch (error) {
+                // Server not running
+            }
+            
+            const checkResults = `
+                <div class="connection-info">
+                    <h3>Environment Status</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Development Server:</div>
+                            <div>${checks.serverRunning ? '✅ Running' : '❌ Not Running'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Database Connection:</div>
+                            <div>${checks.databaseConnected ? '✅ Connected' : '❌ Disconnected'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Prisma Client:</div>
+                            <div>${checks.prismaGenerated ? '✅ Generated' : '❌ Not Generated'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Environment Config:</div>
+                            <div>${checks.envConfigured ? '✅ Configured' : '❌ Not Configured'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('environmentCheck').innerHTML = checkResults;
+            
+            // Show recommendations if issues found
+            const issues = Object.entries(checks).filter(([key, value]) => !value);
+            if (issues.length > 0) {
+                const recommendations = `
+                    <div class="troubleshooting">
+                        <h3>⚠️ Issues Found</h3>
+                        <h4>Recommended Actions:</h4>
+                        <ul>
+                            ${!checks.serverRunning ? '<li>Start development server: <code>npm run dev</code></li>' : ''}
+                            ${!checks.envConfigured ? '<li>Configure .env.local with DATABASE_URL</li>' : ''}
+                            ${!checks.prismaGenerated ? '<li>Generate Prisma client: <code>npm run db:generate</code></li>' : ''}
+                            ${!checks.databaseConnected ? '<li>Push database schema: <code>npm run db:push</code></li>' : ''}
+                        </ul>
+                    </div>
+                `;
+                document.getElementById('environmentCheck').innerHTML += recommendations;
+            }
+        }
+
+        async function runAllTests() {
+            showLoading('allTestsResult');
+            
+            const results = {
+                environment: {},
+                connection: {},
+                database: {},
+                stats: {}
+            };
+            
+            try {
+                // Run environment check
+                await checkEnvironment();
+                
+                // Test connection
+                const connectionResponse = await fetch(`${API_BASE}/test-connection`);
+                results.connection = await connectionResponse.json();
+                
+                if (results.connection.success) {
+                    results.database = results.connection.database;
+                    results.stats = results.connection.stats;
+                    
+                    updateStatusIndicator('connected');
+                    
+                    const summaryHtml = `
+                        <div class="connection-info">
+                            <h3>🎉 All Tests Passed!</h3>
+                            <p>Database is properly connected and configured.</p>
+                            
+                            <h4>Summary:</h4>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Connection Time:</div>
+                                    <div>${results.connection.connectionTime}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Database:</div>
+                                    <div>${results.database.name}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Total Records:</div>
+                                    <div>${results.stats.totalRecords}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Test Time:</div>
+                                    <div>${new Date().toLocaleTimeString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result success">${JSON.stringify(results, null, 2)}</div>
+                    `;
+                    document.getElementById('allTestsResult').innerHTML = summaryHtml;
+                } else {
+                    updateStatusIndicator('disconnected');
+                    showResult('allTestsResult', results, 'error');
+                }
+                
+            } catch (error) {
+                updateStatusIndicator('disconnected');
+                showResult('allTestsResult', { 
+                    error: error.message,
+                    partialResults: results 
+                }, 'error');
+            }
+        }
+
+        // Auto-test connection on page load
+        window.onload = function() {
+            setTimeout(testConnection, 1000);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,2683 @@
+{
+  "microdata": [
+    {
+      "https://schema.org/logo": [
+        "https://www.kayak.com/"
+      ]
+    }
+  ],
+  "jsonld": [
+    {
+      "@context": "https://schema.org",
+      "@type": "Website",
+      "name": "KAYAK",
+      "url": "https://www.kayak.com"
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "Organization",
+      "name": "KAYAK",
+      "url": "https://www.kayak.com/Cheap-Singapore-Car-Rentals.20828.cars.ksp",
+      "sameAs": [
+        "https://www.facebook.com/kayak/",
+        "https://x.com/KAYAK",
+        "https://www.youtube.com/channel/UCs36_o9B5NadGYfiHwT-ekQ",
+        "https://www.instagram.com/kayak/"
+      ]
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How much does it cost to rent a car in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "On average a rental car in Singapore costs $93 per day. But prices differ between operators and you can save money through a price comparison of car rental deals from different agencies. The cheapest price for a car rental in Singapore found in the last 2 weeks is $85. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I rent an automatic car in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, automatic cars are available in most car renting companies in Singapore. As cars with manual transmission are more common in many countries, you might have to pay an additional charge for renting an automatic car. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which car rental companies are at Changi airport (SIN)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Car rental companies onsite at Changi airport include Avis, Sixt, Thrifty and Hertz. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which car rental companies will pick you up at Changi airport (SIN)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Car rental companies that offer shuttle or pick-up services from Changi airport to off-airport locations include Avis, Sixt, Thrifty, and Hertz. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I find car rentals near me in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Take a look at our extensive car rental location map to find the best rental cars near you. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much does a Small car rental cost in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A Small car rental in Singapore costs $112 per day, on average. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much does a Medium car rental cost in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A Medium car rental in Singapore costs $84 per day, on average. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much does a Luxury car rental cost in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A Luxury car rental in Singapore costs $133 per day, on average. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the most popular rental car location in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In Singapore, cars are most frequently rented at Thrifty 50 Ubi Avenue 3 #01-02 (4 miles from city center). <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Should I get insurance when renting a car in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most car rental providers in Singapore offer insurance but the level of protection can differ substantially. If you're unsure whether to get extra protection for your car rental in Singapore, check out KAYAK's car rental insurance guide. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many car agencies are operating in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KAYAK has deals for you to compare from 14 car rental agencies in Singapore. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What type of car is recommended for driving in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "If you're just driving through the city for business purposes, then a small, compact car will make your life easier. If you're embarking on a road trip around the whole island, a convertible can be a fun option when the weather allows it. A hybrid is a great way to reduce your carbon footprint while exploring Singapore. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What’s the speed limit in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The speed limit is typically 60 km/h (37 mph) throughout Singapore's residential streets and 70 km/h (43 mph) on non-residential streets. Singapore's freeways have a speed limit of 90 km/h (56 mph). The city is packed with speed cameras, so make sure you always stick to the implemented limits. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are the best places to park in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Parking in downtown Singapore isn't too difficult, although it is slightly harder during peak business hours. Most parking lots have replaced coupons with the Parking.sg app, which allows drivers to pay for parking with their phones and only for the exact time they were parked. Coupon rates range between SGD$0.60 and $1.20 per 30 minutes, depending on the location. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What do I need to know before booking a car rental in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Finding the right price, understanding the add-ons and staying up to date with policy changes can be a challenge. That’s why KAYAK has produced the ultimate guide to renting a car to help you cut though the jargon and make the right choice for your rental car. Find tips and insights for how to book your rental, what car rental insurance you’ll need, how to deal with a car rental agency and what extra fees to expect (and avoid!). <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why should I use KAYAK to rent a car in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KAYAK searches thousands of car rental agencies to provide you with offers from all car rental agencies operating in Singapore so that you can compare car rental rates, reviews and pick-up and drop-off locations to find the best deal for you. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the most popular rental car in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Rentals in the Small category (Mazda Mazda3 or similar) are the most popular option in Singapore, costing $83/day on average. Some users have found deals as low as $57/day. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the cheapest month to rent a car in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The cheapest month to rent a car in Singapore is July at an average cost of $90/day. January is the most expensive month to rent a car in Singapore when prices are $108/day on average, which tends to be 13% above the yearly average rental price for Singapore. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What rental car company in Singapore has the most locations?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hawk operates 16 locations in Singapore, more than any other rental company. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How far in advance should you book a rental car in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You should book your rental car in Singapore around 78 days before your trip in order to get a below-average price. <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the cheapest car rental company in Singapore?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In the past 72 hours, the cheapest rental cars were found at Thrifty ($53.75/day), Hertz ($53.78/day) and Avis ($62.86/day). The cheapest rental car price was found at Thrifty, 50 Ubi Avenue 3 #01-02 (3.9 mi from city center). <a href='/Cheap-Singapore-Car-Rentals.20828.cars.ksp'>Search rental cars on KAYAK</a>"
+          }
+        }
+      ]
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "SearchResultsPage",
+      "name": "Singapore",
+      "description": "Browse and compare prices for car rentals $[0, preposition:'in ']$[0, article:'in ']$[0, place:'in']. Find the best rental car deals by searching and comparing various rental agencies.",
+      "breadcrumb": {
+        "@context": "http://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": "1",
+            "item": {
+              "@id": "/",
+              "name": "KAYAK.com"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": "2",
+            "item": {
+              "@id": "/cars",
+              "name": "Cars"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": "3",
+            "item": {
+              "@id": "/Asia-Car-Rentals.as.ccr.ksp",
+              "name": "Car rentals in Asia"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": "4",
+            "item": {
+              "@id": "/Singapore-Car-Rentals.218.crc.html",
+              "name": "Car rentals in Singapore"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": "5",
+            "item": {
+              "@id": "/Southeast-Asia-Car-Rentals.f2001893.crr.html",
+              "name": "Car rentals in Southeast Asia"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": "6",
+            "item": {
+              "@id": "",
+              "name": "Singapore car rentals"
+            }
+          }
+        ]
+      },
+      "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@type": "Product",
+              "name": "Economy car rentals",
+              "description": "Economy cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/32_sedan_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 57,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "item": {
+              "@type": "Product",
+              "name": "Compact car rentals",
+              "description": "Compact cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/02_economy_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 71,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "item": {
+              "@type": "Product",
+              "name": "Intermediate car rentals",
+              "description": "Intermediate cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/32_sedan_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 70,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "item": {
+              "@type": "Product",
+              "name": "Standard car rentals",
+              "description": "Standard cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/03_standard_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 70,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "item": {
+              "@type": "Product",
+              "name": "Full-size car rentals",
+              "description": "Full-size cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/39_sedan_orange.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 99,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "item": {
+              "@type": "Product",
+              "name": "SUV car rentals",
+              "description": "SUV cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/05_suv-small_black.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 70,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 7,
+            "item": {
+              "@type": "Product",
+              "name": "Full-size SUV car rentals",
+              "description": "Full-size SUV cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/06_suv-medium_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 110,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 8,
+            "item": {
+              "@type": "Product",
+              "name": "Passenger van car rentals",
+              "description": "Passenger van cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/11_van_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 108,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 9,
+            "item": {
+              "@type": "Product",
+              "name": "Luxury car rentals",
+              "description": "Luxury cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/04_premium.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 111,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 10,
+            "item": {
+              "@type": "Product",
+              "name": "Compact SUV car rentals",
+              "description": "Compact SUV cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/05_suv-small_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 70,
+                "priceCurrency": "USD"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 11,
+            "item": {
+              "@type": "Product",
+              "name": "Standard SUV car rentals",
+              "description": "Standard SUV cars available for rent on KAYAK",
+              "image": "https://content.r9cdn.net/rimg/car-images/generic/28_suv_medium_white.png?width=286&height=180",
+              "offers": {
+                "@type": "Offer",
+                "price": 86,
+                "priceCurrency": "USD"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Thrifty",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/thrifty.png?crop=false&width=120&height=60&fallback=default1.png&_v=db95b0cea0b088cbbb7f494d4f4812ab",
+      "telephone": "+65 6360 9079",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "50 Ubi Avenue 3 #01-02",
+        "postalCode": "408866",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Thrifty"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Thrifty",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/thrifty.png?crop=false&width=120&height=60&fallback=default1.png&_v=db95b0cea0b088cbbb7f494d4f4812ab",
+      "telephone": "+65 6542 5300",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "60 Airport Boulevard",
+        "postalCode": "819643",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Thrifty"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Thrifty",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/thrifty.png?crop=false&width=120&height=60&fallback=default1.png&_v=db95b0cea0b088cbbb7f494d4f4812ab",
+      "telephone": "+65 6734 3300",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Level 1",
+        "postalCode": "408607",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "08:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "08:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "08:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "08:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "08:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "08:00:00",
+          "closes": "13:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Thrifty"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Sixt",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/sixtrentacar.png?crop=false&width=120&height=60&fallback=default3.png&_v=8588d6204673594fdb633f615ecae36c",
+      "telephone": "+65 6423 9566",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1 Cove Avenue",
+        "postalCode": "098537",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Sixt"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Sixt",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/sixtrentacar.png?crop=false&width=120&height=60&fallback=default3.png&_v=8588d6204673594fdb633f615ecae36c",
+      "telephone": "+65 6423 9566",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "20, Changi North Crescent",
+        "postalCode": "499613",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "13:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Sixt"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Sixt",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/sixtrentacar.png?crop=false&width=120&height=60&fallback=default3.png&_v=8588d6204673594fdb633f615ecae36c",
+      "telephone": "+65 6423 9566",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "293 Kaki Bukit Ave 1 #03-00",
+        "postalCode": "416081",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "10:00:00",
+          "closes": "17:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Sixt"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Sixt",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/sixtrentacar.png?crop=false&width=120&height=60&fallback=default3.png&_v=8588d6204673594fdb633f615ecae36c",
+      "telephone": "+65 9660 0506",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "80, Blvd Airport, Unit 01-K05",
+        "postalCode": "819642",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Sixt"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Avis",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/avis.png?crop=false&width=120&height=60&fallback=default1.png&_v=7f7d5a809d8f3ba3988b76e735e9719a",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "390a Havelock Road",
+        "postalCode": "169664",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "13:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Avis"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Avis",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/avis.png?crop=false&width=120&height=60&fallback=default1.png&_v=7f7d5a809d8f3ba3988b76e735e9719a",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Arrival Hall_Terminal 2",
+        "postalCode": "819643",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Avis"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Avis",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/avis.png?crop=false&width=120&height=60&fallback=default1.png&_v=7f7d5a809d8f3ba3988b76e735e9719a",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Arrival Hall_Terminal 3",
+        "postalCode": "819663",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Avis"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Avis",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/avis.png?crop=false&width=120&height=60&fallback=default1.png&_v=7f7d5a809d8f3ba3988b76e735e9719a",
+      "telephone": "+65 6542 8855",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Arrivals Hall_Terminal 4",
+        "postalCode": "819643",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Avis"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hertz",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hertz.png?crop=false&width=120&height=60&fallback=default3.png&_v=b5d809cb115a670bbad4e51d92960c23",
+      "telephone": "+65 6734 4646",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "305 Alexandra Road",
+        "postalCode": "159942",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hertz"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hertz",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hertz.png?crop=false&width=120&height=60&fallback=default3.png&_v=b5d809cb115a670bbad4e51d92960c23",
+      "telephone": "+65 6360 9077",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "50 Ubi Avenue 3 #01-02",
+        "postalCode": "408866",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "18:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hertz"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hertz",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hertz.png?crop=false&width=120&height=60&fallback=default3.png&_v=b5d809cb115a670bbad4e51d92960c23",
+      "telephone": "+65 6550 6718",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "60 Airport Boulevard",
+        "postalCode": "819643",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "09:00:00",
+          "closes": "21:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hertz"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hertz",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hertz.png?crop=false&width=120&height=60&fallback=default3.png&_v=b5d809cb115a670bbad4e51d92960c23",
+      "telephone": "+65 6447 3388",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "L5, #05-05, 305 Alexanda Rd",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "00:00:00",
+          "closes": "24:59:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "00:00:00",
+          "closes": "24:59:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "00:00:00",
+          "closes": "24:59:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "00:00:00",
+          "closes": "24:59:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "00:00:00",
+          "closes": "24:59:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "00:00:00",
+          "closes": "24:59:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "00:00:00",
+          "closes": "24:59:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hertz"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1, Fullerton Square",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "15, Merbau Road",
+        "postalCode": "239032",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1A, Cuscaden Road",
+        "postalCode": "249716",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "20, Bideford Road",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "22, Orange Grove Road",
+        "postalCode": "258350",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "25, Scotts Road",
+        "postalCode": "228220",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "320, Orchard Road",
+        "postalCode": "238865",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "333, Orchard Road",
+        "postalCode": "238867",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "5, Coleman Street #06-00 Excelsior Shopping",
+        "postalCode": "179805",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "5, Raffles Ave Marina Square",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "581 Orchard Road, Singapore",
+        "postalCode": "238883",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "+65 6466 2366",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "68 Jalan Jurong Kechil #01-12 Suites at Bukit Timah",
+        "postalCode": "597180",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "7, Raffles Boulevard",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "76, Bras Basah Road #01-00",
+        "postalCode": "189558",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "80, Bras Basah Road",
+        "postalCode": "189560",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Hawk",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/hawk.png?crop=false&width=120&height=60&fallback=default2.png&_v=169f057a793d8b436ab42d0b771caea4",
+      "telephone": "+65 8332 4095",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Singapore Changi International Airport",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Hawk"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/europcar.png?crop=false&width=120&height=60&fallback=default3.png&_v=20150afe0d617a823f51116e105d0bca",
+      "telephone": "+65 8775 5911",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "2 Kung Chong Road",
+        "postalCode": "159140",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/europcar.png?crop=false&width=120&height=60&fallback=default3.png&_v=20150afe0d617a823f51116e105d0bca",
+      "telephone": "+65 6281 8366",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "56 Loyang Way, N.03-05",
+        "postalCode": "508775",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/europcar.png?crop=false&width=120&height=60&fallback=default3.png&_v=20150afe0d617a823f51116e105d0bca",
+      "telephone": "+65 8775 5911",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "80 Airport Boulevard",
+        "postalCode": "819642",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/europcar.png?crop=false&width=120&height=60&fallback=default3.png&_v=20150afe0d617a823f51116e105d0bca",
+      "telephone": "+65 8775 5911",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Changi Meet And Greet Airport At The Information Counter Terminal 3",
+        "postalCode": "819663",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/europcar.png?crop=false&width=120&height=60&fallback=default3.png&_v=20150afe0d617a823f51116e105d0bca",
+      "telephone": "+65 8775 5911",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Changi Meet And Greet Airport At The Information Counter Terminal 4",
+        "postalCode": "819665",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/europcar.png?crop=false&width=120&height=60&fallback=default3.png&_v=20150afe0d617a823f51116e105d0bca",
+      "telephone": "+65 8775 5911",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Terminal 2 Arrival Hall",
+        "postalCode": "819643",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "keddy by Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/keddy.png?crop=false&width=120&height=60&fallback=default2.png&_v=5107721963065f75433b6d4d888549f5",
+      "telephone": "+65 6389 4222",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "2 Kung Chong Road",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "keddy by Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "keddy by Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/keddy.png?crop=false&width=120&height=60&fallback=default2.png&_v=5107721963065f75433b6d4d888549f5",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "354 Alexandra Road #01-10",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "keddy by Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "keddy by Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/keddy.png?crop=false&width=120&height=60&fallback=default2.png&_v=5107721963065f75433b6d4d888549f5",
+      "telephone": "+65 6281 8366",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "56 Loyang Way, N.03-05",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "keddy by Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "keddy by Europcar",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/keddy.png?crop=false&width=120&height=60&fallback=default2.png&_v=5107721963065f75433b6d4d888549f5",
+      "telephone": "+65 6734 3245",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Changi airport",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "keddy by Europcar"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Budget",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/budget.png?crop=false&width=120&height=60&fallback=default3.png&_v=d9abb6d7c1544876082450eb3bb9fafa",
+      "telephone": "+65 1800 305 5390",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "390a Havelock Road",
+        "postalCode": "169664",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "09:00:00",
+          "closes": "17:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "09:00:00",
+          "closes": "13:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Budget"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Budget",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/budget.png?crop=false&width=120&height=60&fallback=default3.png&_v=d9abb6d7c1544876082450eb3bb9fafa",
+      "telephone": "+65 6441 0764",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Changi Apt Terminal 3",
+        "postalCode": "819463",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "10:00:00",
+          "closes": "20:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "10:00:00",
+          "closes": "20:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "10:00:00",
+          "closes": "20:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "10:00:00",
+          "closes": "20:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "10:00:00",
+          "closes": "20:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "10:00:00",
+          "closes": "20:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "10:00:00",
+          "closes": "20:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Budget"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Budget",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/budget.png?crop=false&width=120&height=60&fallback=default3.png&_v=d9abb6d7c1544876082450eb3bb9fafa",
+      "telephone": "+65 6543 9114",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Changi Apt Terminal 4",
+        "postalCode": "819463",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "07:00:00",
+          "closes": "23:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Budget"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Sunnycars",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/sunnycars.png?crop=false&width=120&height=60&fallback=default2.png&_v=ce73e1c2a6ffc772c6d1c85532c63e68",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "10 Airport Boulevard",
+        "postalCode": "819665",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Sunnycars"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Sunnycars",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/sunnycars.png?crop=false&width=120&height=60&fallback=default2.png&_v=ce73e1c2a6ffc772c6d1c85532c63e68",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "2 Kung Chong Road",
+        "postalCode": "159140",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Sunnycars"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Sunnycars",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/sunnycars.png?crop=false&width=120&height=60&fallback=default2.png&_v=ce73e1c2a6ffc772c6d1c85532c63e68",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No 10 Fourth Lok Yang Road",
+        "postalCode": "629707",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Sunnycars"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "GREEN MOTION ",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/greenmotion.png?crop=false&width=120&height=60&fallback=default3.png&_v=27fe147090b6df32667037618b478476",
+      "telephone": "+65 9839 0641",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "39 Ubi Road 1 #01-05",
+        "postalCode": "408695",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "GREEN MOTION "
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "GREEN MOTION ",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/greenmotion.png?crop=false&width=120&height=60&fallback=default3.png&_v=27fe147090b6df32667037618b478476",
+      "telephone": "+65 9839 0641",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Airport Blvd",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "GREEN MOTION "
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Haihuilai",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/haihuilai.png?crop=false&width=120&height=60&fallback=default2.png&_v=prod-42a7d0d586ef05b2d8ef6fe15b1acca6e85c8ac2",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Clarke Quay Central",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Haihuilai"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "Haihuilai",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/haihuilai.png?crop=false&width=120&height=60&fallback=default2.png&_v=prod-42a7d0d586ef05b2d8ef6fe15b1acca6e85c8ac2",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Marina Bay Sands Hotel",
+        "postalCode": "018956",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Haihuilai"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "SPEED7",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/speedseven.png?crop=false&width=120&height=60&fallback=default2.png&_v=e2598489b9de58b4f561dd2c5287c2d1",
+      "telephone": "+65 8206 6885",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "18 Sin Ming Lane #01-13 Midview City S",
+        "postalCode": "573960",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "SPEED7"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "SPEED7",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/speedseven.png?crop=false&width=120&height=60&fallback=default2.png&_v=e2598489b9de58b4f561dd2c5287c2d1",
+      "telephone": "+65 8206 6885",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Changi Airport T1, T2, T3, T4, T5",
+        "postalCode": "",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "SPEED7"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "ADDCAR RENTAL ",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/addcarrental.png?crop=false&width=120&height=60&fallback=default2.png&_v=ce8f3c11f5eaa0ac31904c7b88c017bf",
+      "telephone": "+355 4 452 2672",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "60 Airport Boulevard, Singapore",
+        "postalCode": "819643",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "ADDCAR RENTAL "
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "AutoRental",
+      "name": "National",
+      "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/national.png?crop=false&width=120&height=60&fallback=default1.png&_v=577fc54c2632048ffc1c7f2e20dbe44a",
+      "telephone": "+65 6338 8444",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "10 Fourth Lok Yang Road",
+        "postalCode": "629707",
+        "addressLocality": "Singapore",
+        "addressCountry": "Singapore"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "monday"
+          ],
+          "opens": "08:30:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "tuesday"
+          ],
+          "opens": "08:30:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "wednesday"
+          ],
+          "opens": "08:30:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "thursday"
+          ],
+          "opens": "08:30:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "friday"
+          ],
+          "opens": "08:30:00",
+          "closes": "18:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "saturday"
+          ],
+          "opens": "00:00:00",
+          "closes": "00:00:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "sunday"
+          ],
+          "opens": "00:00:00",
+          "closes": "00:00:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "National"
+      }
+    },
+    {
+      "@context": "http://schema.org",
+      "@type": "product",
+      "name": "Car rentals $[0, preposition:'in ']$[0, article:'in ']$[0, place:'in']",
+      "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": 56.77000045776367,
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "Review",
+      "@context": "http://schema.org",
+      "itemReviewed": {
+        "@type": "Organization",
+        "name": "Avis",
+        "image": "https://content.r9cdn.net/rimg/provider-logos/cars/h/avis.png?crop=false&width=120&height=60&fallback=default1.png&_v=7f7d5a809d8f3ba3988b76e735e9719a"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": 80,
+        "bestRating": 100,
+        "author": {
+          "@type": "Person",
+          "name": "Anonymous"
+        }
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Anonymous"
+      },
+      "reviewBody": "easy pick-up and drop-off"
+    }
+  ],
+  "graph": null
+}

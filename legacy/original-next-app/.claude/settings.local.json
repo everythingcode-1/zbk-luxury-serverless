@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls C:/Users/HP/OneDrive/Dokumen/Program/rbklux/zbk/src/app/\\\\\\(website\\\\\\)/)",
+      "Bash(ls C:/Users/HP/OneDrive/Dokumen/Program/rbklux/zbk/src/app/\\\\\\(website\\\\\\)/services/ && ls C:/Users/HP/OneDrive/Dokumen/Program/rbklux/zbk/src/app/\\\\\\(website\\\\\\)/fleet/ && ls C:/Users/HP/OneDrive/Dokumen/Program/rbklux/zbk/src/app/\\\\\\(website\\\\\\)/about/ && ls C:/Users/HP/OneDrive/Dokumen/Program/rbklux/zbk/src/app/\\\\\\(website\\\\\\)/blog/)",
+      "Bash(cd \"C:\\\\Users\\\\HP\\\\OneDrive\\\\Dokumen\\\\Program\\\\rbklux\\\\zbk\" && npm run build 2>&1 | tail -60)",
+      "Bash(cd \"C:\\\\Users\\\\HP\\\\OneDrive\\\\Dokumen\\\\Program\\\\rbklux\\\\zbk\" && npx tsc --noEmit 2>&1 | head -50)",
+      "Bash(cd \"C:\\\\Users\\\\HP\\\\OneDrive\\\\Dokumen\\\\Program\\\\rbklux\\\\zbk\" && npx tsc --noEmit 2>&1; echo \"Exit: $?\")",
+      "Bash(cd \"C:\\\\Users\\\\HP\\\\OneDrive\\\\Dokumen\\\\Program\\\\rbklux\\\\zbk\" && node --check scripts/seed-seo-articles.js && echo \"✅ Syntax OK\")",
+      "Bash(cd \"C:\\\\Users\\\\HP\\\\OneDrive\\\\Dokumen\\\\Program\\\\rbklux\\\\zbk\" && node -e \"\nconst script = require\\('fs'\\).readFileSync\\('scripts/seed-seo-articles.js', 'utf8'\\);\nconst slugs = [...script.matchAll\\(/slug: '\\([^']+\\)'/g\\)].map\\(m => m[1]\\);\nconst dates = [...script.matchAll\\(/new Date\\\\\\('\\([^']+\\)'\\\\\\)/g\\)].map\\(m => m[1]\\);\nconsole.log\\('Jumlah artikel:', slugs.length\\);\nconsole.log\\(''\\);\nslugs.forEach\\(\\(slug, i\\) => console.log\\(\\(i+1\\) + '. ' + slug + ' — ' + \\(dates[i] || '-'\\)\\)\\);\n\")",
+      "Bash(find /c/Users/HP/OneDrive/Dokumen/Program/rbklux/zbk/src/app -type d -name \"\\(website\\)\" -o -name \"admin\" -o -name \"login\" | head -20)",
+      "Bash(find /c/Users/HP/OneDrive/Dokumen/Program/rbklux/zbk/src -type f -name \"*.ts\" -o -name \"*.tsx\" | xargs grep -l \"Prisma\\\\|database\\\\|Database\" | head -10)"
+    ]
+  }
+}

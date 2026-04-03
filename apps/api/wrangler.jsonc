@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "zbk-luxury-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-04-03",
+  "vars": {
+    "APP_NAME": "ZBK Luxury API"
+  }
+}

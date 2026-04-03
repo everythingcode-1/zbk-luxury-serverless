@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Metadata Test - ZBK Limo Tours</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status.warning {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 25px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f7fafc;
+        }
+        
+        .test-section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            font-size: 1.5em;
+        }
+        
+        .test-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .test-item h3 {
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .test-item p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .test-item code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            color: #d53f8c;
+            font-size: 0.9em;
+        }
+        
+        .test-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #4299e1;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .test-link:hover {
+            background: #3182ce;
+        }
+        
+        .logo-preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .logo-preview img {
+            max-width: 300px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .checklist li::before {
+            content: "✅";
+            font-size: 1.2em;
+        }
+        
+        .checklist li.pending::before {
+            content: "⏳";
+        }
+        
+        .alert {
+            padding: 20px;
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alert h3 {
+            color: #c53030;
+            margin-bottom: 10px;
+        }
+        
+        .alert p {
+            color: #742a2a;
+            line-height: 1.6;
+        }
+        
+        .timeline {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .timeline-item {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+        
+        .timeline-icon {
+            font-size: 1.5em;
+        }
+        
+        .timeline-content h4 {
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-content p {
+            color: #718096;
+            font-size: 0.95em;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 SEO Metadata Verification</h1>
+        <p class="subtitle">ZBK Limo Tours - Logo Setup untuk Google Search</p>
+        <span class="status success">✅ Setup Complete</span>
+        
+        <div class="test-section">
+            <h2><span class="icon">🔍</span> 1. Test Structured Data (JSON-LD)</h2>
+            <div class="test-item">
+                <h3>Google Rich Results Test</h3>
+                <p>Test apakah Organization schema terdeteksi dengan benar oleh Google.</p>
+                <a href="https://search.google.com/test/rich-results?url=https://www.zbktransportservices.com" 
+                   target="_blank" class="test-link">
+                   🔗 Test Sekarang
+                </a>
+            </div>
+            
+            <div class="test-item">
+                <h3>Schema.org Validator</h3>
+                <p>Validasi struktur JSON-LD sesuai standar Schema.org.</p>
+                <a href="https://validator.schema.org/#url=https://www.zbktransportservices.com" 
+                   target="_blank" class="test-link">
+                   🔗 Validate Schema
+                </a>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2><span class="icon">🖼️</span> 2. Test Open Graph & Social Media</h2>
+            <div class="test-item">
+                <h3>OpenGraph Preview</h3>
+                <p>Preview bagaimana link Anda tampil di social media.</p>
+                <a href="https://www.opengraph.xyz/url/https%3A%2F%2Fwww.zbktransportservices.com" 
+                   target="_blank" class="test-link">
+                   🔗 Preview OpenGraph
+                </a>
+            </div>
+            
+            <div class="test-item">
+                <h3>Facebook Sharing Debugger</h3>
+                <p>Test dan refresh cache Facebook untuk logo baru.</p>
+                <a href="https://developers.facebook.com/tools/debug/?q=https://www.zbktransportservices.com" 
+                   target="_blank" class="test-link">
+                   🔗 Debug Facebook
+                </a>
+            </div>
+            
+            <div class="test-item">
+                <h3>Twitter Card Validator</h3>
+                <p>Preview Twitter Card dengan logo baru.</p>
+                <a href="https://cards-dev.twitter.com/validator" 
+                   target="_blank" class="test-link">
+                   🔗 Validate Twitter Card
+                </a>
+            </div>
+            
+            <div class="test-item">
+                <h3>LinkedIn Post Inspector</h3>
+                <p>Test preview untuk LinkedIn sharing.</p>
+                <a href="https://www.linkedin.com/post-inspector/inspect/https://www.zbktransportservices.com" 
+                   target="_blank" class="test-link">
+                   🔗 Inspect LinkedIn
+                </a>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2><span class="icon">📸</span> 3. Verifikasi Logo</h2>
+            <div class="logo-preview">
+                <h3>Current Logo:</h3>
+                <img src="https://www.zbktransportservices.com/logo-website.png" 
+                     alt="ZBK Limo Tours Logo"
+                     onerror="this.src='public/logo-website.png'; this.onerror=null;">
+            </div>
+            <div class="test-item">
+                <h3>Direct Logo URL</h3>
+                <p>Pastikan logo dapat diakses langsung:</p>
+                <code>https://www.zbktransportservices.com/logo-website.png</code>
+                <a href="https://www.zbktransportservices.com/logo-website.png" 
+                   target="_blank" class="test-link">
+                   🔗 Buka Logo
+                </a>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2><span class="icon">📋</span> 4. Checklist Setup</h2>
+            <ul class="checklist">
+                <li>JSON-LD Structured Data ditambahkan di layout.tsx</li>
+                <li>Open Graph meta tags dengan absolute URL</li>
+                <li>Twitter Card meta tags updated</li>
+                <li>Logo file tersedia di public/logo-website.png</li>
+                <li>Robots.txt dan sitemap sudah dikonfigurasi</li>
+                <li class="pending">Submit ke Google Search Console</li>
+                <li class="pending">Tambahkan Google Verification Code</li>
+                <li class="pending">Request indexing di Google</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2><span class="icon">⏱️</span> 5. Timeline Ekspektasi</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <span class="timeline-icon">🚀</span>
+                    <div class="timeline-content">
+                        <h4>Hari 1-3: Crawling</h4>
+                        <p>Google bot akan mulai crawl website setelah submit sitemap</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-icon">📊</span>
+                    <div class="timeline-content">
+                        <h4>Hari 3-7: Indexing</h4>
+                        <p>Website dan metadata mulai masuk ke index Google</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-icon">✨</span>
+                    <div class="timeline-content">
+                        <h4>Minggu 1-4: Logo Tampil</h4>
+                        <p>Logo mulai tampil di hasil pencarian Google</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert">
+            <h3>⚠️ Langkah Penting Berikutnya</h3>
+            <p>
+                1. <strong>Verifikasi di Google Search Console:</strong> 
+                <a href="https://search.google.com/search-console" target="_blank">search.google.com/search-console</a><br><br>
+                
+                2. <strong>Submit Sitemap:</strong> Masukkan 
+                <code>https://www.zbktransportservices.com/sitemap.xml</code><br><br>
+                
+                3. <strong>Update Verification Code:</strong> Di file <code>src/app/layout.tsx</code> 
+                baris 88, ganti dengan kode verifikasi dari Google Search Console<br><br>
+                
+                4. <strong>Request Indexing:</strong> Gunakan URL Inspection tool untuk request 
+                indexing homepage
+            </p>
+        </div>
+        
+        <div class="test-section">
+            <h2><span class="icon">🛠️</span> 6. Additional Tools</h2>
+            <div class="test-item">
+                <h3>Screaming Frog SEO Spider</h3>
+                <p>Tool untuk comprehensive SEO audit (gratis untuk 500 URLs).</p>
+                <a href="https://www.screamingfrog.co.uk/seo-spider/" 
+                   target="_blank" class="test-link">
+                   🔗 Download Tool
+                </a>
+            </div>
+            
+            <div class="test-item">
+                <h3>PageSpeed Insights</h3>
+                <p>Test performance dan SEO score website.</p>
+                <a href="https://pagespeed.web.dev/?url=https://www.zbktransportservices.com" 
+                   target="_blank" class="test-link">
+                   🔗 Test Performance
+                </a>
+            </div>
+            
+            <div class="test-item">
+                <h3>Bing Webmaster Tools</h3>
+                <p>Daftarkan website di Bing untuk lebih banyak traffic.</p>
+                <a href="https://www.bing.com/webmasters" 
+                   target="_blank" class="test-link">
+                   🔗 Bing Webmaster
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>ZBK Limo Tours</strong> - Premium Luxury Transportation Services</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Setup completed on December 22, 2025
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto test logo accessibility
+        window.addEventListener('load', function() {
+            const img = new Image();
+            img.onerror = function() {
+                console.error('❌ Logo tidak dapat diakses!');
+                alert('⚠️ Warning: Logo tidak dapat diakses di URL yang ditentukan. Silakan periksa file logo.');
+            };
+            img.onload = function() {
+                console.log('✅ Logo berhasil diakses!');
+            };
+            img.src = 'https://www.zbktransportservices.com/logo-website.png';
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+

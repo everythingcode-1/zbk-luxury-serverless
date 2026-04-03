@@ -1,0 +1,276 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Customer {
+  id          String @id @default(cuid())
+  title       Title // Mr, Ms, Mrs
+  firstName   String
+  lastName    String
+  email       String @unique
+  phoneNumber String
+  password    String // Hashed password
+
+  // Social media accounts (optional)
+  facebookHandle  String?
+  instagramHandle String?
+  twitterHandle   String?
+  linkedinHandle  String?
+
+  // Password reset functionality
+  resetPasswordToken   String?   @unique
+  resetPasswordExpires DateTime?
+
+  // Email verification
+  isEmailVerified        Boolean @default(false)
+  emailVerificationToken String? @unique
+
+  // Account status
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  bookings Booking[]
+
+  @@map("customers")
+}
+
+model Vehicle {
+  id                   String        @id @default(cuid())
+  name                 String
+  model                String
+  year                 Int
+  status               VehicleStatus @default(AVAILABLE)
+  location             String
+  plateNumber          String        @unique
+  capacity             Int
+  luggage              Int? // Luggage capacity
+  color                String
+  price                Float? // Legacy hourly rental price (deprecated)
+  priceAirportTransfer Float? // Airport Transfer price (One Way - Airport to Home/Hotel/Destination)
+  price6Hours          Float? // 6 hours rental/booking price
+  price12Hours         Float? // 12 hours rental/booking price
+  pricePerHour         Float? // Per hour price (for TRIP service, rental < 6 hours, or additional hours > 6/12 hours)
+  services             String[] // Available services: ["AIRPORT_TRANSFER", "TRIP", "RENTAL"]
+  minimumHours         Int? // Minimum booking hours
+  carouselOrder        Int? // Optional carousel display order (1, 2, 3, etc.)
+  lastMaintenance      DateTime?
+  nextMaintenance      DateTime?
+  purchaseDate         DateTime
+  purchasePrice        Float
+  mileage              String?
+  features             String[] // JSON array as string
+  images               String[] // JSON array as string
+  description          String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  // Relations
+  bookings           Booking[]
+  maintenanceRecords MaintenanceRecord[]
+
+  @@map("vehicles")
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  customerId      String? // Optional: Link to registered customer
+  customerName    String // For guest bookings or display name
+  customerEmail   String
+  customerPhone   String
+  vehicleId       String
+  service         String // Deprecated: Use serviceType instead
+  serviceType     ServiceType   @default(RENTAL) // AIRPORT_TRANSFER, TRIP, or RENTAL
+  startDate       DateTime
+  endDate         DateTime
+  startTime       String
+  duration        String
+  pickupLocation  String
+  dropoffLocation String?
+  pickupNote      String?
+  dropoffNote     String?
+  totalAmount     Float
+  depositAmount   Float? // 20% deposit amount
+  status          BookingStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  stripeSessionId String?       @unique
+  stripePaymentId String? // Payment intent ID
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  vehicle  Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@map("bookings")
+}
+
+model MaintenanceRecord {
+  id              String            @id @default(cuid())
+  vehicleId       String
+  date            DateTime
+  type            MaintenanceType
+  description     String
+  workshop        String
+  cost            Float
+  status          MaintenanceStatus @default(SCHEDULED)
+  nextServiceDate DateTime?
+  mileage         String?
+  technician      String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("maintenance_records")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  duration    String
+  features    String[] // JSON array as string
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  excerpt     String
+  content     String
+  images      String[] // Multiple images support (max 5)
+  author      String
+  publishedAt DateTime?
+  isPublished Boolean   @default(false)
+  tags        String[] // JSON array as string
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("blog_posts")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contact_messages")
+}
+
+model Settings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+
+  @@map("settings")
+}
+
+model HeroSection {
+  id          String   @id @default(cuid())
+  headline    String
+  description String
+  image       String?  // Image filename/path
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("hero_sections")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  MANAGER
+}
+
+enum Title {
+  MR
+  MS
+  MRS
+  DR
+  PROF
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  RESERVED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum MaintenanceType {
+  REGULAR_SERVICE
+  REPAIR
+  TIRE_REPLACEMENT
+  OIL_CHANGE
+  INSPECTION
+  EMERGENCY
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceType {
+  AIRPORT_TRANSFER // One Way - Airport Transfer (priceAirportTransfer)
+  TRIP // One Way - General Trip (pricePerHour)
+  RENTAL // Round Trip - Hourly Rental (price6Hours / price12Hours / pricePerHour for additional hours)
+}

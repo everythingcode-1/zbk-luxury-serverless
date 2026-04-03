@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZBK Luxury - Data Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #D4AF37;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #D4AF37;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #B8941F;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #D4AF37;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #D4AF37;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #D4AF37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 ZBK Luxury Transport - Database Testing</h1>
+        <p>Test suite untuk memvalidasi input dan pengambilan data dari database.</p>
+        
+        <!-- Current Stats Section -->
+        <div class="test-section">
+            <h2>📊 Current Database Stats</h2>
+            <button onclick="getCurrentStats()">Refresh Stats</button>
+            <div id="statsResult"></div>
+        </div>
+
+        <!-- Test Data Creation Section -->
+        <div class="test-section">
+            <h2>🧪 Create Test Data</h2>
+            <p>Membuat 1 data test untuk masing-masing: Vehicle, Booking, dan Blog Post</p>
+            <button onclick="createTestData()">Create Test Data</button>
+            <div id="createResult"></div>
+        </div>
+
+        <!-- Individual API Tests -->
+        <div class="test-section">
+            <h2>🔍 Individual API Tests</h2>
+            
+            <h3>Vehicle API Test</h3>
+            <button onclick="testVehicleAPI()">Test Vehicle API</button>
+            <div id="vehicleResult"></div>
+
+            <h3>Booking API Test</h3>
+            <button onclick="testBookingAPI()">Test Booking API</button>
+            <div id="bookingResult"></div>
+
+            <h3>Blog API Test</h3>
+            <button onclick="testBlogAPI()">Test Blog API</button>
+            <div id="blogResult"></div>
+        </div>
+
+        <!-- Manual Data Input Test -->
+        <div class="test-section">
+            <h2>✍️ Manual Data Input Test</h2>
+            <p>Test manual input data melalui API endpoints</p>
+            
+            <h3>Add Vehicle</h3>
+            <button onclick="addTestVehicle()">Add Test Vehicle</button>
+            <div id="addVehicleResult"></div>
+
+            <h3>Add Booking</h3>
+            <button onclick="addTestBooking()">Add Test Booking</button>
+            <div id="addBookingResult"></div>
+
+            <h3>Add Blog Post</h3>
+            <button onclick="addTestBlog()">Add Test Blog Post</button>
+            <div id="addBlogResult"></div>
+        </div>
+
+        <!-- Comprehensive Test -->
+        <div class="test-section">
+            <h2>🎯 Run All Tests</h2>
+            <button onclick="runAllTests()">Run Complete Test Suite</button>
+            <div id="allTestsResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<div class="loading"></div> Loading...';
+        }
+
+        function showResult(elementId, result, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${isSuccess ? 'success' : 'error'}">${JSON.stringify(result, null, 2)}</div>`;
+        }
+
+        async function getCurrentStats() {
+            showLoading('statsResult');
+            try {
+                const response = await fetch(`${API_BASE}/test-data`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const statsHtml = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.vehicles}</div>
+                                <div>Vehicles</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.bookings}</div>
+                                <div>Bookings</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.blogPosts}</div>
+                                <div>Blog Posts</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${data.stats.users}</div>
+                                <div>Users</div>
+                            </div>
+                        </div>
+                        <div class="result info">Latest Entries:
+${JSON.stringify(data.latest, null, 2)}</div>
+                    `;
+                    document.getElementById('statsResult').innerHTML = statsHtml;
+                } else {
+                    showResult('statsResult', data, false);
+                }
+            } catch (error) {
+                showResult('statsResult', { error: error.message }, false);
+            }
+        }
+
+        async function createTestData() {
+            showLoading('createResult');
+            try {
+                const response = await fetch(`${API_BASE}/test-data`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                showResult('createResult', data, data.success);
+                
+                // Refresh stats after creating data
+                if (data.success) {
+                    setTimeout(getCurrentStats, 1000);
+                }
+            } catch (error) {
+                showResult('createResult', { error: error.message }, false);
+            }
+        }
+
+        async function testVehicleAPI() {
+            showLoading('vehicleResult');
+            try {
+                const response = await fetch(`${API_BASE}/admin/vehicles`);
+                const data = await response.json();
+                showResult('vehicleResult', { 
+                    count: data.length, 
+                    vehicles: data.slice(0, 2) // Show first 2 vehicles
+                }, true);
+            } catch (error) {
+                showResult('vehicleResult', { error: error.message }, false);
+            }
+        }
+
+        async function testBookingAPI() {
+            showLoading('bookingResult');
+            try {
+                const response = await fetch(`${API_BASE}/admin/bookings`);
+                const data = await response.json();
+                showResult('bookingResult', { 
+                    count: data.length, 
+                    bookings: data.slice(0, 2) // Show first 2 bookings
+                }, true);
+            } catch (error) {
+                showResult('bookingResult', { error: error.message }, false);
+            }
+        }
+
+        async function testBlogAPI() {
+            showLoading('blogResult');
+            try {
+                const response = await fetch(`${API_BASE}/blog`);
+                const data = await response.json();
+                showResult('blogResult', { 
+                    success: data.success,
+                    count: data.data?.length || 0,
+                    posts: data.data?.slice(0, 2) || [] // Show first 2 posts
+                }, data.success);
+            } catch (error) {
+                showResult('blogResult', { error: error.message }, false);
+            }
+        }
+
+        async function addTestVehicle() {
+            showLoading('addVehicleResult');
+            const vehicleData = {
+                name: 'BMW X7 Test Manual',
+                model: 'X7',
+                year: 2024,
+                category: 'ALPHARD_PREMIUM',
+                plateNumber: 'B 9999 MAN',
+                capacity: 7,
+                color: 'Midnight Black',
+                location: 'Jakarta Selatan',
+                purchaseDate: '2024-01-01',
+                purchasePrice: 2000000000,
+                features: ['Panoramic Sunroof', 'Premium Sound', 'Massage Seats'],
+                images: ['/api/placeholder/800/600'],
+                description: 'Manual test vehicle entry via API'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/vehicles`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(vehicleData)
+                });
+                const data = await response.json();
+                showResult('addVehicleResult', data, response.ok);
+            } catch (error) {
+                showResult('addVehicleResult', { error: error.message }, false);
+            }
+        }
+
+        async function addTestBooking() {
+            showLoading('addBookingResult');
+            
+            // First get a vehicle ID
+            try {
+                const vehiclesResponse = await fetch(`${API_BASE}/admin/vehicles`);
+                const vehicles = await vehiclesResponse.json();
+                
+                if (!vehicles.length) {
+                    showResult('addBookingResult', { error: 'No vehicles available. Please add a vehicle first.' }, false);
+                    return;
+                }
+
+                const bookingData = {
+                    customerName: 'Manual Test Customer',
+                    customerEmail: 'manual@test.com',
+                    customerPhone: '+6281234567891',
+                    vehicleId: vehicles[0].id,
+                    service: 'Corporate Event',
+                    startDate: '2024-12-20',
+                    endDate: '2024-12-20',
+                    startTime: '10:00',
+                    duration: '8 hours',
+                    pickupLocation: 'Sudirman Office Tower',
+                    dropoffLocation: 'Soekarno-Hatta Airport',
+                    totalAmount: 2500000,
+                    notes: 'Manual test booking via API'
+                };
+
+                const response = await fetch(`${API_BASE}/public/booking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+                const data = await response.json();
+                showResult('addBookingResult', data, data.success);
+            } catch (error) {
+                showResult('addBookingResult', { error: error.message }, false);
+            }
+        }
+
+        async function addTestBlog() {
+            showLoading('addBlogResult');
+            const blogData = {
+                title: 'Manual Test Blog Post - Corporate Transportation Guide',
+                excerpt: 'A comprehensive guide for corporate transportation services in Jakarta.',
+                content: 'This is a manual test blog post created via API to validate the blog creation functionality...',
+                image: '/api/placeholder/800/600',
+                author: 'Test Author',
+                isPublished: true,
+                tags: ['corporate', 'test', 'manual']
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/blog`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(blogData)
+                });
+                const data = await response.json();
+                showResult('addBlogResult', data, data.success);
+            } catch (error) {
+                showResult('addBlogResult', { error: error.message }, false);
+            }
+        }
+
+        async function runAllTests() {
+            showLoading('allTestsResult');
+            const results = {};
+            
+            try {
+                // Test 1: Get current stats
+                console.log('Running stats test...');
+                const statsResponse = await fetch(`${API_BASE}/test-data`);
+                results.stats = await statsResponse.json();
+
+                // Test 2: Create test data
+                console.log('Creating test data...');
+                const createResponse = await fetch(`${API_BASE}/test-data`, { method: 'POST' });
+                results.createData = await createResponse.json();
+
+                // Test 3: Verify APIs
+                console.log('Testing APIs...');
+                const vehiclesResponse = await fetch(`${API_BASE}/admin/vehicles`);
+                results.vehiclesAPI = { success: vehiclesResponse.ok, count: (await vehiclesResponse.json()).length };
+
+                const bookingsResponse = await fetch(`${API_BASE}/admin/bookings`);
+                results.bookingsAPI = { success: bookingsResponse.ok, count: (await bookingsResponse.json()).length };
+
+                const blogResponse = await fetch(`${API_BASE}/blog`);
+                const blogData = await blogResponse.json();
+                results.blogAPI = { success: blogData.success, count: blogData.data?.length || 0 };
+
+                // Final stats
+                const finalStatsResponse = await fetch(`${API_BASE}/test-data`);
+                results.finalStats = await finalStatsResponse.json();
+
+                showResult('allTestsResult', {
+                    message: 'All tests completed!',
+                    results: results,
+                    summary: {
+                        initialVehicles: results.stats.stats?.vehicles || 0,
+                        finalVehicles: results.finalStats.stats?.vehicles || 0,
+                        initialBookings: results.stats.stats?.bookings || 0,
+                        finalBookings: results.finalStats.stats?.bookings || 0,
+                        initialBlogs: results.stats.stats?.blogPosts || 0,
+                        finalBlogs: results.finalStats.stats?.blogPosts || 0
+                    }
+                }, true);
+
+            } catch (error) {
+                showResult('allTestsResult', { error: error.message, partialResults: results }, false);
+            }
+        }
+
+        // Load initial stats on page load
+        window.onload = function() {
+            getCurrentStats();
+        };
+    </script>
+</body>
+</html>
