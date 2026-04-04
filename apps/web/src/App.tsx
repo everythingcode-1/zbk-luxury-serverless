@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   buildVehicleQuote,
+  type BookingLookupResponse,
   type BookingQuoteRequest,
   type BookingQuoteResponse,
   type CreateBookingResponse,
@@ -30,6 +31,11 @@ type BookingFormState = {
   notes: string;
 };
 
+type BookingLookupFormState = {
+  reference: string;
+  email: string;
+};
+
 const initialBookingForm: BookingFormState = {
   customerName: '',
   customerEmail: '',
@@ -40,6 +46,11 @@ const initialBookingForm: BookingFormState = {
   pickupLocation: '',
   dropoffLocation: '',
   notes: '',
+};
+
+const initialLookupForm: BookingLookupFormState = {
+  reference: '',
+  email: '',
 };
 
 function getDefaultQuoteRequest(vehicle?: Vehicle): BookingQuoteRequest {
@@ -61,11 +72,14 @@ export default function App() {
     additionalHours: 0,
   });
   const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingForm);
+  const [lookupForm, setLookupForm] = useState<BookingLookupFormState>(initialLookupForm);
   const [remoteQuote, setRemoteQuote] = useState<BookingQuoteResponse | null>(null);
   const [bookingResult, setBookingResult] = useState<CreateBookingResponse | null>(null);
+  const [lookupResult, setLookupResult] = useState<BookingLookupResponse | null>(null);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+  const [isLookingUpBooking, setIsLookingUpBooking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -124,6 +138,13 @@ export default function App() {
       ...prev,
       [field]: value,
       ...(field === 'startDate' && !prev.endDate ? { endDate: value } : {}),
+    }));
+  }
+
+  function updateLookupForm(field: keyof BookingLookupFormState, value: string) {
+    setLookupForm((prev) => ({
+      ...prev,
+      [field]: value,
     }));
   }
 
@@ -189,12 +210,54 @@ export default function App() {
         throw new Error(payload.message || `Booking request failed: ${response.status}`);
       }
 
-      setBookingResult(payload as CreateBookingResponse);
+      const bookingResponse = payload as CreateBookingResponse;
+      setBookingResult(bookingResponse);
+      setLookupForm({
+        reference: bookingResponse.data.reference,
+        email: bookingResponse.data.customerEmail,
+      });
+      setLookupResult({
+        message: 'Freshly created booking draft is ready to track from this page.',
+        data: bookingResponse.data,
+        payment: {
+          ...bookingResponse.payment,
+          checkoutReady: false,
+        },
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error submitting booking');
       setBookingResult(null);
     } finally {
       setIsSubmittingBooking(false);
+    }
+  }
+
+  async function lookupBooking(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!lookupForm.reference || !lookupForm.email) {
+      setError('Masukkan booking reference dan email untuk melacak draft.');
+      return;
+    }
+
+    try {
+      setIsLookingUpBooking(true);
+      setError(null);
+      const reference = encodeURIComponent(lookupForm.reference.trim().toUpperCase());
+      const email = encodeURIComponent(lookupForm.email.trim());
+      const response = await fetch(`${API_BASE_URL}/api/public/bookings/${reference}?email=${email}`);
+      const payload: BookingLookupResponse | { message?: string } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || `Lookup failed: ${response.status}`);
+      }
+
+      setLookupResult(payload as BookingLookupResponse);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error looking up booking');
+      setLookupResult(null);
+    } finally {
+      setIsLookingUpBooking(false);
     }
   }
 
@@ -482,6 +545,70 @@ export default function App() {
               </div>
             </div>
           ) : null}
+        </article>
+
+        <article className="card">
+          <div className="section-title-row">
+            <div>
+              <h2>Track booking draft</h2>
+              <p className="muted">
+                Lookup publik ini memigrasikan status check dasar dari flow legacy agar customer bisa cek draft dengan reference + email.
+              </p>
+            </div>
+            <span className="pill pill--muted">
+              {lookupResult ? lookupResult.data.status : 'Lookup ready'}
+            </span>
+          </div>
+
+          <form className="lookup-form" onSubmit={lookupBooking}>
+            <label>
+              Booking reference
+              <input
+                placeholder="BK-20260404-ABCD"
+                value={lookupForm.reference}
+                onChange={(e) => updateLookupForm('reference', e.target.value.toUpperCase())}
+              />
+            </label>
+            <label>
+              Customer email
+              <input
+                required
+                type="email"
+                placeholder="name@example.com"
+                value={lookupForm.email}
+                onChange={(e) => updateLookupForm('email', e.target.value)}
+              />
+            </label>
+            <button className="primary-button primary-button--inline" disabled={isLookingUpBooking} type="submit">
+              {isLookingUpBooking ? 'Looking up…' : 'Lookup booking draft'}
+            </button>
+          </form>
+
+          {lookupResult ? (
+            <div className="quote-box quote-box--success booking-result">
+              <div>
+                <strong>{lookupResult.message}</strong>
+                <p className="muted">
+                  Ref {lookupResult.data.reference} • {lookupResult.data.customerName} • {lookupResult.data.vehicleName}
+                </p>
+                <p className="muted">
+                  {lookupResult.data.startDate} {lookupResult.data.pickupTime ? `• ${lookupResult.data.pickupTime}` : ''}
+                </p>
+                <p className="muted">
+                  Pickup {lookupResult.data.pickupLocation}
+                  {lookupResult.data.dropoffLocation ? ` → ${lookupResult.data.dropoffLocation}` : ''}
+                </p>
+                <p className="muted">Payment: {lookupResult.payment.status} • Checkout ready: {lookupResult.payment.checkoutReady ? 'Yes' : 'Not yet'}</p>
+                <p className="muted">Next: {lookupResult.payment.nextStep}</p>
+              </div>
+              <div className="quote-box__amount">
+                <span>${lookupResult.data.totalAmount.toFixed(2)}</span>
+                <small>Deposit ${lookupResult.data.depositAmount.toFixed(2)}</small>
+              </div>
+            </div>
+          ) : (
+            <p className="muted lookup-empty">Belum ada hasil lookup. Submit draft di atas atau masukkan reference yang sudah ada.</p>
+          )}
         </article>
       </section>
     </main>

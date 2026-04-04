@@ -3,6 +3,8 @@ import { cors } from 'hono/cors';
 import { zValidator } from '@hono/zod-validator';
 import {
   buildVehicleQuote,
+  bookingLookupQuerySchema,
+  bookingLookupResponseSchema,
   bookingQuoteRequestSchema,
   bookingRecordSchema,
   createBookingResponseSchema,
@@ -18,6 +20,7 @@ import {
 const app = new Hono();
 
 const bookingDrafts: BookingRecord[] = [];
+const paymentNextStep = 'Connect Workers-safe Stripe checkout session creation for this booking reference.';
 
 function createBookingReference(date: Date) {
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
@@ -213,10 +216,40 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
       data: bookingRecord,
       payment: {
         status: 'NOT_STARTED',
-        nextStep: 'Connect Workers-safe Stripe checkout session creation for this booking reference.',
+        nextStep: paymentNextStep,
       },
     }),
     202,
+  );
+});
+
+app.get('/api/public/bookings/:reference', zValidator('query', bookingLookupQuerySchema), (c) => {
+  const { email } = c.req.valid('query');
+  const reference = c.req.param('reference').trim().toUpperCase();
+
+  const bookingRecord = bookingDrafts.find(
+    (item) => item.reference.toUpperCase() === reference && item.customerEmail.toLowerCase() === email.toLowerCase(),
+  );
+
+  if (!bookingRecord) {
+    return c.json(
+      {
+        message: 'Booking reference not found for the supplied email.',
+      },
+      404,
+    );
+  }
+
+  return c.json(
+    bookingLookupResponseSchema.parse({
+      message: 'Booking draft located. Status is still pending the serverless payment slice.',
+      data: bookingRecord,
+      payment: {
+        status: 'NOT_STARTED',
+        nextStep: paymentNextStep,
+        checkoutReady: false,
+      },
+    }),
   );
 });
 

@@ -106,10 +106,13 @@ export const createBookingSchema = z.object({
 
 export type CreateBookingRequest = z.infer<typeof createBookingSchema>;
 
+export const bookingRecordStatusOptions = ['DRAFT', 'PENDING_PAYMENT'] as const;
+export const paymentFlowStatusOptions = ['NOT_STARTED'] as const;
+
 export const bookingRecordSchema = z.object({
   id: z.string(),
   reference: z.string(),
-  status: z.enum(['DRAFT', 'PENDING_PAYMENT']),
+  status: z.enum(bookingRecordStatusOptions),
   customerName: z.string(),
   customerEmail: z.string().email(),
   customerPhone: z.string(),
@@ -131,16 +134,36 @@ export const bookingRecordSchema = z.object({
 
 export type BookingRecord = z.infer<typeof bookingRecordSchema>;
 
+export const bookingPaymentStateSchema = z.object({
+  status: z.enum(paymentFlowStatusOptions),
+  nextStep: z.string(),
+});
+
+export type BookingPaymentState = z.infer<typeof bookingPaymentStateSchema>;
+
 export const createBookingResponseSchema = z.object({
   message: z.string(),
   data: bookingRecordSchema,
-  payment: z.object({
-    status: z.enum(['NOT_STARTED']),
-    nextStep: z.string(),
-  }),
+  payment: bookingPaymentStateSchema,
 });
 
 export type CreateBookingResponse = z.infer<typeof createBookingResponseSchema>;
+
+export const bookingLookupQuerySchema = z.object({
+  email: z.string().email(),
+});
+
+export type BookingLookupQuery = z.infer<typeof bookingLookupQuerySchema>;
+
+export const bookingLookupResponseSchema = z.object({
+  message: z.string(),
+  data: bookingRecordSchema,
+  payment: bookingPaymentStateSchema.extend({
+    checkoutReady: z.boolean(),
+  }),
+});
+
+export type BookingLookupResponse = z.infer<typeof bookingLookupResponseSchema>;
 
 export const healthResponseSchema = z.object({
   status: z.literal('ok'),
