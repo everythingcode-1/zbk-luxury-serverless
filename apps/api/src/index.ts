@@ -4,8 +4,11 @@ import { zValidator } from '@hono/zod-validator';
 import {
   buildVehicleQuote,
   bookingQuoteRequestSchema,
+  bookingRecordSchema,
+  createBookingResponseSchema,
   createBookingSchema,
   healthResponseSchema,
+  type BookingRecord,
   type Vehicle,
   vehicleSchema,
   vehiclesFilterSchema,
@@ -13,6 +16,14 @@ import {
 } from '@zbk/shared';
 
 const app = new Hono();
+
+const bookingDrafts: BookingRecord[] = [];
+
+function createBookingReference(date: Date) {
+  const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
+  const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `BK-${datePart}-${randomPart}`;
+}
 
 const vehicleCatalog: Vehicle[] = [
   vehicleSchema.parse({
@@ -159,15 +170,52 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
     return c.json({ message: 'Vehicle not found' }, 404);
   }
 
+  if (!vehicle.services.includes(payload.serviceType)) {
+    return c.json({ message: 'Selected vehicle does not support this service type' }, 400);
+  }
+
+  const quote = buildVehicleQuote(vehicle, {
+    vehicleId: payload.vehicleId,
+    serviceType: payload.serviceType,
+    hours: payload.hours,
+    additionalHours: payload.additionalHours,
+  });
+
+  const createdAt = new Date();
+  const bookingRecord = bookingRecordSchema.parse({
+    id: crypto.randomUUID(),
+    reference: createBookingReference(createdAt),
+    status: 'PENDING_PAYMENT',
+    customerName: payload.customerName,
+    customerEmail: payload.customerEmail,
+    customerPhone: payload.customerPhone,
+    vehicleId: vehicle.id,
+    vehicleName: vehicle.name,
+    serviceType: payload.serviceType,
+    startDate: payload.startDate,
+    endDate: payload.endDate,
+    pickupTime: payload.pickupTime,
+    pickupLocation: payload.pickupLocation,
+    dropoffLocation: payload.dropoffLocation,
+    hours: payload.hours,
+    additionalHours: payload.additionalHours,
+    totalAmount: quote.totalAmount,
+    depositAmount: quote.depositAmount,
+    notes: payload.notes,
+    createdAt: createdAt.toISOString(),
+  });
+
+  bookingDrafts.unshift(bookingRecord);
+
   return c.json(
-    {
-      message: 'Booking endpoint scaffold siap. Persist ke Neon + Stripe belum dihubungkan.',
-      bookingDraft: payload,
-      vehicle: {
-        id: vehicle.id,
-        name: vehicle.name,
+    createBookingResponseSchema.parse({
+      message: 'Booking draft captured. Stripe checkout belum dihubungkan, jadi status masih menunggu payment flow serverless.',
+      data: bookingRecord,
+      payment: {
+        status: 'NOT_STARTED',
+        nextStep: 'Connect Workers-safe Stripe checkout session creation for this booking reference.',
       },
-    },
+    }),
     202,
   );
 });

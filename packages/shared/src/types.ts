@@ -94,12 +94,53 @@ export const createBookingSchema = z.object({
   serviceType: serviceTypeSchema,
   startDate: z.string(),
   endDate: z.string(),
+  pickupTime: z.string().min(2).optional(),
   pickupLocation: z.string().min(2),
   dropoffLocation: z.string().optional(),
-  totalAmount: z.number().nonnegative(),
+  hours: z.number().min(1),
+  additionalHours: z.number().int().nonnegative().default(0),
+  totalAmount: z.number().nonnegative().optional(),
   depositAmount: z.number().nonnegative().optional(),
   notes: z.string().optional(),
 });
+
+export type CreateBookingRequest = z.infer<typeof createBookingSchema>;
+
+export const bookingRecordSchema = z.object({
+  id: z.string(),
+  reference: z.string(),
+  status: z.enum(['DRAFT', 'PENDING_PAYMENT']),
+  customerName: z.string(),
+  customerEmail: z.string().email(),
+  customerPhone: z.string(),
+  vehicleId: z.string(),
+  vehicleName: z.string(),
+  serviceType: serviceTypeSchema,
+  startDate: z.string(),
+  endDate: z.string(),
+  pickupTime: z.string().optional(),
+  pickupLocation: z.string(),
+  dropoffLocation: z.string().optional(),
+  hours: z.number().min(1),
+  additionalHours: z.number().int().nonnegative(),
+  totalAmount: z.number().nonnegative(),
+  depositAmount: z.number().nonnegative(),
+  notes: z.string().optional(),
+  createdAt: z.string(),
+});
+
+export type BookingRecord = z.infer<typeof bookingRecordSchema>;
+
+export const createBookingResponseSchema = z.object({
+  message: z.string(),
+  data: bookingRecordSchema,
+  payment: z.object({
+    status: z.enum(['NOT_STARTED']),
+    nextStep: z.string(),
+  }),
+});
+
+export type CreateBookingResponse = z.infer<typeof createBookingResponseSchema>;
 
 export const healthResponseSchema = z.object({
   status: z.literal('ok'),
