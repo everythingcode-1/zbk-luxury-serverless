@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   buildVehicleQuote,
+  type BookingHistoryResponse,
   type BookingLookupResponse,
   type BookingQuoteRequest,
   type BookingQuoteResponse,
@@ -38,6 +39,10 @@ type BookingLookupFormState = {
   email: string;
 };
 
+type BookingHistoryFormState = {
+  email: string;
+};
+
 const initialBookingForm: BookingFormState = {
   customerName: '',
   customerEmail: '',
@@ -54,6 +59,10 @@ const initialBookingForm: BookingFormState = {
 
 const initialLookupForm: BookingLookupFormState = {
   reference: '',
+  email: '',
+};
+
+const initialHistoryForm: BookingHistoryFormState = {
   email: '',
 };
 
@@ -83,13 +92,16 @@ export default function App() {
   });
   const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingForm);
   const [lookupForm, setLookupForm] = useState<BookingLookupFormState>(initialLookupForm);
+  const [historyForm, setHistoryForm] = useState<BookingHistoryFormState>(initialHistoryForm);
   const [remoteQuote, setRemoteQuote] = useState<BookingQuoteResponse | null>(null);
   const [bookingResult, setBookingResult] = useState<CreateBookingResponse | null>(null);
   const [lookupResult, setLookupResult] = useState<BookingLookupResponse | null>(null);
+  const [historyResult, setHistoryResult] = useState<BookingHistoryResponse | null>(null);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [isLookingUpBooking, setIsLookingUpBooking] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -159,6 +171,13 @@ export default function App() {
 
   function updateLookupForm(field: keyof BookingLookupFormState, value: string) {
     setLookupForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  function updateHistoryForm(field: keyof BookingHistoryFormState, value: string) {
+    setHistoryForm((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -235,6 +254,19 @@ export default function App() {
         reference: bookingResponse.data.reference,
         email: bookingResponse.data.customerEmail,
       });
+      setHistoryForm({
+        email: bookingResponse.data.customerEmail,
+      });
+      setHistoryResult((prev) => ({
+        message: prev?.message || 'Booking drafts loaded for this customer email.',
+        data: [bookingResponse.data, ...(prev?.data || []).filter((item) => item.reference !== bookingResponse.data.reference)],
+        meta: {
+          total: (prev?.data || []).filter((item) => item.reference !== bookingResponse.data.reference).length + 1,
+          pendingPayment:
+            (prev?.data || []).filter((item) => item.reference !== bookingResponse.data.reference && item.status === 'PENDING_PAYMENT')
+              .length + (bookingResponse.data.status === 'PENDING_PAYMENT' ? 1 : 0),
+        },
+      }));
       setLookupResult({
         message: 'Freshly created booking draft is ready to track from this page.',
         data: bookingResponse.data,
@@ -277,6 +309,34 @@ export default function App() {
       setLookupResult(null);
     } finally {
       setIsLookingUpBooking(false);
+    }
+  }
+
+  async function loadBookingHistory(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!historyForm.email) {
+      setError('Masukkan email customer untuk memuat daftar booking draft.');
+      return;
+    }
+
+    try {
+      setIsLoadingHistory(true);
+      setError(null);
+      const email = encodeURIComponent(historyForm.email.trim());
+      const response = await fetch(`${API_BASE_URL}/api/public/bookings?email=${email}`);
+      const payload: BookingHistoryResponse | { message?: string } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || `History lookup failed: ${response.status}`);
+      }
+
+      setHistoryResult(payload as BookingHistoryResponse);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error loading booking history');
+      setHistoryResult(null);
+    } finally {
+      setIsLoadingHistory(false);
     }
   }
 
@@ -658,6 +718,80 @@ export default function App() {
             </div>
           ) : (
             <p className="muted lookup-empty">Belum ada hasil lookup. Submit draft di atas atau masukkan reference yang sudah ada.</p>
+          )}
+        </article>
+
+        <article className="card card--wide">
+          <div className="section-title-row">
+            <div>
+              <h2>Customer booking history snapshot</h2>
+              <p className="muted">
+                Slice ini memigrasikan tampilan dasar mirip “my bookings” versi publik berbasis email, sebelum auth/session serverless selesai.
+              </p>
+            </div>
+            <span className="pill pill--muted">
+              {historyResult ? `${historyResult.meta.total} drafts` : 'History ready'}
+            </span>
+          </div>
+
+          <form className="lookup-form" onSubmit={loadBookingHistory}>
+            <label>
+              Customer email
+              <input
+                required
+                type="email"
+                placeholder="name@example.com"
+                value={historyForm.email}
+                onChange={(e) => updateHistoryForm('email', e.target.value)}
+              />
+            </label>
+            <button className="primary-button primary-button--inline" disabled={isLoadingHistory} type="submit">
+              {isLoadingHistory ? 'Loading…' : 'Load booking drafts by email'}
+            </button>
+          </form>
+
+          {historyResult ? (
+            <div className="booking-history-stack">
+              <div className="quote-box quote-box--success booking-result">
+                <div>
+                  <strong>{historyResult.message}</strong>
+                  <p className="muted">
+                    Total drafts: {historyResult.meta.total} • Pending payment: {historyResult.meta.pendingPayment}
+                  </p>
+                </div>
+              </div>
+
+              {historyResult.data.length > 0 ? (
+                historyResult.data.map((booking) => (
+                  <div key={booking.reference} className="quote-box booking-result">
+                    <div>
+                      <strong>
+                        {booking.reference} • {booking.vehicleName}
+                      </strong>
+                      <p className="muted">
+                        {booking.customerName} • {booking.startDate}
+                        {booking.pickupTime ? ` • ${booking.pickupTime}` : ''}
+                      </p>
+                      <p className="muted">
+                        Pickup {booking.pickupLocation}
+                        {booking.pickupNote ? ` (${booking.pickupNote})` : ''}
+                        {booking.dropoffLocation ? ` → ${booking.dropoffLocation}` : ''}
+                        {booking.dropoffNote ? ` (${booking.dropoffNote})` : ''}
+                      </p>
+                      <p className="muted">Status: {booking.status} • Service: {booking.serviceType}</p>
+                    </div>
+                    <div className="quote-box__amount">
+                      <span>${booking.totalAmount.toFixed(2)}</span>
+                      <small>Deposit ${booking.depositAmount.toFixed(2)}</small>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="muted lookup-empty">Belum ada draft untuk email ini di worker memory scaffold saat ini.</p>
+              )}
+            </div>
+          ) : (
+            <p className="muted lookup-empty">Belum ada history yang dimuat. Gunakan email customer untuk melihat semua draft terbaru.</p>
           )}
         </article>
       </section>

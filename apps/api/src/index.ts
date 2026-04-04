@@ -3,6 +3,8 @@ import { cors } from 'hono/cors';
 import { zValidator } from '@hono/zod-validator';
 import {
   buildVehicleQuote,
+  bookingHistoryQuerySchema,
+  bookingHistoryResponseSchema,
   bookingLookupQuerySchema,
   bookingLookupResponseSchema,
   bookingQuoteRequestSchema,
@@ -163,6 +165,25 @@ app.post('/api/public/booking/quote', zValidator('json', bookingQuoteRequestSche
 
   const quote = buildVehicleQuote(vehicle, payload);
   return c.json({ data: quote });
+});
+
+app.get('/api/public/bookings', zValidator('query', bookingHistoryQuerySchema), (c) => {
+  const { email } = c.req.valid('query');
+  const normalizedEmail = email.trim().toLowerCase();
+  const bookings = bookingDrafts.filter((item) => item.customerEmail.toLowerCase() === normalizedEmail);
+
+  return c.json(
+    bookingHistoryResponseSchema.parse({
+      message: bookings.length
+        ? 'Booking drafts found for this email. Latest draft appears first.'
+        : 'No booking drafts found yet for this email.',
+      data: bookings,
+      meta: {
+        total: bookings.length,
+        pendingPayment: bookings.filter((item) => item.status === 'PENDING_PAYMENT').length,
+      },
+    }),
+  );
 });
 
 app.post('/api/public/bookings', zValidator('json', createBookingSchema), async (c) => {

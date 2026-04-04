@@ -159,6 +159,12 @@ export const bookingLookupQuerySchema = z.object({
 
 export type BookingLookupQuery = z.infer<typeof bookingLookupQuerySchema>;
 
+export const bookingHistoryQuerySchema = z.object({
+  email: z.string().email(),
+});
+
+export type BookingHistoryQuery = z.infer<typeof bookingHistoryQuerySchema>;
+
 export const bookingLookupResponseSchema = z.object({
   message: z.string(),
   data: bookingRecordSchema,
@@ -168,6 +174,17 @@ export const bookingLookupResponseSchema = z.object({
 });
 
 export type BookingLookupResponse = z.infer<typeof bookingLookupResponseSchema>;
+
+export const bookingHistoryResponseSchema = z.object({
+  message: z.string(),
+  data: z.array(bookingRecordSchema),
+  meta: z.object({
+    total: z.number().int().nonnegative(),
+    pendingPayment: z.number().int().nonnegative(),
+  }),
+});
+
+export type BookingHistoryResponse = z.infer<typeof bookingHistoryResponseSchema>;
 
 export const healthResponseSchema = z.object({
   status: z.literal('ok'),
