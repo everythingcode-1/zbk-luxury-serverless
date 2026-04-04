@@ -27,7 +27,9 @@ type BookingFormState = {
   endDate: string;
   pickupTime: string;
   pickupLocation: string;
+  pickupNote: string;
   dropoffLocation: string;
+  dropoffNote: string;
   notes: string;
 };
 
@@ -44,7 +46,9 @@ const initialBookingForm: BookingFormState = {
   endDate: '',
   pickupTime: '09:00',
   pickupLocation: '',
+  pickupNote: '',
   dropoffLocation: '',
+  dropoffNote: '',
   notes: '',
 };
 
@@ -60,6 +64,12 @@ function getDefaultQuoteRequest(vehicle?: Vehicle): BookingQuoteRequest {
     hours: 1,
     additionalHours: 0,
   };
+}
+
+function isAirportLocation(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return false;
+  return ['airport', 'terminal', 'arrival', 'departure', 'gate'].some((keyword) => normalized.includes(keyword));
 }
 
 export default function App() {
@@ -127,6 +137,12 @@ export default function App() {
     if (!selectedVehicle) return null;
     return buildVehicleQuote(selectedVehicle, quoteRequest);
   }, [selectedVehicle, quoteRequest]);
+
+  const showPickupNoteField = useMemo(() => isAirportLocation(bookingForm.pickupLocation), [bookingForm.pickupLocation]);
+  const showDropoffNoteField = useMemo(
+    () => isAirportLocation(bookingForm.dropoffLocation),
+    [bookingForm.dropoffLocation],
+  );
 
   function resetBookingArtifacts() {
     setBookingResult(null);
@@ -196,6 +212,9 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...bookingForm,
+          pickupNote: showPickupNoteField ? bookingForm.pickupNote.trim() : '',
+          dropoffLocation: bookingForm.dropoffLocation.trim() || bookingForm.pickupLocation.trim(),
+          dropoffNote: showDropoffNoteField ? bookingForm.dropoffNote.trim() : '',
           vehicleId: selectedVehicle.id,
           serviceType: quoteRequest.serviceType,
           startDate: bookingForm.startDate,
@@ -507,6 +526,28 @@ export default function App() {
                 onChange={(e) => updateBookingForm('dropoffLocation', e.target.value)}
               />
             </label>
+            {showPickupNoteField ? (
+              <label>
+                Pickup note
+                <input
+                  maxLength={160}
+                  placeholder="Terminal 3 arrival hall / gate details"
+                  value={bookingForm.pickupNote}
+                  onChange={(e) => updateBookingForm('pickupNote', e.target.value)}
+                />
+              </label>
+            ) : null}
+            {showDropoffNoteField ? (
+              <label>
+                Dropoff note
+                <input
+                  maxLength={160}
+                  placeholder="Terminal 1 departure hall / gate details"
+                  value={bookingForm.dropoffNote}
+                  onChange={(e) => updateBookingForm('dropoffNote', e.target.value)}
+                />
+              </label>
+            ) : null}
             <label className="booking-form-grid__full">
               Notes
               <textarea
@@ -536,6 +577,13 @@ export default function App() {
                 <strong>{bookingResult.message}</strong>
                 <p className="muted">
                   Ref {bookingResult.data.reference} • {bookingResult.data.vehicleName} • {bookingResult.data.startDate}
+                </p>
+                <p className="muted">
+                  Pickup {bookingResult.data.pickupLocation}
+                  {bookingResult.data.pickupNote ? ` (${bookingResult.data.pickupNote})` : ''}
+                  {' → '}
+                  {bookingResult.data.dropoffLocation}
+                  {bookingResult.data.dropoffNote ? ` (${bookingResult.data.dropoffNote})` : ''}
                 </p>
                 <p className="muted">Next: {bookingResult.payment.nextStep}</p>
               </div>
@@ -596,7 +644,9 @@ export default function App() {
                 </p>
                 <p className="muted">
                   Pickup {lookupResult.data.pickupLocation}
+                  {lookupResult.data.pickupNote ? ` (${lookupResult.data.pickupNote})` : ''}
                   {lookupResult.data.dropoffLocation ? ` → ${lookupResult.data.dropoffLocation}` : ''}
+                  {lookupResult.data.dropoffNote ? ` (${lookupResult.data.dropoffNote})` : ''}
                 </p>
                 <p className="muted">Payment: {lookupResult.payment.status} • Checkout ready: {lookupResult.payment.checkoutReady ? 'Yes' : 'Not yet'}</p>
                 <p className="muted">Next: {lookupResult.payment.nextStep}</p>
