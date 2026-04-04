@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   buildVehicleQuote,
+  calculateTripHours,
+  deriveAdditionalHours,
+  inferServiceTypeFromTrip,
+  isAirportLocation,
   type BookingHistoryResponse,
   type BookingLookupResponse,
   type BookingQuoteRequest,
   type BookingQuoteResponse,
   type CreateBookingResponse,
+  type TripType,
   type Vehicle,
+  tripTypeOptions,
   vehicleCategoryOptions,
-  serviceTypeOptions,
 } from '@zbk/shared';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
@@ -26,9 +31,11 @@ type BookingFormState = {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  tripType: TripType;
   startDate: string;
   endDate: string;
   pickupTime: string;
+  endTime: string;
   pickupLocation: string;
   pickupNote: string;
   dropoffLocation: string;
@@ -49,9 +56,11 @@ const initialBookingForm: BookingFormState = {
   customerName: '',
   customerEmail: '',
   customerPhone: '',
+  tripType: 'ONE_WAY',
   startDate: '',
   endDate: '',
   pickupTime: '09:00',
+  endTime: '18:00',
   pickupLocation: '',
   pickupNote: '',
   dropoffLocation: '',
@@ -71,16 +80,27 @@ const initialHistoryForm: BookingHistoryFormState = {
 function getDefaultQuoteRequest(vehicle?: Vehicle): BookingQuoteRequest {
   return {
     vehicleId: vehicle?.id || '',
-    serviceType: vehicle?.services[0] || 'AIRPORT_TRANSFER',
+    serviceType: 'AIRPORT_TRANSFER',
     hours: 1,
     additionalHours: 0,
   };
 }
 
-function isAirportLocation(value: string) {
-  const normalized = value.trim().toLowerCase();
-  if (!normalized) return false;
-  return ['airport', 'terminal', 'arrival', 'departure', 'gate'].some((keyword) => normalized.includes(keyword));
+function formatServiceTypeLabel(serviceType: BookingQuoteRequest['serviceType']) {
+  switch (serviceType) {
+    case 'AIRPORT_TRANSFER':
+      return 'Airport transfer';
+    case 'TRIP':
+      return 'One-way trip';
+    case 'RENTAL':
+      return 'Round-trip rental';
+    default:
+      return serviceType;
+  }
+}
+
+function formatTripTypeLabel(tripType: TripType) {
+  return tripType === 'ROUND_TRIP' ? 'Round trip' : 'One way';
 }
 
 export default function App() {
@@ -89,12 +109,6 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<(typeof vehicleCategoryOptions)[number] | 'ALL'>('ALL');
   const [luxuryOnly, setLuxuryOnly] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
-  const [quoteRequest, setQuoteRequest] = useState<BookingQuoteRequest>({
-    vehicleId: '',
-    serviceType: 'AIRPORT_TRANSFER',
-    hours: 1,
-    additionalHours: 0,
-  });
   const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingForm);
   const [lookupForm, setLookupForm] = useState<BookingLookupFormState>(initialLookupForm);
   const [historyForm, setHistoryForm] = useState<BookingHistoryFormState>(initialHistoryForm);
@@ -138,7 +152,6 @@ export default function App() {
 
         const nextVehicle = payload.data.find((vehicle) => vehicle.id === selectedVehicleId) || payload.data[0];
         setSelectedVehicleId(nextVehicle?.id || '');
-        setQuoteRequest(getDefaultQuoteRequest(nextVehicle));
       } catch (err) {
         if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : 'Unknown error loading vehicles');
@@ -151,11 +164,53 @@ export default function App() {
 
     loadVehicles();
     return () => controller.abort();
-  }, [luxuryOnly, selectedCategory]);
+  }, [luxuryOnly, selectedCategory, selectedVehicleId]);
 
   const selectedVehicle = useMemo(
     () => vehicles.find((vehicle) => vehicle.id === selectedVehicleId),
     [selectedVehicleId, vehicles],
+  );
+
+  const normalizedDropoffLocation = useMemo(
+    () => bookingForm.dropoffLocation.trim() || bookingForm.pickupLocation.trim(),
+    [bookingForm.dropoffLocation, bookingForm.pickupLocation],
+  );
+
+  const derivedServiceType = useMemo(
+    () => inferServiceTypeFromTrip(bookingForm.tripType, bookingForm.pickupLocation, normalizedDropoffLocation),
+    [bookingForm.tripType, bookingForm.pickupLocation, normalizedDropoffLocation],
+  );
+
+  const calculatedTripHours = useMemo(() => {
+    if (bookingForm.tripType !== 'ROUND_TRIP') {
+      return null;
+    }
+
+    return calculateTripHours(bookingForm.startDate, bookingForm.pickupTime, bookingForm.endDate, bookingForm.endTime);
+  }, [bookingForm.endDate, bookingForm.endTime, bookingForm.pickupTime, bookingForm.startDate, bookingForm.tripType]);
+
+  const derivedHours = useMemo(() => {
+    if (bookingForm.tripType !== 'ROUND_TRIP') {
+      return 1;
+    }
+
+    return calculatedTripHours || 1;
+  }, [bookingForm.tripType, calculatedTripHours]);
+
+  const derivedAdditionalHours = useMemo(
+    () => (derivedServiceType === 'RENTAL' ? deriveAdditionalHours(derivedHours) : 0),
+    [derivedHours, derivedServiceType],
+  );
+
+  const quoteRequest = useMemo<BookingQuoteRequest>(
+    () => ({
+      ...(getDefaultQuoteRequest(selectedVehicle)),
+      vehicleId: selectedVehicle?.id || '',
+      serviceType: derivedServiceType,
+      hours: derivedHours,
+      additionalHours: derivedAdditionalHours,
+    }),
+    [derivedAdditionalHours, derivedHours, derivedServiceType, selectedVehicle],
   );
 
   const localPreview = useMemo(() => {
@@ -163,11 +218,13 @@ export default function App() {
     return buildVehicleQuote(selectedVehicle, quoteRequest);
   }, [selectedVehicle, quoteRequest]);
 
-  const showPickupNoteField = useMemo(() => isAirportLocation(bookingForm.pickupLocation), [bookingForm.pickupLocation]);
-  const showDropoffNoteField = useMemo(
-    () => isAirportLocation(bookingForm.dropoffLocation),
-    [bookingForm.dropoffLocation],
+  const selectedVehicleSupportsDerivedService = useMemo(
+    () => (selectedVehicle ? selectedVehicle.services.includes(quoteRequest.serviceType) : false),
+    [quoteRequest.serviceType, selectedVehicle],
   );
+
+  const showPickupNoteField = useMemo(() => isAirportLocation(bookingForm.pickupLocation), [bookingForm.pickupLocation]);
+  const showDropoffNoteField = useMemo(() => isAirportLocation(normalizedDropoffLocation), [normalizedDropoffLocation]);
 
   function resetBookingArtifacts() {
     setBookingResult(null);
@@ -175,11 +232,29 @@ export default function App() {
   }
 
   function updateBookingForm(field: keyof BookingFormState, value: string) {
-    setBookingForm((prev) => ({
-      ...prev,
-      [field]: value,
-      ...(field === 'startDate' && !prev.endDate ? { endDate: value } : {}),
-    }));
+    setBookingForm((prev) => {
+      if (field === 'tripType') {
+        const nextTripType = value as TripType;
+        return {
+          ...prev,
+          tripType: nextTripType,
+          endDate: nextTripType === 'ONE_WAY' ? prev.startDate || prev.endDate : prev.endDate || prev.startDate,
+          endTime: nextTripType === 'ONE_WAY' ? '' : prev.endTime || '18:00',
+        };
+      }
+
+      const nextState = {
+        ...prev,
+        [field]: value,
+      };
+
+      if (field === 'startDate' && (prev.tripType === 'ONE_WAY' || !prev.endDate)) {
+        nextState.endDate = value;
+      }
+
+      return nextState;
+    });
+    resetBookingArtifacts();
   }
 
   function updateLookupForm(field: keyof BookingLookupFormState, value: string) {
@@ -197,7 +272,7 @@ export default function App() {
   }
 
   async function requestQuote() {
-    if (!selectedVehicle) return;
+    if (!selectedVehicle || !selectedVehicleSupportsDerivedService) return;
 
     try {
       setIsLoadingQuote(true);
@@ -231,8 +306,18 @@ export default function App() {
       return;
     }
 
+    if (!selectedVehicleSupportsDerivedService) {
+      setError('Vehicle ini belum mendukung service type yang terdeteksi dari ride details.');
+      return;
+    }
+
     if (!bookingForm.startDate || !bookingForm.pickupLocation) {
       setError('Tanggal mulai dan pickup location wajib diisi.');
+      return;
+    }
+
+    if (bookingForm.tripType === 'ROUND_TRIP' && !calculatedTripHours) {
+      setError('Round trip membutuhkan return date dan return time yang valid setelah pickup.');
       return;
     }
 
@@ -245,12 +330,14 @@ export default function App() {
         body: JSON.stringify({
           ...bookingForm,
           pickupNote: showPickupNoteField ? bookingForm.pickupNote.trim() : '',
-          dropoffLocation: bookingForm.dropoffLocation.trim() || bookingForm.pickupLocation.trim(),
+          dropoffLocation: normalizedDropoffLocation,
           dropoffNote: showDropoffNoteField ? bookingForm.dropoffNote.trim() : '',
           vehicleId: selectedVehicle.id,
+          tripType: bookingForm.tripType,
           serviceType: quoteRequest.serviceType,
           startDate: bookingForm.startDate,
-          endDate: bookingForm.endDate || bookingForm.startDate,
+          endDate: bookingForm.tripType === 'ROUND_TRIP' ? bookingForm.endDate : bookingForm.startDate,
+          endTime: bookingForm.tripType === 'ROUND_TRIP' ? bookingForm.endTime : undefined,
           hours: quoteRequest.hours,
           additionalHours: quoteRequest.additionalHours,
         }),
@@ -411,7 +498,6 @@ export default function App() {
                 className={`vehicle-card ${vehicle.id === selectedVehicleId ? 'vehicle-card--active' : ''}`}
                 onClick={() => {
                   setSelectedVehicleId(vehicle.id);
-                  setQuoteRequest(getDefaultQuoteRequest(vehicle));
                   resetBookingArtifacts();
                 }}
                 type="button"
@@ -483,59 +569,43 @@ export default function App() {
 
         <article className="card">
           <h2>Booking quote request</h2>
-          <label>
-            Service type
-            <select
-              value={quoteRequest.serviceType}
-              onChange={(e) => {
-                setQuoteRequest((prev) => ({
-                  ...prev,
-                  serviceType: e.target.value as BookingQuoteRequest['serviceType'],
-                }));
-                resetBookingArtifacts();
-              }}
-            >
-              {(selectedVehicle?.services || serviceTypeOptions).map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="quote-facts">
+            <div className="quote-facts__row">
+              <span className="muted">Trip type</span>
+              <strong>{formatTripTypeLabel(bookingForm.tripType)}</strong>
+            </div>
+            <div className="quote-facts__row">
+              <span className="muted">Detected service</span>
+              <strong>{formatServiceTypeLabel(quoteRequest.serviceType)}</strong>
+            </div>
+            <div className="quote-facts__row">
+              <span className="muted">Chargeable hours</span>
+              <strong>{quoteRequest.hours} hour(s)</strong>
+            </div>
+            <div className="quote-facts__row">
+              <span className="muted">Additional hours</span>
+              <strong>{quoteRequest.additionalHours}</strong>
+            </div>
+          </div>
 
-          <label>
-            Hours
-            <input
-              type="number"
-              min={1}
-              value={quoteRequest.hours}
-              onChange={(e) => {
-                setQuoteRequest((prev) => ({
-                  ...prev,
-                  hours: Number(e.target.value),
-                }));
-                resetBookingArtifacts();
-              }}
-            />
-          </label>
+          <p className="muted quote-helper-text">
+            One-way rides otomatis dipetakan ke airport transfer atau trip berdasarkan lokasi pickup/dropoff.
+            Round-trip rides otomatis menjadi rental dengan durasi dihitung dari pickup dan return time.
+          </p>
 
-          <label>
-            Additional hours
-            <input
-              type="number"
-              min={0}
-              value={quoteRequest.additionalHours}
-              onChange={(e) => {
-                setQuoteRequest((prev) => ({
-                  ...prev,
-                  additionalHours: Number(e.target.value),
-                }));
-                resetBookingArtifacts();
-              }}
-            />
-          </label>
+          {!selectedVehicleSupportsDerivedService && selectedVehicle ? (
+            <div className="alert error quote-inline-alert">
+              {selectedVehicle.name} belum mendukung {formatServiceTypeLabel(quoteRequest.serviceType).toLowerCase()}.
+              Pilih vehicle lain atau ubah ride details.
+            </div>
+          ) : null}
 
-          <button className="primary-button" onClick={requestQuote} disabled={!selectedVehicle || isLoadingQuote} type="button">
+          <button
+            className="primary-button"
+            onClick={requestQuote}
+            disabled={!selectedVehicle || !selectedVehicleSupportsDerivedService || isLoadingQuote}
+            type="button"
+          >
             {isLoadingQuote ? 'Requesting…' : 'Request quote from API'}
           </button>
 
@@ -557,7 +627,7 @@ export default function App() {
               <div>
                 <strong>API quote ready</strong>
                 <p className="muted">
-                  {remoteQuote.vehicleName} • {remoteQuote.serviceType}
+                  {remoteQuote.vehicleName} • {formatServiceTypeLabel(remoteQuote.serviceType)}
                 </p>
               </div>
               <div className="quote-box__amount">
@@ -573,7 +643,7 @@ export default function App() {
             <div>
               <h2>Booking draft submission</h2>
               <p className="muted">
-                Slice ini memigrasikan form booking publik agar bisa mengirim booking draft ke Workers.
+                Slice ini memigrasikan ride detail logic legacy: one-way vs round-trip, auto service detection, dan auto-calculated rental duration.
               </p>
             </div>
             <span className="pill pill--muted">
@@ -582,13 +652,25 @@ export default function App() {
           </div>
 
           <form className="booking-form-grid" onSubmit={submitBooking}>
+            <div className="booking-form-grid__full">
+              <span className="label-title">Trip type</span>
+              <div className="service-pills">
+                {tripTypeOptions.map((tripType) => (
+                  <button
+                    key={tripType}
+                    type="button"
+                    className={`pill pill-button ${bookingForm.tripType === tripType ? '' : 'pill--muted'}`}
+                    onClick={() => updateBookingForm('tripType', tripType)}
+                  >
+                    {formatTripTypeLabel(tripType)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <label>
               Customer name
-              <input
-                required
-                value={bookingForm.customerName}
-                onChange={(e) => updateBookingForm('customerName', e.target.value)}
-              />
+              <input required value={bookingForm.customerName} onChange={(e) => updateBookingForm('customerName', e.target.value)} />
             </label>
             <label>
               Customer email
@@ -601,52 +683,45 @@ export default function App() {
             </label>
             <label>
               Customer phone
-              <input
-                required
-                value={bookingForm.customerPhone}
-                onChange={(e) => updateBookingForm('customerPhone', e.target.value)}
-              />
+              <input required value={bookingForm.customerPhone} onChange={(e) => updateBookingForm('customerPhone', e.target.value)} />
             </label>
             <label>
               Pickup date
-              <input
-                required
-                type="date"
-                value={bookingForm.startDate}
-                onChange={(e) => updateBookingForm('startDate', e.target.value)}
-              />
-            </label>
-            <label>
-              End date
-              <input
-                required
-                type="date"
-                value={bookingForm.endDate}
-                onChange={(e) => updateBookingForm('endDate', e.target.value)}
-              />
+              <input required type="date" value={bookingForm.startDate} onChange={(e) => updateBookingForm('startDate', e.target.value)} />
             </label>
             <label>
               Pickup time
-              <input
-                type="time"
-                value={bookingForm.pickupTime}
-                onChange={(e) => updateBookingForm('pickupTime', e.target.value)}
-              />
+              <input required type="time" value={bookingForm.pickupTime} onChange={(e) => updateBookingForm('pickupTime', e.target.value)} />
             </label>
             <label>
               Pickup location
-              <input
-                required
-                value={bookingForm.pickupLocation}
-                onChange={(e) => updateBookingForm('pickupLocation', e.target.value)}
-              />
+              <input required value={bookingForm.pickupLocation} onChange={(e) => updateBookingForm('pickupLocation', e.target.value)} />
             </label>
+
+            {bookingForm.tripType === 'ROUND_TRIP' ? (
+              <>
+                <label>
+                  Return date
+                  <input required type="date" value={bookingForm.endDate} onChange={(e) => updateBookingForm('endDate', e.target.value)} />
+                </label>
+                <label>
+                  Return time
+                  <input required type="time" value={bookingForm.endTime} onChange={(e) => updateBookingForm('endTime', e.target.value)} />
+                </label>
+                <div className="trip-summary-panel">
+                  <strong>Auto-calculated rental duration</strong>
+                  <p className="muted">
+                    {calculatedTripHours
+                      ? `${calculatedTripHours} hour(s) from pickup to return. Additional billable hours: ${quoteRequest.additionalHours}.`
+                      : 'Isi return date dan return time yang valid untuk menghitung durasi rental.'}
+                  </p>
+                </div>
+              </>
+            ) : null}
+
             <label>
               Dropoff location
-              <input
-                value={bookingForm.dropoffLocation}
-                onChange={(e) => updateBookingForm('dropoffLocation', e.target.value)}
-              />
+              <input value={bookingForm.dropoffLocation} onChange={(e) => updateBookingForm('dropoffLocation', e.target.value)} />
             </label>
             {showPickupNoteField ? (
               <label>
@@ -672,22 +747,23 @@ export default function App() {
             ) : null}
             <label className="booking-form-grid__full">
               Notes
-              <textarea
-                rows={4}
-                value={bookingForm.notes}
-                onChange={(e) => updateBookingForm('notes', e.target.value)}
-              />
+              <textarea rows={4} value={bookingForm.notes} onChange={(e) => updateBookingForm('notes', e.target.value)} />
             </label>
 
             <div className="booking-submit-row booking-form-grid__full">
               <div className="muted booking-submit-row__summary">
                 <span>Selected vehicle: {selectedVehicle?.name || '—'}</span>
-                <span>Service: {quoteRequest.serviceType}</span>
+                <span>Trip type: {formatTripTypeLabel(bookingForm.tripType)}</span>
+                <span>Service: {formatServiceTypeLabel(quoteRequest.serviceType)}</span>
                 <span>
                   Current quote: ${localPreview?.totalAmount.toFixed(2) || '0.00'} / deposit ${localPreview?.depositAmount.toFixed(2) || '0.00'}
                 </span>
               </div>
-              <button className="primary-button primary-button--inline" disabled={!selectedVehicle || isSubmittingBooking} type="submit">
+              <button
+                className="primary-button primary-button--inline"
+                disabled={!selectedVehicle || !selectedVehicleSupportsDerivedService || isSubmittingBooking}
+                type="submit"
+              >
                 {isSubmittingBooking ? 'Submitting…' : 'Submit booking draft'}
               </button>
             </div>
@@ -698,7 +774,14 @@ export default function App() {
               <div>
                 <strong>{bookingResult.message}</strong>
                 <p className="muted">
-                  Ref {bookingResult.data.reference} • {bookingResult.data.vehicleName} • {bookingResult.data.startDate}
+                  Ref {bookingResult.data.reference} • {bookingResult.data.vehicleName} • {formatTripTypeLabel(bookingResult.data.tripType)}
+                </p>
+                <p className="muted">
+                  {bookingResult.data.startDate}
+                  {bookingResult.data.pickupTime ? ` • ${bookingResult.data.pickupTime}` : ''}
+                  {bookingResult.data.tripType === 'ROUND_TRIP' && bookingResult.data.endTime
+                    ? ` → ${bookingResult.data.endDate} • ${bookingResult.data.endTime}`
+                    : ''}
                 </p>
                 <p className="muted">
                   Pickup {bookingResult.data.pickupLocation}
@@ -707,7 +790,7 @@ export default function App() {
                   {bookingResult.data.dropoffLocation}
                   {bookingResult.data.dropoffNote ? ` (${bookingResult.data.dropoffNote})` : ''}
                 </p>
-                <p className="muted">Next: {bookingResult.payment.nextStep}</p>
+                <p className="muted">Service: {formatServiceTypeLabel(bookingResult.data.serviceType)} • Next: {bookingResult.payment.nextStep}</p>
               </div>
               <div className="quote-box__amount">
                 <span>${bookingResult.data.totalAmount.toFixed(2)}</span>
@@ -762,7 +845,13 @@ export default function App() {
                   Ref {lookupResult.data.reference} • {lookupResult.data.customerName} • {lookupResult.data.vehicleName}
                 </p>
                 <p className="muted">
+                  {formatTripTypeLabel(lookupResult.data.tripType)} • {formatServiceTypeLabel(lookupResult.data.serviceType)}
+                </p>
+                <p className="muted">
                   {lookupResult.data.startDate} {lookupResult.data.pickupTime ? `• ${lookupResult.data.pickupTime}` : ''}
+                  {lookupResult.data.tripType === 'ROUND_TRIP' && lookupResult.data.endTime
+                    ? ` → ${lookupResult.data.endDate} • ${lookupResult.data.endTime}`
+                    : ''}
                 </p>
                 <p className="muted">
                   Pickup {lookupResult.data.pickupLocation}
@@ -831,8 +920,12 @@ export default function App() {
                         {booking.reference} • {booking.vehicleName}
                       </strong>
                       <p className="muted">
-                        {booking.customerName} • {booking.startDate}
+                        {booking.customerName} • {formatTripTypeLabel(booking.tripType)} • {formatServiceTypeLabel(booking.serviceType)}
+                      </p>
+                      <p className="muted">
+                        {booking.startDate}
                         {booking.pickupTime ? ` • ${booking.pickupTime}` : ''}
+                        {booking.tripType === 'ROUND_TRIP' && booking.endTime ? ` → ${booking.endDate} • ${booking.endTime}` : ''}
                       </p>
                       <p className="muted">
                         Pickup {booking.pickupLocation}
@@ -840,7 +933,7 @@ export default function App() {
                         {booking.dropoffLocation ? ` → ${booking.dropoffLocation}` : ''}
                         {booking.dropoffNote ? ` (${booking.dropoffNote})` : ''}
                       </p>
-                      <p className="muted">Status: {booking.status} • Service: {booking.serviceType}</p>
+                      <p className="muted">Status: {booking.status}</p>
                     </div>
                     <div className="quote-box__amount">
                       <span>${booking.totalAmount.toFixed(2)}</span>

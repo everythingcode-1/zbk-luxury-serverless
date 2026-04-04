@@ -9,9 +9,12 @@ import {
   bookingLookupResponseSchema,
   bookingQuoteRequestSchema,
   bookingRecordSchema,
+  calculateTripHours,
   createBookingResponseSchema,
   createBookingSchema,
+  deriveAdditionalHours,
   healthResponseSchema,
+  inferServiceTypeFromTrip,
   type BookingRecord,
   type Vehicle,
   vehicleSchema,
@@ -225,15 +228,32 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
     return c.json({ message: 'Vehicle not found' }, 404);
   }
 
-  if (!vehicle.services.includes(payload.serviceType)) {
-    return c.json({ message: 'Selected vehicle does not support this service type' }, 400);
+  const normalizedServiceType = inferServiceTypeFromTrip(
+    payload.tripType,
+    payload.pickupLocation,
+    payload.dropoffLocation || payload.pickupLocation,
+  );
+
+  if (!vehicle.services.includes(normalizedServiceType)) {
+    return c.json({ message: 'Selected vehicle does not support the inferred service type for this ride.' }, 400);
   }
+
+  const normalizedHours = payload.tripType === 'ROUND_TRIP'
+    ? calculateTripHours(payload.startDate, payload.pickupTime || '', payload.endDate, payload.endTime || '')
+    : 1;
+
+  if (payload.tripType === 'ROUND_TRIP' && !normalizedHours) {
+    return c.json({ message: 'Round-trip bookings require a valid return date and return time after pickup.' }, 400);
+  }
+
+  const hours = normalizedHours || 1;
+  const additionalHours = normalizedServiceType === 'RENTAL' ? deriveAdditionalHours(hours) : 0;
 
   const quote = buildVehicleQuote(vehicle, {
     vehicleId: payload.vehicleId,
-    serviceType: payload.serviceType,
-    hours: payload.hours,
-    additionalHours: payload.additionalHours,
+    serviceType: normalizedServiceType,
+    hours,
+    additionalHours,
   });
 
   const createdAt = new Date();
@@ -246,16 +266,18 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
     customerPhone: payload.customerPhone,
     vehicleId: vehicle.id,
     vehicleName: vehicle.name,
-    serviceType: payload.serviceType,
+    tripType: payload.tripType,
+    serviceType: normalizedServiceType,
     startDate: payload.startDate,
     endDate: payload.endDate,
     pickupTime: payload.pickupTime,
+    endTime: payload.endTime,
     pickupLocation: payload.pickupLocation,
     pickupNote: payload.pickupNote,
     dropoffLocation: payload.dropoffLocation || payload.pickupLocation,
     dropoffNote: payload.dropoffNote,
-    hours: payload.hours,
-    additionalHours: payload.additionalHours,
+    hours,
+    additionalHours,
     totalAmount: quote.totalAmount,
     depositAmount: quote.depositAmount,
     notes: payload.notes,
@@ -266,7 +288,7 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
 
   return c.json(
     createBookingResponseSchema.parse({
-      message: 'Booking draft captured. Stripe checkout belum dihubungkan, jadi status masih menunggu payment flow serverless.',
+      message: 'Booking draft captured dengan trip-type logic legacy. Stripe checkout belum dihubungkan, jadi status masih menunggu payment flow serverless.',
       data: bookingRecord,
       payment: {
         status: 'NOT_STARTED',

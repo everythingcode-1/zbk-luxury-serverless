@@ -3,10 +3,12 @@ import { z } from 'zod';
 export const serviceTypeOptions = ['AIRPORT_TRANSFER', 'TRIP', 'RENTAL'] as const;
 export const vehicleStatusOptions = ['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RESERVED'] as const;
 export const vehicleCategoryOptions = ['Executive', 'Wedding', 'Group'] as const;
+export const tripTypeOptions = ['ONE_WAY', 'ROUND_TRIP'] as const;
 
 export const serviceTypeSchema = z.enum(serviceTypeOptions);
 export const vehicleStatusSchema = z.enum(vehicleStatusOptions);
 export const vehicleCategorySchema = z.enum(vehicleCategoryOptions);
+export const tripTypeSchema = z.enum(tripTypeOptions);
 
 export const vehicleSchema = z.object({
   id: z.string(),
@@ -104,10 +106,12 @@ export const createBookingSchema = z.object({
   customerEmail: z.string().email(),
   customerPhone: z.string().min(5),
   vehicleId: z.string().min(1),
+  tripType: tripTypeSchema,
   serviceType: serviceTypeSchema,
   startDate: z.string(),
   endDate: z.string(),
   pickupTime: z.string().min(2).optional(),
+  endTime: z.string().min(2).optional(),
   pickupLocation: z.string().min(2),
   pickupNote: z.string().trim().max(160).optional(),
   dropoffLocation: z.string().optional(),
@@ -133,10 +137,12 @@ export const bookingRecordSchema = z.object({
   customerPhone: z.string(),
   vehicleId: z.string(),
   vehicleName: z.string(),
+  tripType: tripTypeSchema,
   serviceType: serviceTypeSchema,
   startDate: z.string(),
   endDate: z.string(),
   pickupTime: z.string().optional(),
+  endTime: z.string().optional(),
   pickupLocation: z.string(),
   pickupNote: z.string().optional(),
   dropoffLocation: z.string().optional(),
@@ -204,6 +210,58 @@ export const healthResponseSchema = z.object({
   service: z.string(),
   runtime: z.string(),
 });
+
+export type TripType = z.infer<typeof tripTypeSchema>;
+export type ServiceType = z.infer<typeof serviceTypeSchema>;
+
+export const airportLocationKeywords = [
+  'airport',
+  'bandara',
+  'terminal',
+  'arrival',
+  'departure',
+  'gate',
+  'changi',
+  'soekarno',
+  'sukarno',
+  'hatta',
+  'ngurah rai',
+] as const;
+
+export function isAirportLocation(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return false;
+  return airportLocationKeywords.some((keyword) => normalized.includes(keyword));
+}
+
+export function inferServiceTypeFromTrip(tripType: TripType, pickupLocation: string, dropoffLocation: string): ServiceType {
+  if (tripType === 'ROUND_TRIP') {
+    return 'RENTAL';
+  }
+
+  return isAirportLocation(pickupLocation) || isAirportLocation(dropoffLocation) ? 'AIRPORT_TRANSFER' : 'TRIP';
+}
+
+export function calculateTripHours(startDate: string, startTime: string, endDate: string, endTime: string) {
+  if (!startDate || !startTime || !endDate || !endTime) {
+    return null;
+  }
+
+  const start = new Date(`${startDate}T${startTime}`);
+  const end = new Date(`${endDate}T${endTime}`);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+    return null;
+  }
+
+  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60));
+}
+
+export function deriveAdditionalHours(hours: number) {
+  if (hours <= 6) return 0;
+  if (hours <= 12) return hours - 6;
+  return hours - 12;
+}
 
 export function computeBookingQuote(input: BookingQuoteInput) {
   let base = 0;
