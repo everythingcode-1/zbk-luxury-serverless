@@ -7,6 +7,7 @@ import {
   type BookingQuoteResponse,
   type CreateBookingResponse,
   type Vehicle,
+  vehicleCategoryOptions,
   serviceTypeOptions,
 } from '@zbk/shared';
 
@@ -16,6 +17,7 @@ type VehiclesResponse = {
   data: Vehicle[];
   meta: {
     total: number;
+    categories: string[];
     source: string;
   };
 };
@@ -83,6 +85,9 @@ function isAirportLocation(value: string) {
 
 export default function App() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehicleCategories, setVehicleCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<(typeof vehicleCategoryOptions)[number] | 'ALL'>('ALL');
+  const [luxuryOnly, setLuxuryOnly] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [quoteRequest, setQuoteRequest] = useState<BookingQuoteRequest>({
     vehicleId: '',
@@ -111,7 +116,15 @@ export default function App() {
       try {
         setIsLoadingVehicles(true);
         setError(null);
-        const response = await fetch(`${API_BASE_URL}/api/public/vehicles`, {
+        const params = new URLSearchParams();
+        if (selectedCategory !== 'ALL') {
+          params.set('category', selectedCategory);
+        }
+        if (luxuryOnly) {
+          params.set('luxuryOnly', 'true');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/public/vehicles${params.size ? `?${params.toString()}` : ''}`, {
           signal: controller.signal,
         });
 
@@ -121,11 +134,11 @@ export default function App() {
 
         const payload: VehiclesResponse = await response.json();
         setVehicles(payload.data);
+        setVehicleCategories(payload.meta.categories);
 
-        if (payload.data.length > 0) {
-          setSelectedVehicleId(payload.data[0].id);
-          setQuoteRequest(getDefaultQuoteRequest(payload.data[0]));
-        }
+        const nextVehicle = payload.data.find((vehicle) => vehicle.id === selectedVehicleId) || payload.data[0];
+        setSelectedVehicleId(nextVehicle?.id || '');
+        setQuoteRequest(getDefaultQuoteRequest(nextVehicle));
       } catch (err) {
         if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : 'Unknown error loading vehicles');
@@ -138,7 +151,7 @@ export default function App() {
 
     loadVehicles();
     return () => controller.abort();
-  }, []);
+  }, [luxuryOnly, selectedCategory]);
 
   const selectedVehicle = useMemo(
     () => vehicles.find((vehicle) => vehicle.id === selectedVehicleId),
@@ -358,10 +371,37 @@ export default function App() {
         <article className="card card--wide">
           <div className="section-title-row">
             <div>
-              <h2>Seed vehicle catalog</h2>
-              <p className="muted">Sementara memakai seed catalog sebelum Neon dihubungkan penuh.</p>
+              <h2>Legacy-inspired vehicle catalog</h2>
+              <p className="muted">Kategori dan highlight kendaraan publik sudah ikut dimigrasikan ke Workers seed catalog.</p>
             </div>
             <span className="pill">{isLoadingVehicles ? 'Loading…' : `${vehicles.length} vehicles`}</span>
+          </div>
+
+          <div className="catalog-filter-row">
+            <div className="service-pills">
+              <button
+                type="button"
+                className={`pill pill-button ${selectedCategory === 'ALL' ? '' : 'pill--muted'}`}
+                onClick={() => setSelectedCategory('ALL')}
+              >
+                All categories
+              </button>
+              {vehicleCategories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  className={`pill pill-button ${selectedCategory === category ? '' : 'pill--muted'}`}
+                  onClick={() => setSelectedCategory(category as (typeof vehicleCategoryOptions)[number])}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <label className="checkbox-inline">
+              <input type="checkbox" checked={luxuryOnly} onChange={(e) => setLuxuryOnly(e.target.checked)} />
+              Luxury only
+            </label>
           </div>
 
           <div className="vehicle-grid">
@@ -377,7 +417,13 @@ export default function App() {
                 type="button"
               >
                 <div className="vehicle-card__header">
-                  <strong>{vehicle.name}</strong>
+                  <div>
+                    <strong>{vehicle.name}</strong>
+                    <div className="service-pills service-pills--tight">
+                      <span className="pill pill--muted">{vehicle.category}</span>
+                      {vehicle.isLuxury ? <span className="pill">Luxury</span> : null}
+                    </div>
+                  </div>
                   <span>{vehicle.status}</span>
                 </div>
                 <p>
@@ -386,6 +432,7 @@ export default function App() {
                 <p>
                   {vehicle.location} • {vehicle.capacity} pax
                 </p>
+                <p className="muted">{vehicle.features.slice(0, 2).join(' • ')}</p>
                 <div className="service-pills">
                   {vehicle.services.map((service) => (
                     <span key={service} className="pill pill--muted">
@@ -405,14 +452,29 @@ export default function App() {
               <p className="vehicle-detail__name">{selectedVehicle.name}</p>
               <p className="muted">{selectedVehicle.description}</p>
               <ul className="detail-list">
+                <li>Category: {selectedVehicle.category}</li>
                 <li>Location: {selectedVehicle.location}</li>
                 <li>Capacity: {selectedVehicle.capacity} pax</li>
                 <li>Luggage: {selectedVehicle.luggage ?? '-'} bags</li>
+                <li>Transmission: {selectedVehicle.transmission || '-'}</li>
+                <li>Rating: {selectedVehicle.rating ? `${selectedVehicle.rating.toFixed(1)} / 5` : '-'}</li>
                 <li>Airport transfer: ${selectedVehicle.pricing.airportTransfer}</li>
                 <li>6 hours: ${selectedVehicle.pricing.sixHours}</li>
                 <li>12 hours: ${selectedVehicle.pricing.twelveHours}</li>
                 <li>Per hour: ${selectedVehicle.pricing.perHour}</li>
               </ul>
+              {selectedVehicle.features.length ? (
+                <div>
+                  <p className="muted">Legacy feature highlights</p>
+                  <div className="service-pills">
+                    {selectedVehicle.features.map((feature) => (
+                      <span key={feature} className="pill pill--muted">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </>
           ) : (
             <p className="muted">Pilih vehicle dulu.</p>

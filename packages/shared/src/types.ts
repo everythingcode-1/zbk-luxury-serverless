@@ -2,14 +2,17 @@ import { z } from 'zod';
 
 export const serviceTypeOptions = ['AIRPORT_TRANSFER', 'TRIP', 'RENTAL'] as const;
 export const vehicleStatusOptions = ['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RESERVED'] as const;
+export const vehicleCategoryOptions = ['Executive', 'Wedding', 'Group'] as const;
 
 export const serviceTypeSchema = z.enum(serviceTypeOptions);
 export const vehicleStatusSchema = z.enum(vehicleStatusOptions);
+export const vehicleCategorySchema = z.enum(vehicleCategoryOptions);
 
 export const vehicleSchema = z.object({
   id: z.string(),
   name: z.string(),
   model: z.string(),
+  category: vehicleCategorySchema,
   year: z.number().int(),
   status: vehicleStatusSchema,
   location: z.string(),
@@ -17,7 +20,12 @@ export const vehicleSchema = z.object({
   luggage: z.number().int().nonnegative().nullable().optional(),
   color: z.string(),
   imageUrl: z.string().url().optional(),
+  images: z.array(z.string()).default([]),
   description: z.string().optional(),
+  features: z.array(z.string()).default([]),
+  rating: z.number().min(0).max(5).optional(),
+  transmission: z.string().optional(),
+  isLuxury: z.boolean().optional(),
   services: z.array(serviceTypeSchema).min(1),
   minimumHours: z.number().int().positive().nullable().optional(),
   pricing: z.object({
@@ -35,10 +43,13 @@ export const vehiclesResponseSchema = z.object({
   filters: z.object({
     status: z.string().optional(),
     serviceType: serviceTypeSchema.optional(),
+    category: vehicleCategorySchema.optional(),
+    luxuryOnly: z.boolean().optional(),
     limit: z.number().optional(),
   }),
   meta: z.object({
     total: z.number().int().nonnegative(),
+    categories: z.array(vehicleCategorySchema),
     source: z.string(),
   }),
 });
@@ -46,6 +57,8 @@ export const vehiclesResponseSchema = z.object({
 export const vehiclesFilterSchema = z.object({
   status: z.string().optional(),
   serviceType: serviceTypeSchema.optional(),
+  category: vehicleCategorySchema.optional(),
+  luxuryOnly: z.coerce.boolean().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
 });
 

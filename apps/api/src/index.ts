@@ -35,6 +35,7 @@ const vehicleCatalog: Vehicle[] = [
     id: 'alphard-executive-lounge',
     name: 'Toyota Alphard Executive Lounge',
     model: 'Executive Lounge',
+    category: 'Executive',
     year: 2024,
     status: 'AVAILABLE',
     location: 'Bali',
@@ -42,7 +43,15 @@ const vehicleCatalog: Vehicle[] = [
     luggage: 4,
     color: 'Black',
     imageUrl: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
+    ],
     description: 'Premium MPV for airport transfer, wedding, and executive trips.',
+    features: ['Premium captain seats', 'Professional chauffeur', 'Airport meet & greet'],
+    rating: 4.9,
+    transmission: 'Automatic',
+    isLuxury: true,
     services: ['AIRPORT_TRANSFER', 'TRIP', 'RENTAL'],
     minimumHours: 6,
     pricing: {
@@ -56,6 +65,7 @@ const vehicleCatalog: Vehicle[] = [
     id: 'mercedes-s-class',
     name: 'Mercedes-Benz S-Class',
     model: 'S 450 Luxury',
+    category: 'Wedding',
     year: 2023,
     status: 'AVAILABLE',
     location: 'Jakarta',
@@ -63,7 +73,15 @@ const vehicleCatalog: Vehicle[] = [
     luggage: 3,
     color: 'Obsidian Black',
     imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
+    ],
     description: 'Luxury sedan for VIP transfer and corporate hospitality.',
+    features: ['Wedding convoy ready', 'VIP privacy cabin', 'Corporate hospitality setup'],
+    rating: 4.8,
+    transmission: 'Automatic',
+    isLuxury: true,
     services: ['AIRPORT_TRANSFER', 'TRIP'],
     minimumHours: 1,
     pricing: {
@@ -77,6 +95,7 @@ const vehicleCatalog: Vehicle[] = [
     id: 'toyota-hiace-premio',
     name: 'Toyota HiAce Premio',
     model: 'Premio',
+    category: 'Group',
     year: 2024,
     status: 'AVAILABLE',
     location: 'Bali',
@@ -84,7 +103,15 @@ const vehicleCatalog: Vehicle[] = [
     luggage: 8,
     color: 'Pearl White',
     imageUrl: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
+    ],
     description: 'Group transportation for tours, corporate teams, and event mobility.',
+    features: ['10-passenger layout', 'Large luggage capacity', 'Event shuttle friendly'],
+    rating: 4.7,
+    transmission: 'Automatic',
+    isLuxury: false,
     services: ['AIRPORT_TRANSFER', 'TRIP', 'RENTAL'],
     minimumHours: 6,
     pricing: {
@@ -120,10 +147,13 @@ app.get('/health', (c) =>
 
 app.get('/api/public/vehicles', zValidator('query', vehiclesFilterSchema), (c) => {
   const query = c.req.valid('query');
+  const categories = [...new Set(vehicleCatalog.map((vehicle) => vehicle.category))];
 
   const filtered = vehicleCatalog.filter((vehicle) => {
     if (query.status && vehicle.status !== query.status) return false;
     if (query.serviceType && !vehicle.services.includes(query.serviceType)) return false;
+    if (query.category && vehicle.category !== query.category) return false;
+    if (query.luxuryOnly && !vehicle.isLuxury) return false;
     return true;
   });
 
@@ -135,6 +165,7 @@ app.get('/api/public/vehicles', zValidator('query', vehiclesFilterSchema), (c) =
       filters: query,
       meta: {
         total: filtered.length,
+        categories,
         source: 'seed-catalog',
       },
     }),
