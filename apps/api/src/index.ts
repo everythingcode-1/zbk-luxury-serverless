@@ -6,6 +6,8 @@ import {
   bookingHistoryQuerySchema,
   bookingHistoryResponseSchema,
   bookingLookupQuerySchema,
+  bookingPaymentReturnQuerySchema,
+  bookingPaymentReturnResponseSchema,
   bookingLookupResponseSchema,
   bookingQuoteRequestSchema,
   bookingRecordSchema,
@@ -34,6 +36,15 @@ type EnvBindings = {
 const app = new Hono<{ Bindings: EnvBindings }>();
 
 const bookingDrafts: BookingRecord[] = [];
+const bookingCheckoutSessions = new Map<string, {
+  returnToken: string;
+  sessionId: string;
+  checkoutUrl: string;
+  successUrl: string;
+  cancelUrl: string;
+  expiresAt?: string;
+  createdAt: string;
+}>();
 const defaultWebAppBaseUrl = 'http://localhost:5173';
 const paymentNextStep = 'Create a Workers-safe Stripe checkout session for this booking reference.';
 
@@ -41,6 +52,10 @@ function createBookingReference(date: Date) {
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
   const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `BK-${datePart}-${randomPart}`;
+}
+
+function createReturnToken() {
+  return crypto.randomUUID().replace(/-/g, '').slice(0, 16);
 }
 
 function hasStripeCheckoutConfigured(env: EnvBindings) {
@@ -79,7 +94,32 @@ function resolveAppBaseUrl(env: EnvBindings, origin?: string) {
   }
 }
 
-async function createStripeCheckoutSession(env: EnvBindings, bookingRecord: BookingRecord, origin?: string) {
+function buildPaymentReturnState(env: EnvBindings, stage: 'SUCCESS' | 'CANCEL'): BookingPaymentState {
+  if (stage === 'SUCCESS') {
+    return {
+      status: hasStripeCheckoutConfigured(env) ? 'RETURN_PENDING_CONFIRMATION' : 'NOT_STARTED',
+      checkoutReady: hasStripeCheckoutConfigured(env),
+      nextStep: hasStripeCheckoutConfigured(env)
+        ? 'Customer has landed on the migrated payment return view. Webhook verification and durable paid-state persistence are the next Stripe slice.'
+        : 'Stripe return view is wired, but checkout still needs STRIPE_SECRET_KEY in the Worker environment.',
+    };
+  }
+
+  return {
+    status: hasStripeCheckoutConfigured(env) ? 'CHECKOUT_READY' : 'NOT_STARTED',
+    checkoutReady: hasStripeCheckoutConfigured(env),
+    nextStep: hasStripeCheckoutConfigured(env)
+      ? 'Customer can reopen deposit checkout from this migrated cancel view when ready.'
+      : paymentNextStep,
+  };
+}
+
+async function createStripeCheckoutSession(
+  env: EnvBindings,
+  bookingRecord: BookingRecord,
+  returnToken: string,
+  origin?: string,
+) {
   const secretKey = env.STRIPE_SECRET_KEY?.trim();
 
   if (!secretKey) {
@@ -87,8 +127,8 @@ async function createStripeCheckoutSession(env: EnvBindings, bookingRecord: Book
   }
 
   const baseUrl = resolveAppBaseUrl(env, origin);
-  const successUrl = `${baseUrl}/payment/success?reference=${encodeURIComponent(bookingRecord.reference)}&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${baseUrl}/payment/cancel?reference=${encodeURIComponent(bookingRecord.reference)}`;
+  const successUrl = `${baseUrl}/#/payment/success?reference=${encodeURIComponent(bookingRecord.reference)}&token=${encodeURIComponent(returnToken)}&stage=SUCCESS&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${baseUrl}/#/payment/cancel?reference=${encodeURIComponent(bookingRecord.reference)}&token=${encodeURIComponent(returnToken)}&stage=CANCEL`;
   const form = new URLSearchParams();
 
   form.set('mode', 'payment');
@@ -427,7 +467,18 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
   }
 
   try {
-    const session = await createStripeCheckoutSession(c.env, bookingRecord, payload.origin);
+    const returnToken = createReturnToken();
+    const session = await createStripeCheckoutSession(c.env, bookingRecord, returnToken, payload.origin);
+
+    bookingCheckoutSessions.set(bookingRecord.reference, {
+      returnToken,
+      sessionId: session.sessionId,
+      checkoutUrl: session.checkoutUrl,
+      successUrl: session.successUrl,
+      cancelUrl: session.cancelUrl,
+      expiresAt: session.expiresAt,
+      createdAt: new Date().toISOString(),
+    });
 
     return c.json(
       createCheckoutSessionResponseSchema.parse({
@@ -455,6 +506,39 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
       502,
     );
   }
+});
+
+app.get('/api/public/bookings/:reference/payment-return', zValidator('query', bookingPaymentReturnQuerySchema), (c) => {
+  const query = c.req.valid('query');
+  const reference = c.req.param('reference').trim().toUpperCase();
+  const bookingRecord = bookingDrafts.find((item) => item.reference.toUpperCase() === reference);
+  const checkoutSession = bookingCheckoutSessions.get(reference);
+
+  if (!bookingRecord || !checkoutSession || checkoutSession.returnToken !== query.token) {
+    return c.json({ message: 'Payment return summary not found for this booking reference.' }, 404);
+  }
+
+  if (query.session_id && checkoutSession.sessionId !== query.session_id) {
+    return c.json({ message: 'Payment return session does not match the latest checkout attempt for this booking.' }, 404);
+  }
+
+  return c.json(
+    bookingPaymentReturnResponseSchema.parse({
+      message: query.stage === 'SUCCESS'
+        ? 'Stripe returned to the migrated success view. Webhook confirmation and durable payment persistence remain the next payment slice.'
+        : 'Customer returned to the migrated cancel view and can safely reopen checkout from here.',
+      data: {
+        stage: query.stage,
+        sessionId: checkoutSession.sessionId,
+        successUrl: checkoutSession.successUrl,
+        cancelUrl: checkoutSession.cancelUrl,
+        checkoutUrl: checkoutSession.checkoutUrl,
+        expiresAt: checkoutSession.expiresAt,
+        booking: bookingRecord,
+      },
+      payment: buildPaymentReturnState(c.env, query.stage),
+    }),
+  );
 });
 
 app.get('/api/public/bookings/:reference', zValidator('query', bookingLookupQuerySchema), (c) => {

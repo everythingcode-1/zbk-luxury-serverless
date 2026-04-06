@@ -126,8 +126,9 @@ export const createBookingSchema = z.object({
 export type CreateBookingRequest = z.infer<typeof createBookingSchema>;
 
 export const bookingRecordStatusOptions = ['DRAFT', 'PENDING_PAYMENT'] as const;
-export const paymentFlowStatusOptions = ['NOT_STARTED', 'CHECKOUT_READY'] as const;
+export const paymentFlowStatusOptions = ['NOT_STARTED', 'CHECKOUT_READY', 'RETURN_PENDING_CONFIRMATION'] as const;
 export const checkoutSessionModeOptions = ['STRIPE', 'CONFIGURATION_REQUIRED'] as const;
+export const paymentReturnStageOptions = ['SUCCESS', 'CANCEL'] as const;
 
 export const bookingRecordSchema = z.object({
   id: z.string(),
@@ -218,6 +219,30 @@ export const createCheckoutSessionResponseSchema = z.object({
 });
 
 export type CreateCheckoutSessionResponse = z.infer<typeof createCheckoutSessionResponseSchema>;
+
+export const bookingPaymentReturnQuerySchema = z.object({
+  token: z.string().min(8),
+  stage: z.enum(paymentReturnStageOptions),
+  session_id: z.string().optional(),
+});
+
+export type BookingPaymentReturnQuery = z.infer<typeof bookingPaymentReturnQuerySchema>;
+
+export const bookingPaymentReturnResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    stage: z.enum(paymentReturnStageOptions),
+    sessionId: z.string().optional(),
+    successUrl: z.string().url().optional(),
+    cancelUrl: z.string().url().optional(),
+    checkoutUrl: z.string().url().optional(),
+    expiresAt: z.string().optional(),
+    booking: bookingRecordSchema,
+  }),
+  payment: bookingPaymentStateSchema,
+});
+
+export type BookingPaymentReturnResponse = z.infer<typeof bookingPaymentReturnResponseSchema>;
 
 export const bookingHistoryResponseSchema = z.object({
   message: z.string(),

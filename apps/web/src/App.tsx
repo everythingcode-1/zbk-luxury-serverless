@@ -7,6 +7,7 @@ import {
   isAirportLocation,
   type BookingHistoryResponse,
   type BookingLookupResponse,
+  type BookingPaymentReturnResponse,
   type BookingQuoteRequest,
   type BookingQuoteResponse,
   type CreateBookingResponse,
@@ -52,6 +53,28 @@ type BookingLookupFormState = {
 type BookingHistoryFormState = {
   email: string;
 };
+
+type RouteState = {
+  pathname: string;
+  searchParams: URLSearchParams;
+};
+
+function getRouteState(): RouteState {
+  if (typeof window === 'undefined') {
+    return { pathname: '/', searchParams: new URLSearchParams() };
+  }
+
+  const { hash, search } = window.location;
+  if (hash.startsWith('#/')) {
+    const [hashPath, hashQuery = ''] = hash.slice(1).split('?');
+    return {
+      pathname: hashPath || '/',
+      searchParams: new URLSearchParams(hashQuery),
+    };
+  }
+
+  return { pathname: '/', searchParams: new URLSearchParams(search) };
+}
 
 const initialBookingForm: BookingFormState = {
   customerName: '',
@@ -104,7 +127,135 @@ function formatTripTypeLabel(tripType: TripType) {
   return tripType === 'ROUND_TRIP' ? 'Round trip' : 'One way';
 }
 
+
+function PaymentReturnView({ routeState }: { routeState: RouteState }) {
+  const [result, setResult] = useState<BookingPaymentReturnResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const reference = routeState.searchParams.get('reference') || '';
+  const token = routeState.searchParams.get('token') || '';
+  const sessionId = routeState.searchParams.get('session_id') || '';
+  const stage = routeState.searchParams.get('stage') || (routeState.pathname === '/payment/cancel' ? 'CANCEL' : 'SUCCESS');
+
+  const isCancel = stage === 'CANCEL';
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadPaymentReturn() {
+      if (!reference || !token) {
+        setError('Payment return link is missing the booking reference or secure token.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const params = new URLSearchParams({ token, stage });
+        if (sessionId) {
+          params.set('session_id', sessionId);
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/public/bookings/${encodeURIComponent(reference)}/payment-return?${params.toString()}`,
+          { signal: controller.signal },
+        );
+        const payload: BookingPaymentReturnResponse | { message?: string } = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.message || `Payment return lookup failed: ${response.status}`);
+        }
+
+        setResult(payload as BookingPaymentReturnResponse);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setError(err instanceof Error ? err.message : 'Unknown error loading payment return');
+        setResult(null);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadPaymentReturn();
+    return () => controller.abort();
+  }, [reference, routeState.pathname, sessionId, stage, token]);
+
+  const booking = result?.data.booking;
+
+  return (
+    <main className="page payment-return-page">
+      <section className="hero payment-return-hero">
+        <p className="eyebrow">ZBK Luxury Serverless</p>
+        <h1>{isCancel ? 'Checkout dibatalkan, tapi flow return page sudah dimigrasikan.' : 'Payment success return page sudah mendarat di stack serverless.'}</h1>
+        <p>
+          Slice ini memindahkan hash-routed Stripe return pages ke React/Vite + Workers supaya checkout success/cancel
+          kembali ke app baru tanpa bergantung pada Next.js legacy route runtime.
+        </p>
+      </section>
+
+      {isLoading ? <div className="card">Loading payment return summary…</div> : null}
+      {error ? <div className="alert error">{error}</div> : null}
+
+      {booking && result ? (
+        <section className="card-grid payment-return-grid">
+          <article className="card card--wide payment-return-card">
+            <div className="section-title-row">
+              <div>
+                <h2>{isCancel ? 'Deposit checkout can be reopened' : 'Booking deposit return summary'}</h2>
+                <p className="muted">{result.message}</p>
+              </div>
+              <span className={`pill ${isCancel ? 'pill--muted' : ''}`}>{result.payment.status}</span>
+            </div>
+
+            <div className="payment-return-summary">
+              <div>
+                <p><strong>{booking.reference}</strong> • {booking.customerName} • {booking.vehicleName}</p>
+                <p className="muted">{formatTripTypeLabel(booking.tripType)} • {formatServiceTypeLabel(booking.serviceType)}</p>
+                <p className="muted">
+                  {booking.startDate}
+                  {booking.pickupTime ? ` • ${booking.pickupTime}` : ''}
+                  {booking.tripType === 'ROUND_TRIP' && booking.endTime ? ` → ${booking.endDate} • ${booking.endTime}` : ''}
+                </p>
+                <p className="muted">
+                  Pickup {booking.pickupLocation}
+                  {booking.pickupNote ? ` (${booking.pickupNote})` : ''}
+                  {booking.dropoffLocation ? ` → ${booking.dropoffLocation}` : ''}
+                  {booking.dropoffNote ? ` (${booking.dropoffNote})` : ''}
+                </p>
+                <p className="muted">Next: {result.payment.nextStep}</p>
+                {result.data.sessionId ? <p className="muted">Stripe session: {result.data.sessionId}</p> : null}
+                {result.data.expiresAt ? <p className="muted">Checkout expires: {result.data.expiresAt}</p> : null}
+              </div>
+
+              <div className="quote-box__amount">
+                <span>${booking.totalAmount.toFixed(2)}</span>
+                <small>Deposit ${booking.depositAmount.toFixed(2)}</small>
+              </div>
+            </div>
+
+            <div className="payment-return-actions">
+              {result.data.checkoutUrl ? (
+                <button className="primary-button primary-button--inline" onClick={() => window.location.assign(result.data.checkoutUrl!)} type="button">
+                  {isCancel ? 'Reopen deposit checkout' : 'Open latest checkout again'}
+                </button>
+              ) : null}
+              <a className="secondary-link" href="#/">
+                Back to booking workspace
+              </a>
+            </div>
+          </article>
+        </section>
+      ) : null}
+    </main>
+  );
+}
+
 export default function App() {
+  const [routeState, setRouteState] = useState<RouteState>(() => getRouteState());
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [vehicleCategories, setVehicleCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<(typeof vehicleCategoryOptions)[number] | 'ALL'>('ALL');
@@ -126,6 +277,18 @@ export default function App() {
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [checkoutMessageFor, setCheckoutMessageFor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const syncRouteState = () => setRouteState(getRouteState());
+
+    window.addEventListener('hashchange', syncRouteState);
+    window.addEventListener('popstate', syncRouteState);
+
+    return () => {
+      window.removeEventListener('hashchange', syncRouteState);
+      window.removeEventListener('popstate', syncRouteState);
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -470,13 +633,17 @@ export default function App() {
       setCheckoutMessageFor(reference);
 
       if (checkoutPayload.data.checkoutUrl) {
-        window.open(checkoutPayload.data.checkoutUrl, '_blank', 'noopener,noreferrer');
+        window.location.assign(checkoutPayload.data.checkoutUrl);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error starting checkout');
     } finally {
       setIsPreparingCheckoutFor(null);
     }
+  }
+
+  if (routeState.pathname === '/payment/success' || routeState.pathname === '/payment/cancel') {
+    return <PaymentReturnView routeState={routeState} />;
   }
 
   return (
@@ -487,7 +654,8 @@ export default function App() {
         <p>
           UI React ini memakai contract shared untuk membaca katalog, meminta booking quote,
           mengirim booking draft ke backend Hono/Workers, lalu menginisialisasi deposit checkout
-          via Workers-safe Stripe session handoff saat secret sudah tersedia.
+          via Workers-safe Stripe session handoff saat secret sudah tersedia. Return page success/cancel kini
+          juga masuk ke app React/Vite melalui hash route yang aman untuk static hosting.
         </p>
       </section>
 
