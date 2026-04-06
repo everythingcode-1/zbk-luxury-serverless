@@ -126,7 +126,8 @@ export const createBookingSchema = z.object({
 export type CreateBookingRequest = z.infer<typeof createBookingSchema>;
 
 export const bookingRecordStatusOptions = ['DRAFT', 'PENDING_PAYMENT'] as const;
-export const paymentFlowStatusOptions = ['NOT_STARTED'] as const;
+export const paymentFlowStatusOptions = ['NOT_STARTED', 'CHECKOUT_READY'] as const;
+export const checkoutSessionModeOptions = ['STRIPE', 'CONFIGURATION_REQUIRED'] as const;
 
 export const bookingRecordSchema = z.object({
   id: z.string(),
@@ -160,6 +161,7 @@ export type BookingRecord = z.infer<typeof bookingRecordSchema>;
 export const bookingPaymentStateSchema = z.object({
   status: z.enum(paymentFlowStatusOptions),
   nextStep: z.string(),
+  checkoutReady: z.boolean().default(false),
 });
 
 export type BookingPaymentState = z.infer<typeof bookingPaymentStateSchema>;
@@ -187,12 +189,35 @@ export type BookingHistoryQuery = z.infer<typeof bookingHistoryQuerySchema>;
 export const bookingLookupResponseSchema = z.object({
   message: z.string(),
   data: bookingRecordSchema,
-  payment: bookingPaymentStateSchema.extend({
-    checkoutReady: z.boolean(),
-  }),
+  payment: bookingPaymentStateSchema,
 });
 
 export type BookingLookupResponse = z.infer<typeof bookingLookupResponseSchema>;
+
+export const createCheckoutSessionSchema = z.object({
+  email: z.string().email(),
+  origin: z.string().url().optional(),
+});
+
+export type CreateCheckoutSessionRequest = z.infer<typeof createCheckoutSessionSchema>;
+
+export const createCheckoutSessionResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    reference: z.string(),
+    mode: z.enum(checkoutSessionModeOptions),
+    amountDue: z.number().nonnegative(),
+    currency: z.string(),
+    checkoutUrl: z.string().url().optional(),
+    sessionId: z.string().optional(),
+    successUrl: z.string().url().optional(),
+    cancelUrl: z.string().url().optional(),
+    expiresAt: z.string().optional(),
+  }),
+  payment: bookingPaymentStateSchema,
+});
+
+export type CreateCheckoutSessionResponse = z.infer<typeof createCheckoutSessionResponseSchema>;
 
 export const bookingHistoryResponseSchema = z.object({
   message: z.string(),

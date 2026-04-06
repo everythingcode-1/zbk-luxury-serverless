@@ -10,6 +10,7 @@ import {
   type BookingQuoteRequest,
   type BookingQuoteResponse,
   type CreateBookingResponse,
+  type CreateCheckoutSessionResponse,
   type TripType,
   type Vehicle,
   tripTypeOptions,
@@ -121,6 +122,9 @@ export default function App() {
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [isLookingUpBooking, setIsLookingUpBooking] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isPreparingCheckoutFor, setIsPreparingCheckoutFor] = useState<string | null>(null);
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [checkoutMessageFor, setCheckoutMessageFor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -229,6 +233,8 @@ export default function App() {
   function resetBookingArtifacts() {
     setBookingResult(null);
     setRemoteQuote(null);
+    setCheckoutMessage(null);
+    setCheckoutMessageFor(null);
   }
 
   function updateBookingForm(field: keyof BookingFormState, value: string) {
@@ -370,10 +376,7 @@ export default function App() {
       setLookupResult({
         message: 'Freshly created booking draft is ready to track from this page.',
         data: bookingResponse.data,
-        payment: {
-          ...bookingResponse.payment,
-          checkoutReady: false,
-        },
+        payment: bookingResponse.payment,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error submitting booking');
@@ -440,6 +443,42 @@ export default function App() {
     }
   }
 
+  async function startCheckout(reference: string, email: string) {
+    try {
+      setIsPreparingCheckoutFor(reference);
+      setCheckoutMessage(null);
+      setCheckoutMessageFor(null);
+      setError(null);
+
+      const response = await fetch(`${API_BASE_URL}/api/public/bookings/${encodeURIComponent(reference)}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          origin: window.location.origin,
+        }),
+      });
+
+      const payload: CreateCheckoutSessionResponse | { message?: string } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || `Checkout initialization failed: ${response.status}`);
+      }
+
+      const checkoutPayload = payload as CreateCheckoutSessionResponse;
+      setCheckoutMessage(checkoutPayload.message);
+      setCheckoutMessageFor(reference);
+
+      if (checkoutPayload.data.checkoutUrl) {
+        window.open(checkoutPayload.data.checkoutUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error starting checkout');
+    } finally {
+      setIsPreparingCheckoutFor(null);
+    }
+  }
+
   return (
     <main className="page">
       <section className="hero">
@@ -447,8 +486,8 @@ export default function App() {
         <h1>Public vehicles + booking draft flow sudah bergerak ke Workers.</h1>
         <p>
           UI React ini memakai contract shared untuk membaca katalog, meminta booking quote,
-          lalu mengirim booking draft ke backend Hono/Workers dengan response yang siap
-          dipasangkan ke Stripe checkout berikutnya.
+          mengirim booking draft ke backend Hono/Workers, lalu menginisialisasi deposit checkout
+          via Workers-safe Stripe session handoff saat secret sudah tersedia.
         </p>
       </section>
 
@@ -790,11 +829,26 @@ export default function App() {
                   {bookingResult.data.dropoffLocation}
                   {bookingResult.data.dropoffNote ? ` (${bookingResult.data.dropoffNote})` : ''}
                 </p>
-                <p className="muted">Service: {formatServiceTypeLabel(bookingResult.data.serviceType)} • Next: {bookingResult.payment.nextStep}</p>
+                <p className="muted">
+                  Service: {formatServiceTypeLabel(bookingResult.data.serviceType)} • Payment: {bookingResult.payment.status} • Checkout ready:{' '}
+                  {bookingResult.payment.checkoutReady ? 'Yes' : 'Not yet'}
+                </p>
+                <p className="muted">Next: {bookingResult.payment.nextStep}</p>
+                {checkoutMessage && checkoutMessageFor === bookingResult.data.reference ? (
+                  <p className="muted">Checkout: {checkoutMessage}</p>
+                ) : null}
               </div>
               <div className="quote-box__amount">
                 <span>${bookingResult.data.totalAmount.toFixed(2)}</span>
                 <small>Deposit ${bookingResult.data.depositAmount.toFixed(2)}</small>
+                <button
+                  className="primary-button"
+                  disabled={!bookingResult.payment.checkoutReady || isPreparingCheckoutFor === bookingResult.data.reference}
+                  onClick={() => startCheckout(bookingResult.data.reference, bookingResult.data.customerEmail)}
+                  type="button"
+                >
+                  {isPreparingCheckoutFor === bookingResult.data.reference ? 'Preparing checkout…' : 'Open deposit checkout'}
+                </button>
               </div>
             </div>
           ) : null}
@@ -861,10 +915,21 @@ export default function App() {
                 </p>
                 <p className="muted">Payment: {lookupResult.payment.status} • Checkout ready: {lookupResult.payment.checkoutReady ? 'Yes' : 'Not yet'}</p>
                 <p className="muted">Next: {lookupResult.payment.nextStep}</p>
+                {checkoutMessage && checkoutMessageFor === lookupResult.data.reference ? (
+                  <p className="muted">Checkout: {checkoutMessage}</p>
+                ) : null}
               </div>
               <div className="quote-box__amount">
                 <span>${lookupResult.data.totalAmount.toFixed(2)}</span>
                 <small>Deposit ${lookupResult.data.depositAmount.toFixed(2)}</small>
+                <button
+                  className="primary-button"
+                  disabled={!lookupResult.payment.checkoutReady || isPreparingCheckoutFor === lookupResult.data.reference}
+                  onClick={() => startCheckout(lookupResult.data.reference, lookupResult.data.customerEmail)}
+                  type="button"
+                >
+                  {isPreparingCheckoutFor === lookupResult.data.reference ? 'Preparing checkout…' : 'Open deposit checkout'}
+                </button>
               </div>
             </div>
           ) : (

@@ -12,9 +12,12 @@ import {
   calculateTripHours,
   createBookingResponseSchema,
   createBookingSchema,
+  createCheckoutSessionResponseSchema,
+  createCheckoutSessionSchema,
   deriveAdditionalHours,
   healthResponseSchema,
   inferServiceTypeFromTrip,
+  type BookingPaymentState,
   type BookingRecord,
   type Vehicle,
   vehicleSchema,
@@ -22,15 +25,116 @@ import {
   vehiclesResponseSchema,
 } from '@zbk/shared';
 
-const app = new Hono();
+type EnvBindings = {
+  APP_NAME: string;
+  STRIPE_SECRET_KEY?: string;
+  WEB_APP_BASE_URL?: string;
+};
+
+const app = new Hono<{ Bindings: EnvBindings }>();
 
 const bookingDrafts: BookingRecord[] = [];
-const paymentNextStep = 'Connect Workers-safe Stripe checkout session creation for this booking reference.';
+const defaultWebAppBaseUrl = 'http://localhost:5173';
+const paymentNextStep = 'Create a Workers-safe Stripe checkout session for this booking reference.';
 
 function createBookingReference(date: Date) {
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
   const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `BK-${datePart}-${randomPart}`;
+}
+
+function hasStripeCheckoutConfigured(env: EnvBindings) {
+  return Boolean(env.STRIPE_SECRET_KEY?.trim().startsWith('sk_'));
+}
+
+function buildPaymentState(env: EnvBindings): BookingPaymentState {
+  const checkoutReady = hasStripeCheckoutConfigured(env);
+
+  return {
+    status: checkoutReady ? 'CHECKOUT_READY' : 'NOT_STARTED',
+    checkoutReady,
+    nextStep: checkoutReady
+      ? 'Open Stripe checkout to collect the booking deposit and continue the migrated payment flow.'
+      : paymentNextStep,
+  };
+}
+
+function getBookingByReference(reference: string, email: string) {
+  const normalizedReference = reference.trim().toUpperCase();
+  const normalizedEmail = email.trim().toLowerCase();
+
+  return bookingDrafts.find(
+    (item) => item.reference.toUpperCase() === normalizedReference && item.customerEmail.toLowerCase() === normalizedEmail,
+  );
+}
+
+function resolveAppBaseUrl(env: EnvBindings, origin?: string) {
+  const candidate = origin || env.WEB_APP_BASE_URL || defaultWebAppBaseUrl;
+
+  try {
+    const url = new URL(candidate);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return defaultWebAppBaseUrl;
+  }
+}
+
+async function createStripeCheckoutSession(env: EnvBindings, bookingRecord: BookingRecord, origin?: string) {
+  const secretKey = env.STRIPE_SECRET_KEY?.trim();
+
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured.');
+  }
+
+  const baseUrl = resolveAppBaseUrl(env, origin);
+  const successUrl = `${baseUrl}/payment/success?reference=${encodeURIComponent(bookingRecord.reference)}&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${baseUrl}/payment/cancel?reference=${encodeURIComponent(bookingRecord.reference)}`;
+  const form = new URLSearchParams();
+
+  form.set('mode', 'payment');
+  form.set('success_url', successUrl);
+  form.set('cancel_url', cancelUrl);
+  form.set('customer_email', bookingRecord.customerEmail);
+  form.set('payment_method_types[0]', 'card');
+  form.set('metadata[bookingReference]', bookingRecord.reference);
+  form.set('metadata[customerEmail]', bookingRecord.customerEmail);
+  form.set('metadata[vehicleId]', bookingRecord.vehicleId);
+  form.set('line_items[0][quantity]', '1');
+  form.set('line_items[0][price_data][currency]', 'sgd');
+  form.set('line_items[0][price_data][unit_amount]', String(Math.round(bookingRecord.depositAmount * 100)));
+  form.set('line_items[0][price_data][product_data][name]', `ZBK Luxury deposit ${bookingRecord.reference}`);
+  form.set(
+    'line_items[0][price_data][product_data][description]',
+    `${bookingRecord.vehicleName} • ${bookingRecord.startDate}${bookingRecord.pickupTime ? ` ${bookingRecord.pickupTime}` : ''}`,
+  );
+
+  const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: form.toString(),
+  });
+
+  const payload = await response.json<{
+    error?: { message?: string };
+    id?: string;
+    url?: string;
+    expires_at?: number;
+  }>();
+
+  if (!response.ok || !payload.url || !payload.id) {
+    throw new Error(payload.error?.message || `Stripe checkout session creation failed with status ${response.status}.`);
+  }
+
+  return {
+    sessionId: payload.id,
+    checkoutUrl: payload.url,
+    successUrl,
+    cancelUrl,
+    expiresAt: payload.expires_at ? new Date(payload.expires_at * 1000).toISOString() : undefined,
+  };
 }
 
 const vehicleCatalog: Vehicle[] = [
@@ -288,24 +392,76 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
 
   return c.json(
     createBookingResponseSchema.parse({
-      message: 'Booking draft captured dengan trip-type logic legacy. Stripe checkout belum dihubungkan, jadi status masih menunggu payment flow serverless.',
+      message: 'Booking draft captured dengan trip-type logic legacy. Deposit checkout sekarang bisa diinisialisasi lewat Workers-safe Stripe handoff.',
       data: bookingRecord,
-      payment: {
-        status: 'NOT_STARTED',
-        nextStep: paymentNextStep,
-      },
+      payment: buildPaymentState(c.env),
     }),
     202,
   );
+});
+
+app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCheckoutSessionSchema), async (c) => {
+  const payload = c.req.valid('json');
+  const reference = c.req.param('reference').trim().toUpperCase();
+  const bookingRecord = getBookingByReference(reference, payload.email);
+  const paymentState = buildPaymentState(c.env);
+
+  if (!bookingRecord) {
+    return c.json({ message: 'Booking reference not found for the supplied email.' }, 404);
+  }
+
+  if (!paymentState.checkoutReady) {
+    return c.json(
+      createCheckoutSessionResponseSchema.parse({
+        message: 'Stripe checkout contract is now wired for Workers, but STRIPE_SECRET_KEY is not configured in this environment yet.',
+        data: {
+          reference: bookingRecord.reference,
+          mode: 'CONFIGURATION_REQUIRED',
+          amountDue: bookingRecord.depositAmount,
+          currency: 'sgd',
+        },
+        payment: paymentState,
+      }),
+      503,
+    );
+  }
+
+  try {
+    const session = await createStripeCheckoutSession(c.env, bookingRecord, payload.origin);
+
+    return c.json(
+      createCheckoutSessionResponseSchema.parse({
+        message: 'Stripe checkout session created. Customer can continue payment in the hosted checkout page.',
+        data: {
+          reference: bookingRecord.reference,
+          mode: 'STRIPE',
+          amountDue: bookingRecord.depositAmount,
+          currency: 'sgd',
+          checkoutUrl: session.checkoutUrl,
+          sessionId: session.sessionId,
+          successUrl: session.successUrl,
+          cancelUrl: session.cancelUrl,
+          expiresAt: session.expiresAt,
+        },
+        payment: paymentState,
+      }),
+      201,
+    );
+  } catch (error) {
+    return c.json(
+      {
+        message: error instanceof Error ? error.message : 'Unable to create Stripe checkout session.',
+      },
+      502,
+    );
+  }
 });
 
 app.get('/api/public/bookings/:reference', zValidator('query', bookingLookupQuerySchema), (c) => {
   const { email } = c.req.valid('query');
   const reference = c.req.param('reference').trim().toUpperCase();
 
-  const bookingRecord = bookingDrafts.find(
-    (item) => item.reference.toUpperCase() === reference && item.customerEmail.toLowerCase() === email.toLowerCase(),
-  );
+  const bookingRecord = getBookingByReference(reference, email);
 
   if (!bookingRecord) {
     return c.json(
@@ -318,13 +474,9 @@ app.get('/api/public/bookings/:reference', zValidator('query', bookingLookupQuer
 
   return c.json(
     bookingLookupResponseSchema.parse({
-      message: 'Booking draft located. Status is still pending the serverless payment slice.',
+      message: 'Booking draft located. Payment handoff can now initialize Stripe checkout when the Worker secret is configured.',
       data: bookingRecord,
-      payment: {
-        status: 'NOT_STARTED',
-        nextStep: paymentNextStep,
-        checkoutReady: false,
-      },
+      payment: buildPaymentState(c.env),
     }),
   );
 });
