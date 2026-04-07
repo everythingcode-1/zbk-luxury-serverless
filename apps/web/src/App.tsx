@@ -17,6 +17,7 @@ import {
   tripTypeOptions,
   vehicleCategoryOptions,
 } from '@zbk/shared';
+import AuthWorkspace from './AuthWorkspace';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
 
@@ -658,6 +659,8 @@ export default function App() {
           juga masuk ke app React/Vite melalui hash route yang aman untuk static hosting.
         </p>
       </section>
+
+      <AuthWorkspace />
 
       {error ? <div className="alert error">{error}</div> : null}
 

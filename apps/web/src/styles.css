@@ -28,6 +28,15 @@ input, select, textarea { border-radius: 10px; border: 1px solid rgba(255,255,25
 textarea { resize: vertical; min-height: 120px; }
 .primary-button { width: 100%; border: none; border-radius: 12px; background: linear-gradient(135deg, #7ba9ff, #4d77ff); color: white; padding: 12px 16px; cursor: pointer; margin-top: 4px; }
 .primary-button:disabled { opacity: 0.6; cursor: not-allowed; }
+.secondary-button { width: 100%; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; background: rgba(255,255,255,0.04); color: #f4f7fb; padding: 12px 16px; cursor: pointer; margin-top: 4px; }
+.secondary-button:disabled { opacity: 0.55; cursor: not-allowed; }
+.auth-workspace { display: grid; gap: 16px; margin-bottom: 20px; }
+.auth-workspace__note { margin: 0; }
+.auth-workspace__status { margin: 0; }
+.auth-workspace__grid { display: grid; gap: 20px; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; }
+.auth-workspace__form { display: grid; gap: 2px; }
+.auth-workspace__actions { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 8px; }
+.auth-session-panel { padding: 18px; border-radius: 14px; background: rgba(157,192,255,0.08); border: 1px solid rgba(157,192,255,0.16); display: grid; gap: 10px; }
 .quote-box { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 16px; padding: 16px; border-radius: 12px; background: rgba(157,192,255,0.12); border: 1px solid rgba(157,192,255,0.2); }
 .quote-box--success { background: rgba(92, 255, 171, 0.12); border-color: rgba(92, 255, 171, 0.2); }
 .quote-box__amount { display: grid; gap: 4px; text-align: right; }
@@ -54,6 +63,8 @@ textarea { resize: vertical; min-height: 120px; }
 .muted { color: #b2bdd8; }
 @media (max-width: 880px) {
   .card-grid { grid-template-columns: 1fr; }
+  .auth-workspace__grid { grid-template-columns: 1fr; }
+  .auth-workspace__actions { grid-template-columns: 1fr; }
   .booking-form-grid { grid-template-columns: 1fr; }
   .booking-submit-row { flex-direction: column; align-items: stretch; }
   .primary-button--inline { width: 100%; }

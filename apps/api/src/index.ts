@@ -2,6 +2,14 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { zValidator } from '@hono/zod-validator';
 import {
+  authLoginRequestSchema,
+  authLogoutResponseSchema,
+  authRegistrationRequestSchema,
+  authRoleOptions,
+  authSessionResponseSchema,
+  authSessionSchema,
+  authSessionStateResponseSchema,
+  authUserSchema,
   buildVehicleQuote,
   bookingHistoryQuerySchema,
   bookingHistoryResponseSchema,
@@ -19,6 +27,10 @@ import {
   deriveAdditionalHours,
   healthResponseSchema,
   inferServiceTypeFromTrip,
+  type AuthLoginRequest,
+  type AuthRegistrationRequest,
+  type AuthSession,
+  type AuthUser,
   type BookingPaymentState,
   type BookingRecord,
   type Vehicle,
@@ -112,6 +124,150 @@ function buildPaymentReturnState(env: EnvBindings, stage: 'SUCCESS' | 'CANCEL'):
       ? 'Customer can reopen deposit checkout from this migrated cancel view when ready.'
       : paymentNextStep,
   };
+}
+
+type AuthRole = (typeof authRoleOptions)[number];
+
+type AuthAccount = AuthUser & {
+  password: string;
+};
+
+const authSessionTtlMs = 1000 * 60 * 60 * 24 * 7;
+const authAccounts = new Map<string, AuthAccount>([
+  [
+    'admin@zbk.local',
+    {
+      id: 'admin-zbk-demo',
+      email: 'admin@zbk.local',
+      displayName: 'Operations Admin',
+      role: 'ADMIN',
+      password: 'Admin123!',
+    },
+  ],
+  [
+    'customer@zbk.local',
+    {
+      id: 'customer-zbk-demo',
+      email: 'customer@zbk.local',
+      displayName: 'Demo Customer',
+      role: 'CUSTOMER',
+      password: 'Customer123!',
+    },
+  ],
+]);
+const authSessions = new Map<string, AuthSession>();
+
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function createAuthToken() {
+  return `${crypto.randomUUID().replace(/-/g, '')}${crypto.randomUUID().replace(/-/g, '')}`;
+}
+
+function createAuthSession(account: AuthAccount) {
+  const now = new Date();
+  const session = authSessionSchema.parse({
+    token: createAuthToken(),
+    status: 'ACTIVE',
+    issuedAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + authSessionTtlMs).toISOString(),
+    user: authUserSchema.parse({
+      id: account.id,
+      email: account.email,
+      displayName: account.displayName,
+      role: account.role,
+      ...(account.phone ? { phone: account.phone } : {}),
+    }),
+  });
+
+  authSessions.set(session.token, session);
+  return session;
+}
+
+function getAuthTokenFromRequest(request: Request) {
+  const authorizationHeader = request.headers.get('authorization');
+  if (authorizationHeader?.startsWith('Bearer ')) {
+    return authorizationHeader.slice(7).trim();
+  }
+
+  const cookieHeader = request.headers.get('cookie');
+  if (cookieHeader) {
+    const cookieMatch = cookieHeader.match(/(?:^|;\s*)auth-token=([^;]+)/);
+    if (cookieMatch) {
+      return decodeURIComponent(cookieMatch[1]);
+    }
+  }
+
+  const tokenHeader = request.headers.get('x-auth-token');
+  return tokenHeader?.trim() || null;
+}
+
+function getActiveAuthSession(token?: string | null) {
+  if (!token) return null;
+
+  const session = authSessions.get(token);
+  if (!session) return null;
+
+  if (new Date(session.expiresAt).getTime() <= Date.now()) {
+    authSessions.delete(token);
+    return null;
+  }
+
+  return session;
+}
+
+function createAuthResponse(message: string, session: AuthSession) {
+  return authSessionResponseSchema.parse({
+    message,
+    data: { session },
+  });
+}
+
+function createAuthSessionStateResponse(message: string, session: AuthSession | null) {
+  return authSessionStateResponseSchema.parse({
+    message,
+    data: { session },
+  });
+}
+
+function createAuthLogoutResponse(message: string) {
+  return authLogoutResponseSchema.parse({
+    message,
+    data: { session: null },
+  });
+}
+
+function authenticateAccount(email: string, password: string, expectedRole?: AuthRole) {
+  const account = authAccounts.get(normalizeEmail(email));
+  if (!account || account.password !== password) {
+    throw new Error('Invalid email or password.');
+  }
+
+  if (expectedRole && account.role !== expectedRole) {
+    throw new Error(`This endpoint is for ${expectedRole.toLowerCase()} accounts.`);
+  }
+
+  return account;
+}
+
+function registerCustomerAccount(payload: AuthRegistrationRequest) {
+  const normalizedEmail = normalizeEmail(payload.email);
+  if (authAccounts.has(normalizedEmail)) {
+    throw new Error('An account with this email already exists.');
+  }
+
+  const account: AuthAccount = {
+    id: `customer-${crypto.randomUUID().slice(0, 8)}`,
+    email: normalizedEmail,
+    displayName: payload.displayName.trim(),
+    role: 'CUSTOMER',
+    password: payload.password,
+    ...(payload.phone ? { phone: payload.phone.trim() } : {}),
+  };
+
+  authAccounts.set(normalizedEmail, account);
+  return account;
 }
 
 async function createStripeCheckoutSession(
@@ -291,6 +447,99 @@ app.get('/health', (c) =>
     }),
   ),
 );
+
+app.post('/api/auth/login', zValidator('json', authLoginRequestSchema), (c) => {
+  const payload = c.req.valid('json');
+
+  try {
+    const account = authenticateAccount(payload.email, payload.password);
+    const session = createAuthSession(account);
+
+    return c.json(
+      createAuthResponse(`Signed in as ${account.displayName}.`, session),
+      201,
+    );
+  } catch (error) {
+    return c.json(
+      {
+        message: error instanceof Error ? error.message : 'Unable to sign in.',
+      },
+      401,
+    );
+  }
+});
+
+app.post('/api/auth/customer/login', zValidator('json', authLoginRequestSchema), (c) => {
+  const payload = c.req.valid('json');
+
+  try {
+    const account = authenticateAccount(payload.email, payload.password, 'CUSTOMER');
+    const session = createAuthSession(account);
+
+    return c.json(
+      createAuthResponse(`Customer session created for ${account.displayName}.`, session),
+      201,
+    );
+  } catch (error) {
+    return c.json(
+      {
+        message: error instanceof Error ? error.message : 'Unable to sign in customer.',
+      },
+      401,
+    );
+  }
+});
+
+app.post('/api/auth/customer/register', zValidator('json', authRegistrationRequestSchema), (c) => {
+  const payload = c.req.valid('json');
+
+  try {
+    const account = registerCustomerAccount(payload);
+    const session = createAuthSession(account);
+
+    return c.json(
+      createAuthResponse(`Customer account created for ${account.displayName}.`, session),
+      201,
+    );
+  } catch (error) {
+    return c.json(
+      {
+        message: error instanceof Error ? error.message : 'Unable to register customer.',
+      },
+      409,
+    );
+  }
+});
+
+app.get('/api/auth/me', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json(
+      createAuthSessionStateResponse('No active auth session found for this request.', null),
+      401,
+    );
+  }
+
+  return c.json(createAuthSessionStateResponse('Active auth session resolved from Workers memory.', session));
+});
+
+app.post('/api/auth/logout', (c) => {
+  const token = getAuthTokenFromRequest(c.req.raw);
+  const session = getActiveAuthSession(token);
+
+  if (token) {
+    authSessions.delete(token);
+  }
+
+  return c.json(
+    createAuthLogoutResponse(
+      session
+        ? `Signed out ${session.user.displayName}.`
+        : 'No active auth session to sign out.',
+    ),
+  );
+});
 
 app.get('/api/public/vehicles', zValidator('query', vehiclesFilterSchema), (c) => {
   const query = c.req.valid('query');

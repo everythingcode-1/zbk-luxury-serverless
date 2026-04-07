@@ -1,24 +1,25 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-07 03:20 WIB
-- Estimated migration progress: 65%
-- Justification: workspace scaffolding, shared pricing contracts, public vehicle catalog, legacy-inspired vehicle metadata/category filtering, quote flow, booking draft submission, booking reference lookup, airport pickup/dropoff detail notes, customer booking-history-by-email, legacy ride-detail logic, Workers-safe Stripe checkout-session handoff, and now static-host-safe payment success/cancel return pages plus a payment-return summary endpoint are live in the Workers/Vite stack; durable persistence, webhook-driven payment confirmation, auth, and admin/serverless replacement work are still pending.
+- Last updated: 2026-04-07 21:52 WIB
+- Estimated migration progress: 68%
+- Justification: the serverless stack now includes a typed auth session contract plus Workers-safe login, customer registration, session lookup, and logout endpoints, and the React/Vite app has a working auth workspace that exercises those routes; the booking, quote, payment-return, and history slices remain intact, but auth/session persistence is still in-memory and the remaining admin/persistence/payment durability work is still substantial.
 
 ## Completed this run
 
-- Migrated one coherent Stripe return-page slice from the legacy app into the serverless workspace:
-  - Added shared payment-return query/response contracts plus a `RETURN_PENDING_CONFIRMATION` payment state for post-checkout landing views.
-  - Extended the Cloudflare Worker checkout handoff to generate secure return tokens, store the latest checkout attempt metadata in Worker memory, and redirect Stripe back into hash-routed success/cancel views that work on static hosting.
-  - Implemented `GET /api/public/bookings/:reference/payment-return` so the new React/Vite app can load a booking/payment summary from Stripe return links without requiring the customer to re-enter email immediately.
-  - Added dedicated React/Vite payment success/cancel views that show the booking summary, payment next-step messaging, and a reopen-checkout action from the migrated cancel flow.
-  - Switched checkout launch in the web app to same-tab redirect so Stripe return lands back inside the new app flow instead of an auxiliary tab.
-- Kept the slice incremental and reviewable by focusing on checkout return handling only; Stripe webhook verification, receipt generation, and durable paid-state persistence remain for later runs.
+- Migrated the auth/session slice into the serverless workspace:
+  - Added shared auth schemas for login, registration, user identity, and session envelopes.
+  - Implemented Workers-safe auth routes for generic login, customer login, customer registration, me, and logout.
+  - Seeded demo admin/customer accounts so the new auth flow can be exercised immediately in the migrated stack.
+  - Added a Vite auth workspace that can sign in, register a customer, refresh the current session, and sign out against the Workers API.
+  - Persisted the returned session token in browser localStorage so the web app can rehydrate the current auth state on reload.
+- Kept the slice incremental and reviewable by focusing on auth/session shape only; durable storage, protected routes, and admin dashboard migration remain for later runs.
 
 ## Current migrated areas
 
 - Monorepo workspace for Cloudflare Workers API + React/Vite web app + shared package.
 - Shared vehicle/quote schemas and pricing logic.
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
+- Shared auth/session schemas for login, registration, session lookup, and logout.
 - Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, and category/luxury filtering.
 - Public vehicle selection UI with category browsing and richer detail highlights.
 - Public booking quote request flow.
@@ -28,12 +29,13 @@
 - Workers-safe Stripe checkout-session handoff endpoint and web UI trigger for deposit payment initialization.
 - Hash-routed payment success/cancel return views plus a public payment-return summary endpoint for the latest checkout attempt.
 - Basic Worker health endpoint and Stripe webhook placeholder.
+- Workers-safe auth endpoints plus a small React/Vite auth workspace exercising login/register/me/logout.
 
 ## Remaining major areas
 
 - Real persistence for vehicles/bookings/users via Neon/Drizzle instead of in-memory/seed scaffolds.
 - Public vehicle detail parity beyond current seed metadata (real images/content sourcing, database-backed catalog management).
-- Auth endpoints, session shape, and protected admin access.
+- Protected auth/session handling, session durability, and admin access control.
 - Stripe webhook verification plus booking/payment state persistence updates after checkout completion/cancellation.
 - Receipt/invoice retrieval and durable payment confirmation data wired into the new return flow.
 - Admin dashboard API + UI migration.
@@ -42,8 +44,10 @@
 
 ## Blockers / risks
 
+- Auth sessions are still stored in the Worker’s in-memory map and browser localStorage, so they disappear on deploy/restart and are not yet suitable for production auth.
+- Demo credentials are intentionally seeded for the migration slice and should be replaced with real persistence before any protected admin/user flows rely on them.
 - Booking drafts, checkout return tokens, and latest checkout-session summaries still live only in Worker memory for this scaffold slice; payment return views are therefore not durable across deploys/restarts.
-- The new return pages summarize the latest Stripe handoff attempt, but they do not yet verify webhook signatures or persist authoritative paid/confirmed state.
+- The return pages summarize the latest Stripe handoff attempt, but they do not yet verify webhook signatures or persist authoritative paid/confirmed state.
 - Actual hosted checkout creation still depends on `STRIPE_SECRET_KEY` being configured in the deployed Worker environment.
 - Vehicle catalog still comes from curated Worker seed data; category/filter contracts are migrated, but the source is not yet database-backed or admin-editable.
 - Public history snapshot remains email-based and unauthenticated, so it is only a transitional bridge until the real auth/session shape and protected customer history land.
