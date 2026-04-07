@@ -1,18 +1,17 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-08 00:00 WIB
-- Estimated migration progress: 72%
-- Justification: the serverless stack now includes Workers-safe Stripe webhook intake with signature verification support, in-memory payment state transitions, and confirmed/failed booking status propagation back into the lookup/return flow. The public booking slice is already usable end-to-end, but durable persistence, admin migration, and production-grade payment storage are still the biggest remaining gaps.
+- Last updated: 2026-04-08 02:07 WIB
+- Estimated migration progress: 74%
+- Justification: the serverless stack now includes a richer public vehicle detail slice that is actually consumed through the Workers API, with gallery thumbnails, spotlight metadata, and a booking CTA linked back into the migrated booking flow. The public booking/payment surface is usable end-to-end, but durable persistence, admin migration, and production-grade payment storage are still the biggest remaining gaps.
 
 ## Completed this run
 
-- Advanced the Stripe/payment slice in the serverless workspace:
-  - Added shared booking/payment lifecycle statuses for confirmed and failed outcomes.
-  - Implemented Workers-safe Stripe webhook handling with optional HMAC signature verification, booking-reference extraction from metadata, and booking/payment state updates.
-  - Added a second webhook alias under `/api/webhooks/stripe` for easier deployment routing.
-  - Persisted checkout session state in Worker memory so return/lookup endpoints can now reflect webhook-confirmed payment outcomes instead of only the initial checkout handoff.
-  - Updated the payment return hero copy to surface confirmed/failed webhook states in the Vite UI.
-- Kept the migration incremental by staying inside the booking/payment vertical slice rather than attempting durable persistence or the admin dashboard in the same run.
+- Advanced the public vehicle slice in the serverless workspace:
+  - Added a shared `vehicleDetailResponseSchema` contract so the detail endpoint has a typed, reviewable payload shape.
+  - Upgraded `/api/public/vehicles/:id` to return structured vehicle detail metadata from the Workers seed catalog.
+  - Moved the React/Vite vehicle detail panel onto the dedicated detail endpoint and surfaced a hero image, thumbnail gallery, featured highlight, and a booking CTA that scrolls back into the draft form.
+  - Added responsive CSS for the new vehicle spotlight layout so the public catalog feels closer to the legacy fleet browsing experience.
+- Kept the migration incremental by staying inside the public vehicles + booking vertical slice rather than attempting persistence or admin work in the same run.
 
 ## Current migrated areas
 
@@ -20,8 +19,9 @@
 - Shared vehicle/quote schemas and pricing logic.
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
 - Shared auth/session schemas for login, registration, session lookup, and logout.
+- Shared public vehicle detail response contract for the fleet spotlight view.
 - Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, and category/luxury filtering.
-- Public vehicle selection UI with category browsing and richer detail highlights.
+- Public vehicle selection UI with category browsing, richer detail highlights, and image gallery spotlighting.
 - Public booking quote request flow.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
 - Public booking reference lookup flow using booking reference + customer email.

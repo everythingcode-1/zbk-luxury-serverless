@@ -56,6 +56,18 @@ export const vehiclesResponseSchema = z.object({
   }),
 });
 
+export const vehicleDetailResponseSchema = z.object({
+  message: z.string(),
+  data: vehicleSchema,
+  meta: z.object({
+    imageCount: z.number().int().nonnegative(),
+    source: z.string(),
+    featuredFeature: z.string().optional(),
+  }),
+});
+
+export type VehicleDetailResponse = z.infer<typeof vehicleDetailResponseSchema>;
+
 export const vehiclesFilterSchema = z.object({
   status: z.string().optional(),
   serviceType: serviceTypeSchema.optional(),

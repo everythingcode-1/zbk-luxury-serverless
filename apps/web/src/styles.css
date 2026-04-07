@@ -61,6 +61,16 @@ textarea { resize: vertical; min-height: 120px; }
 .quote-inline-alert { margin-bottom: 16px; }
 .trip-summary-panel { display: grid; gap: 8px; align-content: start; padding: 14px; border-radius: 12px; background: rgba(123,169,255,0.12); border: 1px solid rgba(123,169,255,0.2); }
 .muted { color: #b2bdd8; }
+.vehicle-spotlight { display: grid; gap: 18px; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; }
+.vehicle-spotlight__media { position: relative; display: grid; gap: 12px; }
+.vehicle-spotlight__image { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: #091022; }
+.vehicle-spotlight__placeholder { min-height: 280px; display: grid; place-items: center; border-radius: 14px; border: 1px dashed rgba(255,255,255,0.14); color: #b2bdd8; background: rgba(255,255,255,0.03); }
+.vehicle-spotlight__meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.vehicle-spotlight__summary { display: grid; gap: 12px; }
+.vehicle-spotlight__thumbs { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 18px; }
+.vehicle-spotlight__thumb { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); padding: 0; border-radius: 12px; overflow: hidden; cursor: pointer; aspect-ratio: 4 / 3; }
+.vehicle-spotlight__thumb--active { border-color: #8db3ff; box-shadow: 0 0 0 1px rgba(141, 179, 255, 0.35); }
+.vehicle-spotlight__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 880px) {
   .card-grid { grid-template-columns: 1fr; }
   .auth-workspace__grid { grid-template-columns: 1fr; }
@@ -68,6 +78,7 @@ textarea { resize: vertical; min-height: 120px; }
   .booking-form-grid { grid-template-columns: 1fr; }
   .booking-submit-row { flex-direction: column; align-items: stretch; }
   .primary-button--inline { width: 100%; }
+  .vehicle-spotlight { grid-template-columns: 1fr; }
 }
 
 .payment-return-page { max-width: 960px; }

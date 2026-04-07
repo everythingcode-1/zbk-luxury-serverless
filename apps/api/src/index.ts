@@ -36,6 +36,7 @@ import {
   type BookingRecord,
   type Vehicle,
   vehicleSchema,
+  vehicleDetailResponseSchema,
   vehiclesFilterSchema,
   vehiclesResponseSchema,
 } from '@zbk/shared';
@@ -724,7 +725,17 @@ app.get('/api/public/vehicles/:id', (c) => {
     return c.json({ message: 'Vehicle not found' }, 404);
   }
 
-  return c.json({ data: vehicle });
+  return c.json(
+    vehicleDetailResponseSchema.parse({
+      message: 'Vehicle detail loaded from the serverless seed catalog.',
+      data: vehicle,
+      meta: {
+        imageCount: vehicle.images.length,
+        source: 'seed-catalog',
+        featuredFeature: vehicle.features[0],
+      },
+    }),
+  );
 });
 
 app.post('/api/public/booking/quote', zValidator('json', bookingQuoteRequestSchema), async (c) => {

@@ -14,6 +14,7 @@ import {
   type CreateCheckoutSessionResponse,
   type TripType,
   type Vehicle,
+  type VehicleDetailResponse,
   tripTypeOptions,
   vehicleCategoryOptions,
 } from '@zbk/shared';
@@ -270,6 +271,10 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<(typeof vehicleCategoryOptions)[number] | 'ALL'>('ALL');
   const [luxuryOnly, setLuxuryOnly] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
+  const [selectedVehicleDetail, setSelectedVehicleDetail] = useState<VehicleDetailResponse | null>(null);
+  const [isLoadingVehicleDetail, setIsLoadingVehicleDetail] = useState(true);
+  const [vehicleDetailError, setVehicleDetailError] = useState<string | null>(null);
+  const [activeVehicleImageIndex, setActiveVehicleImageIndex] = useState(0);
   const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingForm);
   const [lookupForm, setLookupForm] = useState<BookingLookupFormState>(initialLookupForm);
   const [historyForm, setHistoryForm] = useState<BookingHistoryFormState>(initialHistoryForm);
@@ -347,6 +352,48 @@ export default function App() {
     [selectedVehicleId, vehicles],
   );
 
+  useEffect(() => {
+    if (!selectedVehicleId) {
+      setSelectedVehicleDetail(null);
+      setIsLoadingVehicleDetail(false);
+      setVehicleDetailError(null);
+      setActiveVehicleImageIndex(0);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function loadVehicleDetail() {
+      try {
+        setIsLoadingVehicleDetail(true);
+        setVehicleDetailError(null);
+
+        const response = await fetch(`${API_BASE_URL}/api/public/vehicles/${encodeURIComponent(selectedVehicleId)}`, {
+          signal: controller.signal,
+        });
+        const payload: VehicleDetailResponse | { message?: string } = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.message || `Vehicle detail failed: ${response.status}`);
+        }
+
+        setSelectedVehicleDetail(payload as VehicleDetailResponse);
+        setActiveVehicleImageIndex(0);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setSelectedVehicleDetail(null);
+        setVehicleDetailError(err instanceof Error ? err.message : 'Unknown error loading vehicle detail');
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingVehicleDetail(false);
+        }
+      }
+    }
+
+    loadVehicleDetail();
+    return () => controller.abort();
+  }, [selectedVehicleId]);
+
   const normalizedDropoffLocation = useMemo(
     () => bookingForm.dropoffLocation.trim() || bookingForm.pickupLocation.trim(),
     [bookingForm.dropoffLocation, bookingForm.pickupLocation],
@@ -398,6 +445,13 @@ export default function App() {
     () => (selectedVehicle ? selectedVehicle.services.includes(quoteRequest.serviceType) : false),
     [quoteRequest.serviceType, selectedVehicle],
   );
+
+  const spotlightVehicle = selectedVehicleDetail?.data || selectedVehicle;
+  const vehicleImages = useMemo(
+    () => (spotlightVehicle?.images?.length ? spotlightVehicle.images : spotlightVehicle?.imageUrl ? [spotlightVehicle.imageUrl] : []),
+    [spotlightVehicle],
+  );
+  const activeVehicleImage = vehicleImages[activeVehicleImageIndex] || vehicleImages[0] || '';
 
   const showPickupNoteField = useMemo(() => isAirportLocation(bookingForm.pickupLocation), [bookingForm.pickupLocation]);
   const showDropoffNoteField = useMemo(() => isAirportLocation(normalizedDropoffLocation), [normalizedDropoffLocation]);
@@ -716,6 +770,9 @@ export default function App() {
                 className={`vehicle-card ${vehicle.id === selectedVehicleId ? 'vehicle-card--active' : ''}`}
                 onClick={() => {
                   setSelectedVehicleId(vehicle.id);
+                  setSelectedVehicleDetail(null);
+                  setVehicleDetailError(null);
+                  setActiveVehicleImageIndex(0);
                   resetBookingArtifacts();
                 }}
                 type="button"
@@ -749,34 +806,106 @@ export default function App() {
           </div>
         </article>
 
-        <article className="card">
-          <h2>Vehicle detail</h2>
-          {selectedVehicle ? (
+        <article className="card vehicle-detail-card">
+          <div className="section-title-row">
+            <div>
+              <h2>Vehicle detail spotlight</h2>
+              <p className="muted">
+                Selected vehicle detail now comes from the Workers endpoint so the public fleet can grow into deeper pages.
+              </p>
+            </div>
+            <span className={`pill ${isLoadingVehicleDetail ? 'pill--muted' : ''}`}>
+              {isLoadingVehicleDetail ? 'Loading detail…' : `${spotlightVehicle?.images?.length || 0} images`}
+            </span>
+          </div>
+
+          {vehicleDetailError ? <div className="alert error">{vehicleDetailError}</div> : null}
+
+          {spotlightVehicle ? (
             <>
-              <p className="vehicle-detail__name">{selectedVehicle.name}</p>
-              <p className="muted">{selectedVehicle.description}</p>
-              <ul className="detail-list">
-                <li>Category: {selectedVehicle.category}</li>
-                <li>Location: {selectedVehicle.location}</li>
-                <li>Capacity: {selectedVehicle.capacity} pax</li>
-                <li>Luggage: {selectedVehicle.luggage ?? '-'} bags</li>
-                <li>Transmission: {selectedVehicle.transmission || '-'}</li>
-                <li>Rating: {selectedVehicle.rating ? `${selectedVehicle.rating.toFixed(1)} / 5` : '-'}</li>
-                <li>Airport transfer: ${selectedVehicle.pricing.airportTransfer}</li>
-                <li>6 hours: ${selectedVehicle.pricing.sixHours}</li>
-                <li>12 hours: ${selectedVehicle.pricing.twelveHours}</li>
-                <li>Per hour: ${selectedVehicle.pricing.perHour}</li>
-              </ul>
-              {selectedVehicle.features.length ? (
-                <div>
-                  <p className="muted">Legacy feature highlights</p>
-                  <div className="service-pills">
-                    {selectedVehicle.features.map((feature) => (
-                      <span key={feature} className="pill pill--muted">
-                        {feature}
-                      </span>
-                    ))}
+              <div className="vehicle-spotlight">
+                <div className="vehicle-spotlight__media">
+                  {activeVehicleImage ? (
+                    <img
+                      alt={`${spotlightVehicle.name} hero image`}
+                      className="vehicle-spotlight__image"
+                      src={activeVehicleImage}
+                    />
+                  ) : (
+                    <div className="vehicle-spotlight__placeholder">No vehicle image available yet.</div>
+                  )}
+                  <div className="vehicle-spotlight__meta">
+                    <span className="pill">{spotlightVehicle.category}</span>
+                    {spotlightVehicle.isLuxury ? <span className="pill">Luxury</span> : null}
+                    <span className="pill pill--muted">{spotlightVehicle.status}</span>
                   </div>
+                </div>
+
+                <div className="vehicle-spotlight__summary">
+                  <p className="vehicle-detail__name">{spotlightVehicle.name}</p>
+                  <p className="muted">{selectedVehicleDetail?.message || spotlightVehicle.description}</p>
+                  <p className="muted">
+                    {selectedVehicleDetail
+                      ? `Loaded from ${selectedVehicleDetail.meta.source} • ${selectedVehicleDetail.meta.imageCount} photos`
+                      : 'Previewed from the selected catalog card.'}
+                  </p>
+
+                  <ul className="detail-list">
+                    <li>Model: {spotlightVehicle.model}</li>
+                    <li>Location: {spotlightVehicle.location}</li>
+                    <li>Capacity: {spotlightVehicle.capacity} pax</li>
+                    <li>Luggage: {spotlightVehicle.luggage ?? '-'} bags</li>
+                    <li>Transmission: {spotlightVehicle.transmission || '-'}</li>
+                    <li>Rating: {spotlightVehicle.rating ? `${spotlightVehicle.rating.toFixed(1)} / 5` : '-'}</li>
+                    <li>Featured highlight: {selectedVehicleDetail?.meta.featuredFeature || spotlightVehicle.features[0] || '-'}</li>
+                    <li>Airport transfer: ${spotlightVehicle.pricing.airportTransfer}</li>
+                    <li>6 hours: ${spotlightVehicle.pricing.sixHours}</li>
+                    <li>12 hours: ${spotlightVehicle.pricing.twelveHours}</li>
+                    <li>Per hour: ${spotlightVehicle.pricing.perHour}</li>
+                  </ul>
+
+                  {spotlightVehicle.features.length ? (
+                    <div>
+                      <p className="muted">Legacy feature highlights</p>
+                      <div className="service-pills">
+                        {spotlightVehicle.features.map((feature) => (
+                          <span key={feature} className="pill pill--muted">
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="payment-return-actions">
+                    <button
+                      className="primary-button primary-button--inline"
+                      type="button"
+                      onClick={() => document.getElementById('booking-draft-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    >
+                      Book this vehicle
+                    </button>
+                    {spotlightVehicle.imageUrl ? (
+                      <a className="secondary-link" href={spotlightVehicle.imageUrl} target="_blank" rel="noreferrer">
+                        Open source image
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              {vehicleImages.length > 1 ? (
+                <div className="vehicle-spotlight__thumbs" aria-label="Vehicle image gallery">
+                  {vehicleImages.map((image, index) => (
+                    <button
+                      key={`${spotlightVehicle.id}-image-${index}`}
+                      className={`vehicle-spotlight__thumb ${index === activeVehicleImageIndex ? 'vehicle-spotlight__thumb--active' : ''}`}
+                      type="button"
+                      onClick={() => setActiveVehicleImageIndex(index)}
+                    >
+                      <img alt={`${spotlightVehicle.name} gallery thumbnail ${index + 1}`} src={image} />
+                    </button>
+                  ))}
                 </div>
               ) : null}
             </>
@@ -856,7 +985,7 @@ export default function App() {
           ) : null}
         </article>
 
-        <article className="card card--wide">
+        <article className="card card--wide" id="booking-draft-section">
           <div className="section-title-row">
             <div>
               <h2>Booking draft submission</h2>
