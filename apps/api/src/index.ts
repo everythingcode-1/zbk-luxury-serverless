@@ -19,6 +19,7 @@ import {
   bookingLookupResponseSchema,
   bookingQuoteRequestSchema,
   bookingRecordSchema,
+  bookingPaymentStateSchema,
   calculateTripHours,
   createBookingResponseSchema,
   createBookingSchema,
@@ -42,6 +43,7 @@ import {
 type EnvBindings = {
   APP_NAME: string;
   STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
   WEB_APP_BASE_URL?: string;
 };
 
@@ -56,9 +58,64 @@ const bookingCheckoutSessions = new Map<string, {
   cancelUrl: string;
   expiresAt?: string;
   createdAt: string;
+  webhookEventId?: string;
+  webhookEventType?: string;
+  paymentStatus?: BookingPaymentState['status'];
 }>();
+const bookingPaymentStates = new Map<string, BookingPaymentState>();
 const defaultWebAppBaseUrl = 'http://localhost:5173';
 const paymentNextStep = 'Create a Workers-safe Stripe checkout session for this booking reference.';
+
+function buildDefaultPaymentState(env: EnvBindings): BookingPaymentState {
+  const checkoutReady = hasStripeCheckoutConfigured(env);
+
+  return {
+    status: checkoutReady ? 'CHECKOUT_READY' : 'NOT_STARTED',
+    checkoutReady,
+    nextStep: checkoutReady
+      ? 'Open Stripe checkout to collect the booking deposit and continue the migrated payment flow.'
+      : paymentNextStep,
+  };
+}
+
+function buildReturnPendingPaymentState(env: EnvBindings): BookingPaymentState {
+  return {
+    status: 'RETURN_PENDING_CONFIRMATION',
+    checkoutReady: hasStripeCheckoutConfigured(env),
+    nextStep: hasStripeCheckoutConfigured(env)
+      ? 'Hosted checkout has been created. Waiting for the Stripe webhook to confirm the booking.'
+      : 'Stripe return view is wired, but checkout still needs STRIPE_SECRET_KEY in the Worker environment.',
+  };
+}
+
+function getBookingPaymentState(reference: string, env: EnvBindings, stage?: 'SUCCESS' | 'CANCEL') {
+  const normalizedReference = reference.trim().toUpperCase();
+  return bookingPaymentStates.get(normalizedReference) || (stage === 'SUCCESS' ? buildReturnPendingPaymentState(env) : buildDefaultPaymentState(env));
+}
+
+function setBookingPaymentState(reference: string, paymentState: BookingPaymentState) {
+  const normalizedReference = reference.trim().toUpperCase();
+  const parsed = bookingPaymentStateSchema.parse(paymentState);
+  bookingPaymentStates.set(normalizedReference, parsed);
+  return parsed;
+}
+
+function updateBookingRecordStatus(reference: string, status: BookingRecord['status']) {
+  const normalizedReference = reference.trim().toUpperCase();
+  const bookingRecord = bookingDrafts.find((item) => item.reference.toUpperCase() === normalizedReference);
+
+  if (bookingRecord) {
+    bookingRecord.status = status;
+  }
+
+  return bookingRecord;
+}
+
+function applyConfirmedBookingState(reference: string, paymentState: BookingPaymentState, status: BookingRecord['status']) {
+  const parsed = setBookingPaymentState(reference, paymentState);
+  updateBookingRecordStatus(reference, status);
+  return parsed;
+}
 
 function createBookingReference(date: Date) {
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
@@ -293,6 +350,7 @@ async function createStripeCheckoutSession(
   form.set('customer_email', bookingRecord.customerEmail);
   form.set('payment_method_types[0]', 'card');
   form.set('metadata[bookingReference]', bookingRecord.reference);
+  form.set('metadata[returnToken]', returnToken);
   form.set('metadata[customerEmail]', bookingRecord.customerEmail);
   form.set('metadata[vehicleId]', bookingRecord.vehicleId);
   form.set('line_items[0][quantity]', '1');
@@ -331,6 +389,97 @@ async function createStripeCheckoutSession(
     cancelUrl,
     expiresAt: payload.expires_at ? new Date(payload.expires_at * 1000).toISOString() : undefined,
   };
+}
+
+type StripeWebhookEvent = {
+  id: string;
+  type: string;
+  data?: {
+    object?: {
+      id?: string;
+      client_reference_id?: string;
+      metadata?: Record<string, string | undefined>;
+      payment_status?: string;
+      status?: string;
+    };
+  };
+};
+
+function parseStripeSignatureHeader(signatureHeader: string | null) {
+  if (!signatureHeader) return null;
+
+  const segments = signatureHeader.split(',').reduce<Record<string, string[]>>((acc, segment) => {
+    const [rawKey, ...rawValueParts] = segment.trim().split('=');
+    const key = rawKey?.trim();
+    const value = rawValueParts.join('=').trim();
+
+    if (!key || !value) return acc;
+
+    acc[key] = acc[key] || [];
+    acc[key].push(value);
+    return acc;
+  }, {});
+
+  return {
+    timestamp: segments.t?.[0] || null,
+    signatures: segments.v1 || [],
+  };
+}
+
+async function verifyStripeWebhookSignature(rawBody: string, signatureHeader: string | null, webhookSecret?: string) {
+  const secret = webhookSecret?.trim();
+  if (!secret) {
+    return { mode: 'DEV_BYPASS' as const, verified: false };
+  }
+
+  const parsed = parseStripeSignatureHeader(signatureHeader);
+  if (!parsed?.timestamp || !parsed.signatures.length) {
+    throw new Error('Stripe signature header is missing or malformed.');
+  }
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const digest = await crypto.subtle.sign('HMAC', key, encoder.encode(`${parsed.timestamp}.${rawBody}`));
+  const expectedSignature = Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+
+  if (!parsed.signatures.includes(expectedSignature)) {
+    throw new Error('Stripe webhook signature verification failed.');
+  }
+
+  return { mode: 'SIGNED' as const, verified: true };
+}
+
+function getStripeWebhookBookingReference(event: StripeWebhookEvent) {
+  const object = event.data?.object;
+  return object?.metadata?.bookingReference || object?.metadata?.reference || object?.client_reference_id || null;
+}
+
+function getStripeWebhookPaymentUpdate(eventType: string) {
+  switch (eventType) {
+    case 'checkout.session.completed':
+      return {
+        bookingStatus: 'CONFIRMED' as const,
+        paymentState: {
+          status: 'CONFIRMED' as const,
+          checkoutReady: true,
+          nextStep: 'Stripe webhook confirmed the payment and the booking is now marked as confirmed.',
+        },
+      };
+    case 'checkout.session.async_payment_failed':
+    case 'payment_intent.payment_failed':
+      return {
+        bookingStatus: 'PAYMENT_FAILED' as const,
+        paymentState: {
+          status: 'FAILED' as const,
+          checkoutReady: true,
+          nextStep: 'Stripe reported a payment failure. Customer can retry checkout from the booking record.',
+        },
+      };
+    default:
+      return null;
+  }
 }
 
 const vehicleCatalog: Vehicle[] = [
@@ -683,7 +832,7 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
     createBookingResponseSchema.parse({
       message: 'Booking draft captured dengan trip-type logic legacy. Deposit checkout sekarang bisa diinisialisasi lewat Workers-safe Stripe handoff.',
       data: bookingRecord,
-      payment: buildPaymentState(c.env),
+      payment: getBookingPaymentState(bookingRecord.reference, c.env),
     }),
     202,
   );
@@ -693,7 +842,7 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
   const payload = c.req.valid('json');
   const reference = c.req.param('reference').trim().toUpperCase();
   const bookingRecord = getBookingByReference(reference, payload.email);
-  const paymentState = buildPaymentState(c.env);
+  const paymentState = getBookingPaymentState(bookingRecord?.reference || reference, c.env);
 
   if (!bookingRecord) {
     return c.json({ message: 'Booking reference not found for the supplied email.' }, 404);
@@ -718,6 +867,7 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
   try {
     const returnToken = createReturnToken();
     const session = await createStripeCheckoutSession(c.env, bookingRecord, returnToken, payload.origin);
+    const checkoutPaymentState = setBookingPaymentState(bookingRecord.reference, buildReturnPendingPaymentState(c.env));
 
     bookingCheckoutSessions.set(bookingRecord.reference, {
       returnToken,
@@ -727,6 +877,7 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
       cancelUrl: session.cancelUrl,
       expiresAt: session.expiresAt,
       createdAt: new Date().toISOString(),
+      paymentStatus: checkoutPaymentState.status,
     });
 
     return c.json(
@@ -743,7 +894,7 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
           cancelUrl: session.cancelUrl,
           expiresAt: session.expiresAt,
         },
-        payment: paymentState,
+        payment: checkoutPaymentState,
       }),
       201,
     );
@@ -762,6 +913,7 @@ app.get('/api/public/bookings/:reference/payment-return', zValidator('query', bo
   const reference = c.req.param('reference').trim().toUpperCase();
   const bookingRecord = bookingDrafts.find((item) => item.reference.toUpperCase() === reference);
   const checkoutSession = bookingCheckoutSessions.get(reference);
+  const paymentState = getBookingPaymentState(reference, c.env, query.stage);
 
   if (!bookingRecord || !checkoutSession || checkoutSession.returnToken !== query.token) {
     return c.json({ message: 'Payment return summary not found for this booking reference.' }, 404);
@@ -773,9 +925,13 @@ app.get('/api/public/bookings/:reference/payment-return', zValidator('query', bo
 
   return c.json(
     bookingPaymentReturnResponseSchema.parse({
-      message: query.stage === 'SUCCESS'
-        ? 'Stripe returned to the migrated success view. Webhook confirmation and durable payment persistence remain the next payment slice.'
-        : 'Customer returned to the migrated cancel view and can safely reopen checkout from here.',
+      message: paymentState.status === 'CONFIRMED'
+        ? 'Stripe webhook confirmed the checkout and the booking is now marked confirmed in Workers memory.'
+        : paymentState.status === 'FAILED'
+          ? 'Stripe webhook marked this checkout as failed, so the booking record is flagged for a retry.'
+          : query.stage === 'SUCCESS'
+            ? 'Stripe returned to the migrated success view. Webhook confirmation and durable payment persistence remain the next payment slice.'
+            : 'Customer returned to the migrated cancel view and can safely reopen checkout from here.',
       data: {
         stage: query.stage,
         sessionId: checkoutSession.sessionId,
@@ -785,7 +941,7 @@ app.get('/api/public/bookings/:reference/payment-return', zValidator('query', bo
         expiresAt: checkoutSession.expiresAt,
         booking: bookingRecord,
       },
-      payment: buildPaymentReturnState(c.env, query.stage),
+      payment: paymentState,
     }),
   );
 });
@@ -809,17 +965,71 @@ app.get('/api/public/bookings/:reference', zValidator('query', bookingLookupQuer
     bookingLookupResponseSchema.parse({
       message: 'Booking draft located. Payment handoff can now initialize Stripe checkout when the Worker secret is configured.',
       data: bookingRecord,
-      payment: buildPaymentState(c.env),
+      payment: getBookingPaymentState(bookingRecord.reference, c.env),
     }),
   );
 });
 
-app.post('/webhooks/stripe', async (c) => {
+async function handleStripeWebhook(c: any) {
   const rawBody = await c.req.text();
-  return c.json({
-    message: 'Stripe webhook scaffold siap. Signature verification dan update booking belum diimplementasikan.',
-    receivedBytes: rawBody.length,
-  });
-});
+  const signatureHeader = c.req.header('stripe-signature');
+  const verification = await verifyStripeWebhookSignature(rawBody, signatureHeader, c.env.STRIPE_WEBHOOK_SECRET);
+
+  let event: StripeWebhookEvent;
+  try {
+    event = JSON.parse(rawBody) as StripeWebhookEvent;
+  } catch {
+    return c.json({ message: 'Stripe webhook payload is not valid JSON.' }, 400);
+  }
+
+  const bookingReference = getStripeWebhookBookingReference(event);
+  if (!bookingReference) {
+    return c.json({ message: 'Stripe webhook ignored because bookingReference metadata is missing.' }, 400);
+  }
+
+  const normalizedReference = bookingReference.trim().toUpperCase();
+  const paymentUpdate = getStripeWebhookPaymentUpdate(event.type);
+  const checkoutSession = bookingCheckoutSessions.get(normalizedReference);
+
+  if (paymentUpdate) {
+    applyConfirmedBookingState(normalizedReference, paymentUpdate.paymentState, paymentUpdate.bookingStatus);
+  }
+
+  if (checkoutSession) {
+    bookingCheckoutSessions.set(normalizedReference, {
+      ...checkoutSession,
+      webhookEventId: event.id,
+      webhookEventType: event.type,
+      paymentStatus: paymentUpdate?.paymentState.status || checkoutSession.paymentStatus,
+    });
+  }
+
+  const resolvedBooking = bookingDrafts.find((item) => item.reference.toUpperCase() === normalizedReference) || null;
+  const resolvedPayment = getBookingPaymentState(normalizedReference, c.env);
+
+  return c.json(
+    {
+      message: paymentUpdate
+        ? verification.verified
+          ? 'Stripe webhook verified and booking payment state updated in Workers memory.'
+          : 'Stripe webhook parsed in development bypass mode and booking payment state updated.'
+        : verification.verified
+          ? 'Stripe webhook verified but the event type was not mapped to a booking state change.'
+          : 'Stripe webhook parsed in development bypass mode, but the event type was not mapped to a booking state change.',
+      data: {
+        eventId: event.id,
+        eventType: event.type,
+        bookingReference: normalizedReference,
+        bookingStatus: resolvedBooking?.status || 'UNKNOWN',
+        verificationMode: verification.mode,
+      },
+      payment: resolvedPayment,
+    },
+    200,
+  );
+}
+
+app.post('/webhooks/stripe', handleStripeWebhook);
+app.post('/api/webhooks/stripe', handleStripeWebhook);
 
 export default app;

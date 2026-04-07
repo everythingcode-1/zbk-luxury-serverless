@@ -125,8 +125,8 @@ export const createBookingSchema = z.object({
 
 export type CreateBookingRequest = z.infer<typeof createBookingSchema>;
 
-export const bookingRecordStatusOptions = ['DRAFT', 'PENDING_PAYMENT'] as const;
-export const paymentFlowStatusOptions = ['NOT_STARTED', 'CHECKOUT_READY', 'RETURN_PENDING_CONFIRMATION'] as const;
+export const bookingRecordStatusOptions = ['DRAFT', 'PENDING_PAYMENT', 'CONFIRMED', 'PAYMENT_FAILED'] as const;
+export const paymentFlowStatusOptions = ['NOT_STARTED', 'CHECKOUT_READY', 'RETURN_PENDING_CONFIRMATION', 'CONFIRMED', 'FAILED'] as const;
 export const checkoutSessionModeOptions = ['STRIPE', 'CONFIGURATION_REQUIRED'] as const;
 export const paymentReturnStageOptions = ['SUCCESS', 'CANCEL'] as const;
 

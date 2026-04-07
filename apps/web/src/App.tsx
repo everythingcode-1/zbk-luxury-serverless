@@ -186,12 +186,20 @@ function PaymentReturnView({ routeState }: { routeState: RouteState }) {
   }, [reference, routeState.pathname, sessionId, stage, token]);
 
   const booking = result?.data.booking;
+  const returnHeadline =
+    result?.payment.status === 'CONFIRMED'
+      ? 'Stripe webhook sudah mengonfirmasi payment dan booking kini berstatus confirmed.'
+      : result?.payment.status === 'FAILED'
+        ? 'Stripe webhook menandai checkout ini gagal, jadi booking bisa diulang dari return flow.'
+        : isCancel
+          ? 'Checkout dibatalkan, tapi flow return page sudah dimigrasikan.'
+          : 'Payment success return page sudah mendarat di stack serverless.';
 
   return (
     <main className="page payment-return-page">
       <section className="hero payment-return-hero">
         <p className="eyebrow">ZBK Luxury Serverless</p>
-        <h1>{isCancel ? 'Checkout dibatalkan, tapi flow return page sudah dimigrasikan.' : 'Payment success return page sudah mendarat di stack serverless.'}</h1>
+        <h1>{returnHeadline}</h1>
         <p>
           Slice ini memindahkan hash-routed Stripe return pages ke React/Vite + Workers supaya checkout success/cancel
           kembali ke app baru tanpa bergantung pada Next.js legacy route runtime.
