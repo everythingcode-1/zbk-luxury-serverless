@@ -1,17 +1,16 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-08 02:07 WIB
-- Estimated migration progress: 74%
-- Justification: the serverless stack now includes a richer public vehicle detail slice that is actually consumed through the Workers API, with gallery thumbnails, spotlight metadata, and a booking CTA linked back into the migrated booking flow. The public booking/payment surface is usable end-to-end, but durable persistence, admin migration, and production-grade payment storage are still the biggest remaining gaps.
+- Last updated: 2026-04-09 19:57 WIB
+- Estimated migration progress: 75%
+- Justification: the serverless stack now not only exposes the public vehicle detail slice through the Workers API, but also gives the public booking history snapshot a more useful summary by exposing status counts and a direct checkout continuation CTA for pending bookings. The public booking/payment surface is usable end-to-end, but durable persistence, admin migration, and production-grade payment storage are still the biggest remaining gaps.
 
 ## Completed this run
 
-- Advanced the public vehicle slice in the serverless workspace:
-  - Added a shared `vehicleDetailResponseSchema` contract so the detail endpoint has a typed, reviewable payload shape.
-  - Upgraded `/api/public/vehicles/:id` to return structured vehicle detail metadata from the Workers seed catalog.
-  - Moved the React/Vite vehicle detail panel onto the dedicated detail endpoint and surfaced a hero image, thumbnail gallery, featured highlight, and a booking CTA that scrolls back into the draft form.
-  - Added responsive CSS for the new vehicle spotlight layout so the public catalog feels closer to the legacy fleet browsing experience.
-- Kept the migration incremental by staying inside the public vehicles + booking vertical slice rather than attempting persistence or admin work in the same run.
+- Advanced the public booking history slice in the serverless workspace:
+  - Expanded the shared `bookingHistoryResponseSchema` meta contract so the history snapshot can report total, pending, confirmed, and payment-failed counts.
+  - Updated `/api/public/bookings` to derive those counts from the Worker’s booking drafts and return them in a typed response.
+  - Surfaced the richer summary in the React/Vite history panel and added a per-booking “Continue deposit checkout” CTA for pending bookings so the user can resume payment from the history view.
+- Kept the migration incremental by staying inside the public booking/history/payment vertical slice rather than attempting persistence or admin work in the same run.
 
 ## Current migrated areas
 

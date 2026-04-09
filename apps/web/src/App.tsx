@@ -589,16 +589,21 @@ export default function App() {
       setHistoryForm({
         email: bookingResponse.data.customerEmail,
       });
-      setHistoryResult((prev) => ({
-        message: prev?.message || 'Booking drafts loaded for this customer email.',
-        data: [bookingResponse.data, ...(prev?.data || []).filter((item) => item.reference !== bookingResponse.data.reference)],
-        meta: {
-          total: (prev?.data || []).filter((item) => item.reference !== bookingResponse.data.reference).length + 1,
-          pendingPayment:
-            (prev?.data || []).filter((item) => item.reference !== bookingResponse.data.reference && item.status === 'PENDING_PAYMENT')
-              .length + (bookingResponse.data.status === 'PENDING_PAYMENT' ? 1 : 0),
-        },
-      }));
+      setHistoryResult((prev) => {
+        const existing = (prev?.data || []).filter((item) => item.reference !== bookingResponse.data.reference);
+        const nextData = [bookingResponse.data, ...existing];
+
+        return {
+          message: prev?.message || 'Booking drafts loaded for this customer email.',
+          data: nextData,
+          meta: {
+            total: nextData.length,
+            pendingPayment: nextData.filter((item) => item.status === 'PENDING_PAYMENT').length,
+            confirmed: nextData.filter((item) => item.status === 'CONFIRMED').length,
+            paymentFailed: nextData.filter((item) => item.status === 'PAYMENT_FAILED').length,
+          },
+        };
+      });
       setLookupResult({
         message: 'Freshly created booking draft is ready to track from this page.',
         data: bookingResponse.data,
@@ -1280,7 +1285,7 @@ export default function App() {
                 <div>
                   <strong>{historyResult.message}</strong>
                   <p className="muted">
-                    Total drafts: {historyResult.meta.total} • Pending payment: {historyResult.meta.pendingPayment}
+                    Total drafts: {historyResult.meta.total} • Pending payment: {historyResult.meta.pendingPayment} • Confirmed: {historyResult.meta.confirmed} • Payment failed: {historyResult.meta.paymentFailed}
                   </p>
                 </div>
               </div>
@@ -1311,6 +1316,15 @@ export default function App() {
                     <div className="quote-box__amount">
                       <span>${booking.totalAmount.toFixed(2)}</span>
                       <small>Deposit ${booking.depositAmount.toFixed(2)}</small>
+                      {booking.status === 'PENDING_PAYMENT' ? (
+                        <button
+                          className="primary-button primary-button--inline"
+                          onClick={() => startCheckout(booking.reference, booking.customerEmail)}
+                          type="button"
+                        >
+                          {isPreparingCheckoutFor === booking.reference ? 'Preparing checkout…' : 'Continue deposit checkout'}
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 ))

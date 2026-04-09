@@ -768,6 +768,8 @@ app.get('/api/public/bookings', zValidator('query', bookingHistoryQuerySchema), 
       meta: {
         total: bookings.length,
         pendingPayment: bookings.filter((item) => item.status === 'PENDING_PAYMENT').length,
+        confirmed: bookings.filter((item) => item.status === 'CONFIRMED').length,
+        paymentFailed: bookings.filter((item) => item.status === 'PAYMENT_FAILED').length,
       },
     }),
   );

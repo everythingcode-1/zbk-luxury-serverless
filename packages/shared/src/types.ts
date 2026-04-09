@@ -262,6 +262,8 @@ export const bookingHistoryResponseSchema = z.object({
   meta: z.object({
     total: z.number().int().nonnegative(),
     pendingPayment: z.number().int().nonnegative(),
+    confirmed: z.number().int().nonnegative(),
+    paymentFailed: z.number().int().nonnegative(),
   }),
 });
 
