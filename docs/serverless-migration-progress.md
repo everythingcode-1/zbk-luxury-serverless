@@ -1,16 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-09 19:57 WIB
-- Estimated migration progress: 75%
-- Justification: the serverless stack now not only exposes the public vehicle detail slice through the Workers API, but also gives the public booking history snapshot a more useful summary by exposing status counts and a direct checkout continuation CTA for pending bookings. The public booking/payment surface is usable end-to-end, but durable persistence, admin migration, and production-grade payment storage are still the biggest remaining gaps.
+- Last updated: 2026-04-09 20:37 WIB
+- Estimated migration progress: 77%
+- Justification: the serverless app now includes a dedicated hash-routed booking-demo page that mirrors the legacy booking entry point with live Worker-backed fleet preview cards, while the root workspace keeps the existing quote/lookup/history/payment slices. Public booking/navigation parity is getting closer, but durable persistence, admin migration, and production-grade payment storage are still the biggest remaining gaps.
 
 ## Completed this run
 
-- Advanced the public booking history slice in the serverless workspace:
-  - Expanded the shared `bookingHistoryResponseSchema` meta contract so the history snapshot can report total, pending, confirmed, and payment-failed counts.
-  - Updated `/api/public/bookings` to derive those counts from the Worker’s booking drafts and return them in a typed response.
-  - Surfaced the richer summary in the React/Vite history panel and added a per-booking “Continue deposit checkout” CTA for pending bookings so the user can resume payment from the history view.
-- Kept the migration incremental by staying inside the public booking/history/payment vertical slice rather than attempting persistence or admin work in the same run.
+- Added a dedicated `#/booking-demo` hash route to the React/Vite app so the legacy booking-demo entry point now has a serverless counterpart.
+- Built the new booking demo view around the live Workers-backed fleet data: 3-step booking guidance, a public fleet preview grid, and a featured-vehicle handoff back to the migrated booking workspace.
+- Added a visible CTA from the root workspace into the new booking demo route so the migration is easy to discover and review in GitHub.
+- Kept the migration incremental by staying inside the public booking/navigation vertical slice rather than attempting persistence or admin work in the same run.
 
 ## Current migrated areas
 
@@ -19,7 +18,7 @@
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
 - Shared auth/session schemas for login, registration, session lookup, and logout.
 - Shared public vehicle detail response contract for the fleet spotlight view.
-- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, and category/luxury filtering.
+- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury filtering, and a hash-routed booking demo route built on top of the live fleet data.
 - Public vehicle selection UI with category browsing, richer detail highlights, and image gallery spotlighting.
 - Public booking quote request flow.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.

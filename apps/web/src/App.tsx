@@ -19,6 +19,7 @@ import {
   vehicleCategoryOptions,
 } from '@zbk/shared';
 import AuthWorkspace from './AuthWorkspace';
+import BookingDemoView from './BookingDemoView';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
 
@@ -714,6 +715,16 @@ export default function App() {
     return <PaymentReturnView routeState={routeState} />;
   }
 
+  if (routeState.pathname === '/booking-demo') {
+    return (
+      <BookingDemoView
+        isLoadingVehicles={isLoadingVehicles}
+        vehicleCategories={vehicleCategories}
+        vehicles={vehicles}
+      />
+    );
+  }
+
   return (
     <main className="page">
       <section className="hero">
@@ -725,6 +736,14 @@ export default function App() {
           via Workers-safe Stripe session handoff saat secret sudah tersedia. Return page success/cancel kini
           juga masuk ke app React/Vite melalui hash route yang aman untuk static hosting.
         </p>
+        <div className="service-pills">
+          <a className="secondary-link" href="#/booking-demo" style={{ minWidth: 0 }}>
+            Open booking demo
+          </a>
+          <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
+            Stay in workspace
+          </a>
+        </div>
       </section>
 
       <AuthWorkspace />
