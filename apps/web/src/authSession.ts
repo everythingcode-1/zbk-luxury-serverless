@@ -1,4 +1,4 @@
-import { authSessionSchema, type AuthSession } from '@zbk/shared';
+import { authSessionSchema, normalizeAuthSession, type AuthSession } from '@zbk/shared';
 
 export const AUTH_SESSION_STORAGE_KEY = 'zbk-auth-session';
 
@@ -6,7 +6,7 @@ export function normalizeStoredSession(rawValue: string | null): AuthSession | n
   if (!rawValue) return null;
 
   try {
-    return authSessionSchema.parse(JSON.parse(rawValue));
+    return normalizeAuthSession(authSessionSchema.parse(JSON.parse(rawValue)));
   } catch {
     return null;
   }

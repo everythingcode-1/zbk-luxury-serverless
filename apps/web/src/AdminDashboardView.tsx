@@ -30,6 +30,21 @@ function BookingStatusPill({ status }: { status: string }) {
   return <span className={`pill ${status === 'CONFIRMED' ? '' : 'pill--muted'}`}>{status}</span>;
 }
 
+function formatSessionCapability(capability: string) {
+  switch (capability) {
+    case 'AUTH_WORKSPACE':
+      return 'Auth workspace';
+    case 'BOOKING_WORKSPACE':
+      return 'Booking workspace';
+    case 'PUBLIC_FLEET':
+      return 'Public fleet';
+    case 'ADMIN_DASHBOARD':
+      return 'Admin dashboard';
+    default:
+      return capability;
+  }
+}
+
 export default function AdminDashboardView() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -266,6 +281,8 @@ export default function AdminDashboardView() {
               <p className="muted">Signed in as</p>
               <strong>{session.user.displayName}</strong>
               <p className="muted">{session.user.email}</p>
+              <p className="muted">Primary route: {session.primaryRoute}</p>
+              <p className="muted">Capabilities: {session.capabilities.map(formatSessionCapability).join(', ')}</p>
             </div>
             <ul className="detail-list">
               <li>Token: {session.token.slice(0, 12)}…</li>

@@ -38,6 +38,21 @@ type AuthFormState = {
 
 type PendingAction = 'login' | 'register' | 'refresh' | 'logout' | null;
 
+function formatSessionCapability(capability: string) {
+  switch (capability) {
+    case 'AUTH_WORKSPACE':
+      return 'Auth workspace';
+    case 'BOOKING_WORKSPACE':
+      return 'Booking workspace';
+    case 'PUBLIC_FLEET':
+      return 'Public fleet';
+    case 'ADMIN_DASHBOARD':
+      return 'Admin dashboard';
+    default:
+      return capability;
+  }
+}
+
 const initialFormState: AuthFormState = {
   role: 'CUSTOMER',
   email: demoCredentials.CUSTOMER.email,
@@ -77,19 +92,24 @@ function SessionSummary({ session }: { session: AuthSession | null }) {
       <p className="muted">{session.user.role} • {session.user.email}</p>
       {session.user.phone ? <p className="muted">Phone: {session.user.phone}</p> : null}
       <ul className="detail-list">
+        <li>Primary route: {session.primaryRoute}</li>
+        <li>Capabilities: {session.capabilities.map(formatSessionCapability).join(', ')}</li>
         <li>Token: {session.token.slice(0, 12)}…</li>
         <li>Status: {session.status}</li>
         <li>Issued: {session.issuedAt}</li>
         <li>Expires: {session.expiresAt}</li>
       </ul>
-      {session.user.role === 'ADMIN' ? (
-        <div className="auth-session-panel__cta">
-          <p className="muted">Admin session detected. The new serverless admin dashboard is available now.</p>
+      <div className="auth-session-panel__cta">
+        <p className="muted">The session now carries a route hint and capability list, so the migrated app can send users to the right workspace.</p>
+        <a className="primary-button primary-button--inline" href={session.primaryRoute}>
+          Open primary route
+        </a>
+        {session.user.role === 'ADMIN' ? (
           <a className="secondary-link" href="#/admin">
             Open admin dashboard
           </a>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   );
 }

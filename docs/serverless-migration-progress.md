@@ -1,21 +1,22 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-10 02:54 WIB
-- Estimated migration progress: 86%
-- Justification: the serverless stack now has a dedicated hash-routed public fleet page on top of the existing booking demo/how-to-book/public booking workspace surfaces. Reviewers can now browse the live Workers vehicle catalog from both the main booking shell and a separate fleet route, which is a meaningful public-vehicles migration step even though persistence and protected auth are still scaffolded.
+- Last updated: 2026-04-10 04:59 WIB
+- Estimated migration progress: 88%
+- Justification: the serverless stack now has a role-aware auth session contract with primary-route hints and capability lists, and that session shape is rendered in both the auth workspace and admin dashboard. Reviewers can now see how the migrated Workers login flow routes ADMIN vs CUSTOMER users without breaking existing localStorage sessions, which is a meaningful auth/session-shape step even though durability is still scaffolded.
 
 ## Completed this run
 
-- Added a new hash-routed `#/fleet` React/Vite page that presents the live Workers vehicle catalog with category and luxury filters, a selectable vehicle grid, and a serverless vehicle-detail spotlight.
-- Added fleet-aware links from the booking workspace, booking demo, and how-to-book surfaces so the public vehicle browsing path is easier to discover from the migrated app.
-- Kept the workspace/build pipeline green after the route addition (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
+- Added role-aware auth session metadata in the shared contract so login responses now include a primary route hint plus a capability list.
+- Normalized stored auth sessions in the web app so existing localStorage sessions upgrade cleanly to the new shape instead of breaking sign-in state.
+- Surfaced the new session shape in the auth workspace and admin dashboard, giving reviewers a visible route/access bridge between CUSTOMER and ADMIN sessions.
+- Kept the workspace/build pipeline green after the auth-session update (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
 
 - Monorepo workspace for Cloudflare Workers API + React/Vite web app + shared package.
 - Shared vehicle/quote schemas and pricing logic.
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
-- Shared auth/session schemas for login, registration, session lookup, logout, and admin overview reporting.
+- Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, and admin overview reporting.
 - Shared public vehicle detail response contract for the fleet spotlight view.
 - Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury filtering, and hash-routed fleet / booking demo / how-to-book guide routes built on top of the live fleet data.
 - Public vehicle selection UI with category browsing, richer detail highlights, image gallery spotlighting, and a dedicated fleet route.
@@ -27,7 +28,7 @@
 - Hash-routed payment success/cancel return views plus a public payment-return summary endpoint for the latest checkout attempt.
 - Stripe webhook intake with signature verification support and in-memory booking/payment confirmation tracking.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
-- Workers-safe auth endpoints plus a small React/Vite auth workspace exercising login/register/me/logout.
+- Workers-safe auth endpoints plus a small React/Vite auth workspace exercising login/register/me/logout and route-aware session surfacing.
 - Serverless admin overview endpoint and hash-routed admin dashboard.
 
 ## Remaining major areas

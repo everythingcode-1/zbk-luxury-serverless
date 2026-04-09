@@ -8,6 +8,9 @@ import {
   authRoleOptions,
   authSessionResponseSchema,
   authSessionSchema,
+  getAuthSessionCapabilities,
+  getAuthSessionPrimaryRoute,
+  normalizeAuthSession,
   adminDashboardResponseSchema,
   authSessionStateResponseSchema,
   authUserSchema,
@@ -226,19 +229,23 @@ function createAuthToken() {
 
 function createAuthSession(account: AuthAccount) {
   const now = new Date();
-  const session = authSessionSchema.parse({
-    token: createAuthToken(),
-    status: 'ACTIVE',
-    issuedAt: now.toISOString(),
-    expiresAt: new Date(now.getTime() + authSessionTtlMs).toISOString(),
-    user: authUserSchema.parse({
-      id: account.id,
-      email: account.email,
-      displayName: account.displayName,
-      role: account.role,
-      ...(account.phone ? { phone: account.phone } : {}),
+  const session = normalizeAuthSession(
+    authSessionSchema.parse({
+      token: createAuthToken(),
+      status: 'ACTIVE',
+      issuedAt: now.toISOString(),
+      expiresAt: new Date(now.getTime() + authSessionTtlMs).toISOString(),
+      user: authUserSchema.parse({
+        id: account.id,
+        email: account.email,
+        displayName: account.displayName,
+        role: account.role,
+        ...(account.phone ? { phone: account.phone } : {}),
+      }),
+      primaryRoute: getAuthSessionPrimaryRoute(account.role),
+      capabilities: getAuthSessionCapabilities(account.role),
     }),
-  });
+  );
 
   authSessions.set(session.token, session);
   return session;

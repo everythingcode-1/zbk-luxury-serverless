@@ -3,9 +3,23 @@ import { bookingRecordSchema, vehicleCategorySchema } from './types';
 
 export const authRoleOptions = ['ADMIN', 'CUSTOMER'] as const;
 export const authSessionStatusOptions = ['ACTIVE', 'SIGNED_OUT'] as const;
+export const authSessionCapabilityOptions = ['AUTH_WORKSPACE', 'BOOKING_WORKSPACE', 'PUBLIC_FLEET', 'ADMIN_DASHBOARD'] as const;
 
 export const authRoleSchema = z.enum(authRoleOptions);
 export const authSessionStatusSchema = z.enum(authSessionStatusOptions);
+export const authSessionCapabilitySchema = z.enum(authSessionCapabilityOptions);
+
+export type AuthRole = z.infer<typeof authRoleSchema>;
+
+export function getAuthSessionCapabilities(role: AuthRole) {
+  return role === 'ADMIN'
+    ? ['AUTH_WORKSPACE', 'BOOKING_WORKSPACE', 'PUBLIC_FLEET', 'ADMIN_DASHBOARD']
+    : ['AUTH_WORKSPACE', 'BOOKING_WORKSPACE', 'PUBLIC_FLEET'];
+}
+
+export function getAuthSessionPrimaryRoute(role: AuthRole) {
+  return role === 'ADMIN' ? '#/admin' : '#/';
+}
 
 export const authLoginRequestSchema = z.object({
   email: z.string().email(),
@@ -39,9 +53,19 @@ export const authSessionSchema = z.object({
   issuedAt: z.string(),
   expiresAt: z.string(),
   user: authUserSchema,
+  primaryRoute: z.string().min(1).default('#/'),
+  capabilities: z.array(authSessionCapabilitySchema).default([]),
 });
 
 export type AuthSession = z.infer<typeof authSessionSchema>;
+
+export function normalizeAuthSession(session: AuthSession): AuthSession {
+  return authSessionSchema.parse({
+    ...session,
+    primaryRoute: session.primaryRoute || getAuthSessionPrimaryRoute(session.user.role),
+    capabilities: session.capabilities.length ? session.capabilities : getAuthSessionCapabilities(session.user.role),
+  });
+}
 
 export const authSessionResponseSchema = z.object({
   message: z.string(),
