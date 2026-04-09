@@ -18,6 +18,7 @@ import {
   tripTypeOptions,
   vehicleCategoryOptions,
 } from '@zbk/shared';
+import AdminDashboardView from './AdminDashboardView';
 import AuthWorkspace from './AuthWorkspace';
 import BookingDemoView from './BookingDemoView';
 
@@ -713,6 +714,10 @@ export default function App() {
 
   if (routeState.pathname === '/payment/success' || routeState.pathname === '/payment/cancel') {
     return <PaymentReturnView routeState={routeState} />;
+  }
+
+  if (routeState.pathname === '/admin') {
+    return <AdminDashboardView />;
   }
 
   if (routeState.pathname === '/booking-demo') {

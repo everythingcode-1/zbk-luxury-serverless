@@ -8,6 +8,7 @@ import {
   authRoleOptions,
   authSessionResponseSchema,
   authSessionSchema,
+  adminDashboardResponseSchema,
   authSessionStateResponseSchema,
   authUserSchema,
   buildVehicleQuote,
@@ -576,6 +577,42 @@ const vehicleCatalog: Vehicle[] = [
   }),
 ];
 
+function buildAdminDashboardPayload(session: AuthSession) {
+  const categories = [...new Set(vehicleCatalog.map((vehicle) => vehicle.category))].map((category) => {
+    const vehiclesInCategory = vehicleCatalog.filter((vehicle) => vehicle.category === category);
+    return {
+      category,
+      totalVehicles: vehiclesInCategory.length,
+      luxuryVehicles: vehiclesInCategory.filter((vehicle) => vehicle.isLuxury).length,
+    };
+  });
+
+  const latestBookings = [...bookingDrafts].slice(-5).reverse();
+  const adminSessions = [...authSessions.values()].filter((item) => item.user.role === 'ADMIN').length;
+  const customerSessions = [...authSessions.values()].filter((item) => item.user.role === 'CUSTOMER').length;
+
+  return adminDashboardResponseSchema.parse({
+    message: 'Admin dashboard loaded from the Workers runtime snapshot.',
+    data: {
+      generatedAt: new Date().toISOString(),
+      sessionUser: session.user,
+      summary: {
+        totalVehicles: vehicleCatalog.length,
+        availableVehicles: vehicleCatalog.filter((vehicle) => vehicle.status === 'AVAILABLE').length,
+        totalBookings: bookingDrafts.length,
+        pendingBookings: bookingDrafts.filter((booking) => booking.status === 'PENDING_PAYMENT').length,
+        confirmedBookings: bookingDrafts.filter((booking) => booking.status === 'CONFIRMED').length,
+        failedBookings: bookingDrafts.filter((booking) => booking.status === 'PAYMENT_FAILED').length,
+        activeSessions: authSessions.size,
+        adminSessions,
+        customerSessions,
+      },
+      vehicleCategories: categories,
+      latestBookings,
+    },
+  });
+}
+
 app.use(
   '*',
   cors({
@@ -689,6 +726,20 @@ app.post('/api/auth/logout', (c) => {
         : 'No active auth session to sign out.',
     ),
   );
+});
+
+app.get('/api/admin/overview', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to view the dashboard overview.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Admin dashboard access requires an ADMIN session.' }, 403);
+  }
+
+  return c.json(buildAdminDashboardPayload(session));
 });
 
 app.get('/api/public/vehicles', zValidator('query', vehiclesFilterSchema), (c) => {

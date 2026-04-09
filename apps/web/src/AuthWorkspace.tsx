@@ -5,14 +5,13 @@ import {
   authRegistrationRequestSchema,
   authRoleOptions,
   authSessionResponseSchema,
-  authSessionSchema,
   authSessionStateResponseSchema,
   type AuthSession,
   type AuthUser,
 } from '@zbk/shared';
+import { AUTH_SESSION_STORAGE_KEY, normalizeStoredSession } from './authSession';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
-const AUTH_SESSION_STORAGE_KEY = 'zbk-auth-session-token';
 
 const demoCredentials = {
   ADMIN: {
@@ -46,16 +45,6 @@ const initialFormState: AuthFormState = {
   displayName: demoCredentials.CUSTOMER.displayName,
   phone: demoCredentials.CUSTOMER.phone,
 };
-
-function normalizeStoredSession(rawValue: string | null) {
-  if (!rawValue) return null;
-
-  try {
-    return authSessionSchema.parse(JSON.parse(rawValue));
-  } catch {
-    return null;
-  }
-}
 
 async function parseResponse<T>(response: Response, schema: { parse: (value: unknown) => T }) {
   const payload = await response.json().catch(() => ({}));
@@ -93,6 +82,14 @@ function SessionSummary({ session }: { session: AuthSession | null }) {
         <li>Issued: {session.issuedAt}</li>
         <li>Expires: {session.expiresAt}</li>
       </ul>
+      {session.user.role === 'ADMIN' ? (
+        <div className="auth-session-panel__cta">
+          <p className="muted">Admin session detected. The new serverless admin dashboard is available now.</p>
+          <a className="secondary-link" href="#/admin">
+            Open admin dashboard
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 }
