@@ -97,6 +97,9 @@ export default function BookingDemoView({ isLoadingVehicles, vehicles, vehicleCa
         <div className="service-pills">
           <span className="pill">{isLoadingVehicles ? 'Loading fleet…' : `${vehicles.length} vehicles`}</span>
           <span className="pill pill--muted">{vehicleCategories.length || 0} categories</span>
+          <a className="secondary-link" href="#/how-to-book" style={{ minWidth: 0 }}>
+            How to book
+          </a>
           <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
             Back to booking workspace
           </a>
