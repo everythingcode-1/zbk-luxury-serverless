@@ -130,6 +130,9 @@ export default function HowToBookView({
             Open booking workspace
           </a>
           <a className="secondary-link" href={fleetDemoHref} style={{ minWidth: 0 }}>
+            Open public fleet
+          </a>
+          <a className="secondary-link" href="#/booking-demo" style={{ minWidth: 0 }}>
             Open booking demo
           </a>
           <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>

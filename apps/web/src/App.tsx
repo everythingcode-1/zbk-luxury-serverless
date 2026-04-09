@@ -21,6 +21,7 @@ import {
 import AdminDashboardView from './AdminDashboardView';
 import AuthWorkspace from './AuthWorkspace';
 import BookingDemoView from './BookingDemoView';
+import FleetView from './FleetView';
 import HowToBookView from './HowToBookView';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
@@ -717,6 +718,10 @@ export default function App() {
     return <PaymentReturnView routeState={routeState} />;
   }
 
+  if (routeState.pathname === '/fleet') {
+    return <FleetView />;
+  }
+
   if (routeState.pathname === '/admin') {
     return <AdminDashboardView />;
   }
@@ -738,7 +743,7 @@ export default function App() {
         vehicleCategoryCount={vehicleCategories.length}
         featuredVehicleName={vehicles[0]?.name}
         bookingWorkspaceHref="#/"
-        fleetDemoHref="#/booking-demo"
+        fleetDemoHref="#/fleet"
       />
     );
   }
@@ -755,14 +760,14 @@ export default function App() {
           juga masuk ke app React/Vite melalui hash route yang aman untuk static hosting.
         </p>
         <div className="service-pills">
+          <a className="secondary-link" href="#/fleet" style={{ minWidth: 0 }}>
+            Open public fleet
+          </a>
           <a className="secondary-link" href="#/booking-demo" style={{ minWidth: 0 }}>
             Open booking demo
           </a>
           <a className="secondary-link" href="#/how-to-book" style={{ minWidth: 0 }}>
             How to book
-          </a>
-          <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
-            Stay in workspace
           </a>
         </div>
       </section>

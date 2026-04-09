@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-10 00:49 WIB
-- Estimated migration progress: 84%
-- Justification: the serverless stack now has a protected admin overview endpoint plus hash-routed React/Vite surfaces for admin, booking demo, and a new legacy-style `#/how-to-book` public guide. The public booking/payment/auth flows are still scaffold-backed, but the customer-facing migration surface is now broader and more reviewable on the new architecture.
+- Last updated: 2026-04-10 02:54 WIB
+- Estimated migration progress: 86%
+- Justification: the serverless stack now has a dedicated hash-routed public fleet page on top of the existing booking demo/how-to-book/public booking workspace surfaces. Reviewers can now browse the live Workers vehicle catalog from both the main booking shell and a separate fleet route, which is a meaningful public-vehicles migration step even though persistence and protected auth are still scaffolded.
 
 ## Completed this run
 
-- Added a new hash-routed `#/how-to-book` React/Vite guide page that mirrors the legacy public booking instructions with a live fleet count, public FAQ cards, and direct links back into the booking workspace and booking demo.
-- Added navigation links from the main workspace and booking demo into the new `#/how-to-book` guide so the public booking flow is easier to discover from the migrated app.
+- Added a new hash-routed `#/fleet` React/Vite page that presents the live Workers vehicle catalog with category and luxury filters, a selectable vehicle grid, and a serverless vehicle-detail spotlight.
+- Added fleet-aware links from the booking workspace, booking demo, and how-to-book surfaces so the public vehicle browsing path is easier to discover from the migrated app.
 - Kept the workspace/build pipeline green after the route addition (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -17,8 +17,8 @@
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
 - Shared auth/session schemas for login, registration, session lookup, logout, and admin overview reporting.
 - Shared public vehicle detail response contract for the fleet spotlight view.
-- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury filtering, and hash-routed booking demo / how-to-book guide routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, richer detail highlights, and image gallery spotlighting.
+- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury filtering, and hash-routed fleet / booking demo / how-to-book guide routes built on top of the live fleet data.
+- Public vehicle selection UI with category browsing, richer detail highlights, image gallery spotlighting, and a dedicated fleet route.
 - Public booking quote request flow.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
 - Public booking reference lookup flow using booking reference + customer email.

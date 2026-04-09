@@ -100,6 +100,9 @@ export default function BookingDemoView({ isLoadingVehicles, vehicles, vehicleCa
           <a className="secondary-link" href="#/how-to-book" style={{ minWidth: 0 }}>
             How to book
           </a>
+          <a className="secondary-link" href="#/fleet" style={{ minWidth: 0 }}>
+            Open public fleet
+          </a>
           <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
             Back to booking workspace
           </a>
@@ -178,7 +181,7 @@ export default function BookingDemoView({ isLoadingVehicles, vehicles, vehicleCa
             <div>
               <h2>Featured vehicle handoff</h2>
               <p className="muted">
-                {featuredVehicle.name} is the currently featured catalog item and can be opened directly from the main booking workspace.
+                {featuredVehicle.name} is the currently featured catalog item and can be opened directly from the main booking workspace or the new public fleet page.
               </p>
             </div>
             <span className="pill">{featuredVehicle.category}</span>
