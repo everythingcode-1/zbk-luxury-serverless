@@ -400,7 +400,10 @@ export default function FleetView() {
                     Loaded from the Workers API detail endpoint
                   </p>
                 </div>
-                <a className="primary-button primary-button--inline" href="#/">
+                <a
+                  className="primary-button primary-button--inline"
+                  href={`#/booking?vehicleId=${encodeURIComponent(selectedVehicle.id)}`}
+                >
                   Book this vehicle
                 </a>
               </div>

@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-10 09:11 WIB
-- Estimated migration progress: 90%
-- Justification: auth now has a cookie-backed transport path that matches the legacy worker flow more closely, while the React/Vite workspace can bootstrap sessions from the Workers API even when localStorage is empty. The migration still lacks durable persistence, but the auth/session bridge is now visible and reviewable on the new stack.
+- Last updated: 2026-04-10 11:13 WIB
+- Estimated migration progress: 91%
+- Justification: the legacy booking entry point now has a dedicated hash-routed landing page in the React/Vite app, and the public fleet / booking demo flows can deep-link straight into that route with a selected vehicle. That closes another visible legacy route gap while keeping the migration Workers-safe and reviewable.
 
 ## Completed this run
 
-- Added Workers cookie-backed auth transport so login/register/logout/me now mirror the legacy auth-token flow more closely.
-- Added an auth-session bootstrap helper in the Vite app so the auth workspace and admin dashboard can rehydrate from the Workers API even when localStorage is empty.
-- Upgraded the auth workspace and admin dashboard fetches to send credentials with auth requests, keeping the cookie-based session path visible in the new serverless UI.
-- Kept the workspace/build pipeline green after the auth-session update (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
+- Added a new `/booking` hash route that mirrors the legacy Next.js booking entry point as a serverless landing page.
+- Added vehicle-aware booking handoff links from the public fleet and booking demo pages into the new booking landing route.
+- Added a booking landing CTA path from the how-to-book guide so the new route is discoverable across the migrated public flows.
+- Kept the workspace/build pipeline green after the route update (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
 
@@ -19,8 +19,8 @@
 - Shared vehicle capacity-band helpers and filter contract.
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, and admin overview reporting.
 - Shared public vehicle detail response contract for the fleet spotlight view.
-- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking demo / how-to-book guide routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, image gallery spotlighting, and a dedicated fleet route.
+- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking demo / how-to-book guide routes built on top of the live fleet data.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, image gallery spotlighting, and deep-linkable fleet-to-booking handoff.
 - Public booking quote request flow.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
 - Public booking reference lookup flow using booking reference + customer email.
@@ -44,7 +44,7 @@
 
 ## Blockers / risks
 
-- Auth sessions are still stored in the Worker’s in-memory map and browser localStorage; the new auth-token cookie improves the transport path but not durability, so they still disappear on deploy/restart.
+- Auth sessions are still stored in the Worker’s in-memory map and browser localStorage; the auth-token cookie improves the transport path but not durability, so they still disappear on deploy/restart.
 - Demo credentials are intentionally seeded for the migration slice and should be replaced with real persistence before any protected admin/user flows rely on them.
 - Booking drafts, checkout return tokens, and latest checkout-session summaries still live in Worker memory; payment return views therefore are not durable across deploys/restarts.
 - Webhook verification is Workers-safe, but it falls back to a dev bypass when `STRIPE_WEBHOOK_SECRET` is unset.

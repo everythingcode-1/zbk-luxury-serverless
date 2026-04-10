@@ -73,7 +73,7 @@ function BookingDemoVehicleCard({ vehicle }: { vehicle: Vehicle }) {
             Live seed catalog card from the Workers API
           </p>
         </div>
-        <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
+        <a className="secondary-link" href={`#/booking?vehicleId=${encodeURIComponent(vehicle.id)}`} style={{ minWidth: 0 }}>
           Book now
         </a>
       </div>
@@ -196,8 +196,8 @@ export default function BookingDemoView({ isLoadingVehicles, vehicles, vehicleCa
                 {featuredVehicle.capacity} passengers • {featuredVehicle.location}
               </p>
             </div>
-            <a className="primary-button primary-button--inline" href="#/" style={{ width: 'auto', textDecoration: 'none' }}>
-              Open booking workspace
+            <a className="primary-button primary-button--inline" href={`#/booking?vehicleId=${encodeURIComponent(featuredVehicle.id)}`} style={{ width: 'auto', textDecoration: 'none' }}>
+              Open booking landing
             </a>
           </div>
         </section>

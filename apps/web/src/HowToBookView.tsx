@@ -3,6 +3,7 @@ type HowToBookViewProps = {
   vehicleCategoryCount: number;
   featuredVehicleName?: string;
   bookingWorkspaceHref: string;
+  bookingLandingHref: string;
   fleetDemoHref: string;
 };
 
@@ -34,6 +35,7 @@ export default function HowToBookView({
   vehicleCategoryCount,
   featuredVehicleName,
   bookingWorkspaceHref,
+  bookingLandingHref,
   fleetDemoHref,
 }: HowToBookViewProps) {
   return (
@@ -128,6 +130,9 @@ export default function HowToBookView({
         <div className="service-pills">
           <a className="primary-button primary-button--inline" href={bookingWorkspaceHref}>
             Open booking workspace
+          </a>
+          <a className="secondary-link" href={bookingLandingHref} style={{ minWidth: 0 }}>
+            Open booking landing
           </a>
           <a className="secondary-link" href={fleetDemoHref} style={{ minWidth: 0 }}>
             Open public fleet
