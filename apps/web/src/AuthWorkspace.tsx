@@ -6,8 +6,10 @@ import {
   authRoleOptions,
   authSessionResponseSchema,
   authSessionStateResponseSchema,
+  bookingHistoryResponseSchema,
   type AuthSession,
   type AuthUser,
+  type BookingHistoryResponse,
 } from '@zbk/shared';
 import { AUTH_SESSION_STORAGE_KEY, loadAuthSessionFromApi, normalizeStoredSession } from './authSession';
 
@@ -114,6 +116,98 @@ function SessionSummary({ session }: { session: AuthSession | null }) {
   );
 }
 
+function CustomerBookingsSummary({
+  session,
+  bookings,
+  loading,
+  error,
+  onRefresh,
+}: {
+  session: AuthSession | null;
+  bookings: BookingHistoryResponse | null;
+  loading: boolean;
+  error: string | null;
+  onRefresh: () => void;
+}) {
+  if (!session) {
+    return (
+      <div className="auth-session-panel">
+        <p className="muted">Sign in as a customer to load the Workers-authenticated booking history slice.</p>
+      </div>
+    );
+  }
+
+  if (session.user.role !== 'CUSTOMER') {
+    return (
+      <div className="auth-session-panel">
+        <p className="muted">This booking history slice is customer-only; sign in with the customer demo account to review it.</p>
+      </div>
+    );
+  }
+
+  const count = bookings?.meta.total ?? 0;
+
+  return (
+    <div className="auth-session-panel">
+      <div className="section-title-row">
+        <div>
+          <h3>Customer bookings snapshot</h3>
+          <p className="muted">This replaces the legacy email lookup with an auth-backed Workers endpoint.</p>
+        </div>
+        <span className="pill pill--muted">{loading ? 'Loading…' : `${count} bookings`}</span>
+      </div>
+
+      {error ? <div className="alert error">{error}</div> : null}
+
+      {bookings ? (
+        <>
+          <p className="muted">
+            {bookings.message} • Pending payment: {bookings.meta.pendingPayment} • Confirmed: {bookings.meta.confirmed} • Payment failed: {bookings.meta.paymentFailed}
+          </p>
+          {bookings.data.length > 0 ? (
+            <div className="booking-history-stack">
+              {bookings.data.slice(0, 3).map((booking) => (
+                <div key={booking.id} className="quote-box booking-result">
+                  <div>
+                    <strong>{booking.reference} • {booking.vehicleName}</strong>
+                    <p className="muted">
+                      {booking.tripType} • {booking.serviceType} • {booking.status}
+                    </p>
+                    <p className="muted">
+                      {booking.pickupLocation}
+                      {booking.dropoffLocation ? ` → ${booking.dropoffLocation}` : ''}
+                    </p>
+                    <p className="muted">
+                      Pickup {booking.startDate}{booking.pickupTime ? ` • ${booking.pickupTime}` : ''}
+                    </p>
+                  </div>
+                  <div className="quote-box__amount">
+                    <span>${booking.totalAmount.toFixed(2)}</span>
+                    <small>Deposit ${booking.depositAmount.toFixed(2)}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="muted">No authenticated bookings have been stored yet for this customer.</p>
+          )}
+        </>
+      ) : (
+        <p className="muted">{loading ? 'Loading authenticated booking history from the Workers API…' : 'Press refresh to load the booking history snapshot.'}</p>
+      )}
+
+      <div className="auth-session-panel__cta">
+        <button className="secondary-button" type="button" onClick={onRefresh} disabled={loading}>
+          {loading ? 'Refreshing…' : 'Refresh customer bookings'}
+        </button>
+        <a className="primary-button primary-button--inline" href="#/booking">
+          Open booking workspace
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function AuthWorkspace() {
   const [form, setForm] = useState<AuthFormState>(initialFormState);
   const [session, setSession] = useState<AuthSession | null>(null);
@@ -126,6 +220,9 @@ export default function AuthWorkspace() {
   const canRegister = form.role === 'CUSTOMER';
 
   const sessionUser = useMemo<AuthUser | null>(() => session?.user ?? null, [session]);
+  const [customerBookings, setCustomerBookings] = useState<BookingHistoryResponse | null>(null);
+  const [customerBookingsError, setCustomerBookingsError] = useState<string | null>(null);
+  const [isLoadingCustomerBookings, setIsLoadingCustomerBookings] = useState(false);
 
   useEffect(() => {
     const storedSession = normalizeStoredSession(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY));
@@ -184,6 +281,13 @@ export default function AuthWorkspace() {
     void bootstrapSession();
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    void refreshCustomerBookings(controller.signal);
+    return () => controller.abort();
+  }, [session, token]);
 
   function persistSession(nextSession: AuthSession | null) {
     setSession(nextSession);
@@ -360,6 +464,47 @@ export default function AuthWorkspace() {
     }
   }
 
+  async function refreshCustomerBookings(signal?: AbortSignal) {
+    if (!session || session.user.role !== 'CUSTOMER' || !token) {
+      setCustomerBookings(null);
+      setCustomerBookingsError(null);
+      setIsLoadingCustomerBookings(false);
+      return;
+    }
+
+    try {
+      setIsLoadingCustomerBookings(true);
+      setCustomerBookingsError(null);
+
+      const response = await fetch(`${API_BASE_URL}/api/customer/bookings`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: 'include',
+        signal,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error((payload as { message?: string }).message || 'Unable to load customer bookings.');
+      }
+
+      const parsed = bookingHistoryResponseSchema.parse(payload);
+      if (signal?.aborted) return;
+
+      setCustomerBookings(parsed);
+    } catch (err) {
+      if (signal?.aborted) return;
+
+      setCustomerBookings(null);
+      setCustomerBookingsError(err instanceof Error ? err.message : 'Unable to load customer bookings.');
+    } finally {
+      if (!signal?.aborted) {
+        setIsLoadingCustomerBookings(false);
+      }
+    }
+  }
+
   return (
     <article className="card card--wide auth-workspace">
       <div className="section-title-row">
@@ -465,6 +610,14 @@ export default function AuthWorkspace() {
 
         <SessionSummary session={session} />
       </div>
+
+      <CustomerBookingsSummary
+        bookings={customerBookings}
+        error={customerBookingsError}
+        loading={isLoadingCustomerBookings}
+        onRefresh={() => void refreshCustomerBookings()}
+        session={session}
+      />
     </article>
   );
 }

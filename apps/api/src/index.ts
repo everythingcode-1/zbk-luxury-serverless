@@ -160,6 +160,24 @@ function getBookingByReference(reference: string, email: string) {
   );
 }
 
+function getBookingsForCustomerEmail(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  return bookingDrafts.filter((item) => item.customerEmail.toLowerCase() === normalizedEmail);
+}
+
+function buildBookingHistoryResponse(bookings: BookingRecord[], message: string) {
+  return bookingHistoryResponseSchema.parse({
+    message,
+    data: bookings,
+    meta: {
+      total: bookings.length,
+      pendingPayment: bookings.filter((item) => item.status === 'PENDING_PAYMENT').length,
+      confirmed: bookings.filter((item) => item.status === 'CONFIRMED').length,
+      paymentFailed: bookings.filter((item) => item.status === 'PAYMENT_FAILED').length,
+    },
+  });
+}
+
 function resolveAppBaseUrl(env: EnvBindings, origin?: string) {
   const candidate = origin || env.WEB_APP_BASE_URL || defaultWebAppBaseUrl;
 
@@ -777,6 +795,30 @@ app.post('/api/auth/logout', (c) => {
   );
 });
 
+app.get('/api/customer/bookings', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Authentication required to load customer bookings.' }, 401);
+  }
+
+  if (session.user.role !== 'CUSTOMER') {
+    return c.json({ message: 'Customer bookings are available to customer sessions only.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+
+  const bookings = getBookingsForCustomerEmail(session.user.email);
+  return c.json(
+    buildBookingHistoryResponse(
+      bookings,
+      bookings.length
+        ? `Loaded ${session.user.displayName}'s authenticated booking history from Workers memory.`
+        : 'No authenticated customer bookings found yet.',
+    ),
+  );
+});
+
 app.get('/api/admin/overview', (c) => {
   const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
 
@@ -857,22 +899,15 @@ app.post('/api/public/booking/quote', zValidator('json', bookingQuoteRequestSche
 
 app.get('/api/public/bookings', zValidator('query', bookingHistoryQuerySchema), (c) => {
   const { email } = c.req.valid('query');
-  const normalizedEmail = email.trim().toLowerCase();
-  const bookings = bookingDrafts.filter((item) => item.customerEmail.toLowerCase() === normalizedEmail);
+  const bookings = getBookingsForCustomerEmail(email);
 
   return c.json(
-    bookingHistoryResponseSchema.parse({
-      message: bookings.length
+    buildBookingHistoryResponse(
+      bookings,
+      bookings.length
         ? 'Booking drafts found for this email. Latest draft appears first.'
         : 'No booking drafts found yet for this email.',
-      data: bookings,
-      meta: {
-        total: bookings.length,
-        pendingPayment: bookings.filter((item) => item.status === 'PENDING_PAYMENT').length,
-        confirmed: bookings.filter((item) => item.status === 'CONFIRMED').length,
-        paymentFailed: bookings.filter((item) => item.status === 'PAYMENT_FAILED').length,
-      },
-    }),
+    ),
   );
 });
 
