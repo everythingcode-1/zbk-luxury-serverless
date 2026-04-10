@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-10 07:05 WIB
-- Estimated migration progress: 89%
-- Justification: the serverless public fleet slice now includes legacy-inspired capacity-band filtering in addition to category and luxury filters, and the Worker API now understands that new query contract. Reviewers can see a clearer vehicle-selection bridge between the old 3-step booking flow and the new React/Vite + Workers catalog, though durable persistence and deeper CRUD are still outstanding.
+- Last updated: 2026-04-10 09:11 WIB
+- Estimated migration progress: 90%
+- Justification: auth now has a cookie-backed transport path that matches the legacy worker flow more closely, while the React/Vite workspace can bootstrap sessions from the Workers API even when localStorage is empty. The migration still lacks durable persistence, but the auth/session bridge is now visible and reviewable on the new stack.
 
 ## Completed this run
 
-- Added capacity-band helpers and query support to the shared vehicle contract so the fleet filter can express compact, mid-size, and group-ready vehicles.
-- Wired the Workers public vehicles endpoint to honor the new capacity-band filter alongside the existing status/category/luxury filters.
-- Upgraded the public fleet view with clickable capacity-band pills and a visible capacity-band label on each vehicle card, making the migrated vehicle-selection experience closer to the legacy flow.
-- Kept the workspace/build pipeline green after the fleet-filter update (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
+- Added Workers cookie-backed auth transport so login/register/logout/me now mirror the legacy auth-token flow more closely.
+- Added an auth-session bootstrap helper in the Vite app so the auth workspace and admin dashboard can rehydrate from the Workers API even when localStorage is empty.
+- Upgraded the auth workspace and admin dashboard fetches to send credentials with auth requests, keeping the cookie-based session path visible in the new serverless UI.
+- Kept the workspace/build pipeline green after the auth-session update (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
 
@@ -29,8 +29,8 @@
 - Hash-routed payment success/cancel return views plus a public payment-return summary endpoint for the latest checkout attempt.
 - Stripe webhook intake with signature verification support and in-memory booking/payment confirmation tracking.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
-- Workers-safe auth endpoints plus a small React/Vite auth workspace exercising login/register/me/logout and route-aware session surfacing.
-- Serverless admin overview endpoint and hash-routed admin dashboard.
+- Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout and route-aware session surfacing.
+- Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.
 
 ## Remaining major areas
 
@@ -44,7 +44,7 @@
 
 ## Blockers / risks
 
-- Auth sessions are still stored in the Worker’s in-memory map and browser localStorage, so they disappear on deploy/restart and are not yet suitable for production auth.
+- Auth sessions are still stored in the Worker’s in-memory map and browser localStorage; the new auth-token cookie improves the transport path but not durability, so they still disappear on deploy/restart.
 - Demo credentials are intentionally seeded for the migration slice and should be replaced with real persistence before any protected admin/user flows rely on them.
 - Booking drafts, checkout return tokens, and latest checkout-session summaries still live in Worker memory; payment return views therefore are not durable across deploys/restarts.
 - Webhook verification is Workers-safe, but it falls back to a dev bypass when `STRIPE_WEBHOOK_SECRET` is unset.

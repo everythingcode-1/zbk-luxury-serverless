@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { bookingRecordSchema, vehicleCategorySchema } from './types';
 
 export const authRoleOptions = ['ADMIN', 'CUSTOMER'] as const;
+export const authTokenCookieName = 'auth-token' as const;
 export const authSessionStatusOptions = ['ACTIVE', 'SIGNED_OUT'] as const;
 export const authSessionCapabilityOptions = ['AUTH_WORKSPACE', 'BOOKING_WORKSPACE', 'PUBLIC_FLEET', 'ADMIN_DASHBOARD'] as const;
 

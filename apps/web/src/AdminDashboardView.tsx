@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { AdminDashboardResponse, AuthSession } from '@zbk/shared';
-import { AUTH_SESSION_STORAGE_KEY, normalizeStoredSession } from './authSession';
+import { AUTH_SESSION_STORAGE_KEY, loadAuthSessionFromApi, normalizeStoredSession } from './authSession';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
 
@@ -54,8 +54,42 @@ export default function AdminDashboardView() {
   const [refreshTick, setRefreshTick] = useState(0);
 
   useEffect(() => {
-    setSession(normalizeStoredSession(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY)));
-    setSessionLoaded(true);
+    const controller = new AbortController();
+    const storedSession = normalizeStoredSession(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY));
+
+    if (storedSession) {
+      setSession(storedSession);
+    }
+
+    async function bootstrapSession() {
+      try {
+        const loadedSession = await loadAuthSessionFromApi(API_BASE_URL, controller.signal);
+        if (controller.signal.aborted) return;
+
+        if (loadedSession) {
+          setSession(loadedSession);
+          window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(loadedSession));
+          return;
+        }
+
+        if (!storedSession) {
+          setSession(null);
+        }
+      } catch (err) {
+        if (controller.signal.aborted) return;
+
+        if (!storedSession) {
+          setError(err instanceof Error ? err.message : 'Unable to bootstrap the admin session from Workers.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setSessionLoaded(true);
+        }
+      }
+    }
+
+    void bootstrapSession();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -79,6 +113,7 @@ export default function AdminDashboardView() {
           headers: {
             Authorization: `Bearer ${session.token}`,
           },
+          credentials: 'include',
         });
         const payload: AdminDashboardResponse | { message?: string } = await response.json();
 

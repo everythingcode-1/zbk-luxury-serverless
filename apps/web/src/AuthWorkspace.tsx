@@ -9,7 +9,7 @@ import {
   type AuthSession,
   type AuthUser,
 } from '@zbk/shared';
-import { AUTH_SESSION_STORAGE_KEY, normalizeStoredSession } from './authSession';
+import { AUTH_SESSION_STORAGE_KEY, loadAuthSessionFromApi, normalizeStoredSession } from './authSession';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
 
@@ -129,6 +129,8 @@ export default function AuthWorkspace() {
 
   useEffect(() => {
     const storedSession = normalizeStoredSession(window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY));
+    const controller = new AbortController();
+
     if (storedSession) {
       setSession(storedSession);
       setForm((prev) => ({
@@ -138,8 +140,49 @@ export default function AuthWorkspace() {
         displayName: storedSession.user.displayName,
         phone: storedSession.user.phone || prev.phone,
       }));
-      void refreshSession(storedSession.token);
     }
+
+    async function bootstrapSession() {
+      try {
+        const loadedSession = await loadAuthSessionFromApi(API_BASE_URL, controller.signal);
+        if (controller.signal.aborted) return;
+
+        if (loadedSession) {
+          persistSession(loadedSession);
+          setForm((prev) => ({
+            ...prev,
+            role: loadedSession.user.role,
+            email: loadedSession.user.email,
+            displayName: loadedSession.user.displayName,
+            phone: loadedSession.user.phone || prev.phone,
+          }));
+          setStatusMessage(`Rehydrated ${loadedSession.user.displayName} from the auth cookie.`);
+          return;
+        }
+
+        if (storedSession) {
+          persistSession(storedSession);
+          setStatusMessage(`Validated the stored ${storedSession.user.role.toLowerCase()} session from localStorage.`);
+          return;
+        }
+
+        persistSession(null);
+        setStatusMessage('No active session yet. Sign in or register a customer to see the new Workers session shape.');
+      } catch (err) {
+        if (controller.signal.aborted) return;
+
+        if (storedSession) {
+          persistSession(storedSession);
+          setStatusMessage(`Using the stored ${storedSession.user.role.toLowerCase()} session while the cookie bootstrap retries.`);
+          return;
+        }
+
+        setError(err instanceof Error ? err.message : 'Unable to bootstrap the auth session from Workers.');
+      }
+    }
+
+    void bootstrapSession();
+    return () => controller.abort();
   }, []);
 
   function persistSession(nextSession: AuthSession | null) {
@@ -173,20 +216,28 @@ export default function AuthWorkspace() {
   }
 
   async function refreshSession(nextToken = token) {
-    if (!nextToken) {
-      setStatusMessage('No stored token to refresh yet.');
-      setError(null);
-      persistSession(null);
-      return;
-    }
-
     setPendingAction('refresh');
     try {
       setError(null);
+
+      if (!nextToken) {
+        const cookieSession = await loadAuthSessionFromApi(API_BASE_URL);
+        if (!cookieSession) {
+          persistSession(null);
+          setStatusMessage('No stored token or auth cookie is active yet.');
+          return;
+        }
+
+        persistSession(cookieSession);
+        setStatusMessage(`Rehydrated ${cookieSession.user.displayName} from the auth cookie.`);
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${nextToken}`,
         },
+        credentials: 'include',
       });
 
       const payload = await parseResponse(response, authSessionStateResponseSchema);
@@ -222,6 +273,7 @@ export default function AuthWorkspace() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
 
@@ -263,6 +315,7 @@ export default function AuthWorkspace() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
 
@@ -294,6 +347,7 @@ export default function AuthWorkspace() {
               Authorization: `Bearer ${token}`,
             }
           : undefined,
+        credentials: 'include',
       });
 
       const payload = await parseResponse(response, authLogoutResponseSchema);

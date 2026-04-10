@@ -1,11 +1,13 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { deleteCookie, setCookie } from 'hono/cookie';
 import { zValidator } from '@hono/zod-validator';
 import {
   authLoginRequestSchema,
   authLogoutResponseSchema,
   authRegistrationRequestSchema,
   authRoleOptions,
+  authTokenCookieName,
   authSessionResponseSchema,
   authSessionSchema,
   getAuthSessionCapabilities,
@@ -227,6 +229,24 @@ const authAccounts = new Map<string, AuthAccount>([
   ],
 ]);
 const authSessions = new Map<string, AuthSession>();
+
+function getAuthCookieOptions(request: Request) {
+  return {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'Lax' as const,
+    secure: new URL(request.url).protocol === 'https:',
+    maxAge: Math.floor(authSessionTtlMs / 1000),
+  };
+}
+
+function setAuthSessionCookie(c: any, token: string) {
+  setCookie(c, authTokenCookieName, token, getAuthCookieOptions(c.req.raw));
+}
+
+function clearAuthSessionCookie(c: any) {
+  deleteCookie(c, authTokenCookieName, { path: '/' });
+}
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
@@ -632,7 +652,7 @@ function buildAdminDashboardPayload(session: AuthSession) {
 app.use(
   '*',
   cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
@@ -658,6 +678,8 @@ app.post('/api/auth/login', zValidator('json', authLoginRequestSchema), (c) => {
     const account = authenticateAccount(payload.email, payload.password);
     const session = createAuthSession(account);
 
+    setAuthSessionCookie(c, session.token);
+
     return c.json(
       createAuthResponse(`Signed in as ${account.displayName}.`, session),
       201,
@@ -678,6 +700,8 @@ app.post('/api/auth/customer/login', zValidator('json', authLoginRequestSchema),
   try {
     const account = authenticateAccount(payload.email, payload.password, 'CUSTOMER');
     const session = createAuthSession(account);
+
+    setAuthSessionCookie(c, session.token);
 
     return c.json(
       createAuthResponse(`Customer session created for ${account.displayName}.`, session),
@@ -700,6 +724,8 @@ app.post('/api/auth/customer/register', zValidator('json', authRegistrationReque
     const account = registerCustomerAccount(payload);
     const session = createAuthSession(account);
 
+    setAuthSessionCookie(c, session.token);
+
     return c.json(
       createAuthResponse(`Customer account created for ${account.displayName}.`, session),
       201,
@@ -715,15 +741,21 @@ app.post('/api/auth/customer/register', zValidator('json', authRegistrationReque
 });
 
 app.get('/api/auth/me', (c) => {
-  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+  const token = getAuthTokenFromRequest(c.req.raw);
+  const session = getActiveAuthSession(token);
 
   if (!session) {
+    if (token) {
+      clearAuthSessionCookie(c);
+    }
+
     return c.json(
       createAuthSessionStateResponse('No active auth session found for this request.', null),
       401,
     );
   }
 
+  setAuthSessionCookie(c, session.token);
   return c.json(createAuthSessionStateResponse('Active auth session resolved from Workers memory.', session));
 });
 
@@ -733,6 +765,7 @@ app.post('/api/auth/logout', (c) => {
 
   if (token) {
     authSessions.delete(token);
+    clearAuthSessionCookie(c);
   }
 
   return c.json(
