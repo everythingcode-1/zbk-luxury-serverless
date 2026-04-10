@@ -39,6 +39,7 @@ import {
   type BookingPaymentState,
   type BookingRecord,
   type Vehicle,
+  getVehicleCapacityBand,
   vehicleSchema,
   vehicleDetailResponseSchema,
   vehiclesFilterSchema,
@@ -166,6 +167,14 @@ function resolveAppBaseUrl(env: EnvBindings, origin?: string) {
   } catch {
     return defaultWebAppBaseUrl;
   }
+}
+
+function matchesCapacityBand(capacity: number, capacityBand?: 'ALL' | 'COMPACT' | 'MID_SIZE' | 'GROUP') {
+  if (!capacityBand || capacityBand === 'ALL') {
+    return true;
+  }
+
+  return getVehicleCapacityBand(capacity) === capacityBand;
 }
 
 function buildPaymentReturnState(env: EnvBindings, stage: 'SUCCESS' | 'CANCEL'): BookingPaymentState {
@@ -757,6 +766,7 @@ app.get('/api/public/vehicles', zValidator('query', vehiclesFilterSchema), (c) =
     if (query.status && vehicle.status !== query.status) return false;
     if (query.serviceType && !vehicle.services.includes(query.serviceType)) return false;
     if (query.category && vehicle.category !== query.category) return false;
+    if (!matchesCapacityBand(vehicle.capacity, query.capacityBand)) return false;
     if (query.luxuryOnly && !vehicle.isLuxury) return false;
     return true;
   });

@@ -3,12 +3,37 @@ import { z } from 'zod';
 export const serviceTypeOptions = ['AIRPORT_TRANSFER', 'TRIP', 'RENTAL'] as const;
 export const vehicleStatusOptions = ['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RESERVED'] as const;
 export const vehicleCategoryOptions = ['Executive', 'Wedding', 'Group'] as const;
+export const vehicleCapacityBandOptions = ['ALL', 'COMPACT', 'MID_SIZE', 'GROUP'] as const;
 export const tripTypeOptions = ['ONE_WAY', 'ROUND_TRIP'] as const;
 
 export const serviceTypeSchema = z.enum(serviceTypeOptions);
 export const vehicleStatusSchema = z.enum(vehicleStatusOptions);
 export const vehicleCategorySchema = z.enum(vehicleCategoryOptions);
+export const vehicleCapacityBandSchema = z.enum(vehicleCapacityBandOptions);
 export const tripTypeSchema = z.enum(tripTypeOptions);
+
+export type VehicleCapacityBand = z.infer<typeof vehicleCapacityBandSchema>;
+
+export function getVehicleCapacityBand(capacity: number): VehicleCapacityBand {
+  if (capacity <= 4) return 'COMPACT';
+  if (capacity <= 8) return 'MID_SIZE';
+  return 'GROUP';
+}
+
+export function getVehicleCapacityBandLabel(capacityBand: VehicleCapacityBand) {
+  switch (capacityBand) {
+    case 'ALL':
+      return 'All capacities';
+    case 'COMPACT':
+      return 'Up to 4 pax';
+    case 'MID_SIZE':
+      return '5-8 pax';
+    case 'GROUP':
+      return '9+ pax';
+    default:
+      return capacityBand;
+  }
+}
 
 export const vehicleSchema = z.object({
   id: z.string(),
@@ -46,6 +71,7 @@ export const vehiclesResponseSchema = z.object({
     status: z.string().optional(),
     serviceType: serviceTypeSchema.optional(),
     category: vehicleCategorySchema.optional(),
+    capacityBand: vehicleCapacityBandSchema.optional(),
     luxuryOnly: z.boolean().optional(),
     limit: z.number().optional(),
   }),
@@ -72,6 +98,7 @@ export const vehiclesFilterSchema = z.object({
   status: z.string().optional(),
   serviceType: serviceTypeSchema.optional(),
   category: vehicleCategorySchema.optional(),
+  capacityBand: vehicleCapacityBandSchema.optional(),
   luxuryOnly: z.coerce.boolean().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
 });

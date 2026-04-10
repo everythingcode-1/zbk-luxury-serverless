@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Vehicle, VehicleDetailResponse } from '@zbk/shared';
+import {
+  getVehicleCapacityBand,
+  getVehicleCapacityBandLabel,
+  type Vehicle,
+  type VehicleCapacityBand,
+  type VehicleDetailResponse,
+  vehicleCapacityBandOptions,
+} from '@zbk/shared';
 
 type VehiclesResponse = {
   data: Vehicle[];
@@ -30,6 +37,7 @@ export default function FleetView() {
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'ALL' | string>('ALL');
+  const [selectedCapacityBand, setSelectedCapacityBand] = useState<VehicleCapacityBand | 'ALL'>('ALL');
   const [luxuryOnly, setLuxuryOnly] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [selectedVehicleDetail, setSelectedVehicleDetail] = useState<VehicleDetailResponse | null>(null);
@@ -45,7 +53,18 @@ export default function FleetView() {
         setIsLoadingVehicles(true);
         setError(null);
 
-        const response = await fetch(`${API_BASE_URL}/api/public/vehicles?status=AVAILABLE`, {
+        const params = new URLSearchParams({ status: 'AVAILABLE' });
+        if (selectedCategory !== 'ALL') {
+          params.set('category', selectedCategory);
+        }
+        if (selectedCapacityBand !== 'ALL') {
+          params.set('capacityBand', selectedCapacityBand);
+        }
+        if (luxuryOnly) {
+          params.set('luxuryOnly', 'true');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/public/vehicles?${params.toString()}`, {
           signal: controller.signal,
         });
         const payload: VehiclesResponse = await response.json();
@@ -75,16 +94,17 @@ export default function FleetView() {
 
     loadVehicles();
     return () => controller.abort();
-  }, []);
+  }, [luxuryOnly, selectedCapacityBand, selectedCategory]);
 
   const visibleVehicles = useMemo(
     () =>
       vehicles.filter((vehicle) => {
         if (selectedCategory !== 'ALL' && vehicle.category !== selectedCategory) return false;
+        if (selectedCapacityBand !== 'ALL' && getVehicleCapacityBand(vehicle.capacity) !== selectedCapacityBand) return false;
         if (luxuryOnly && !vehicle.isLuxury) return false;
         return true;
       }),
-    [luxuryOnly, selectedCategory, vehicles],
+    [luxuryOnly, selectedCapacityBand, selectedCategory, vehicles],
   );
 
   const spotlightVehicle = useMemo(
@@ -218,6 +238,18 @@ export default function FleetView() {
               </button>
             ))}
           </div>
+          <div className="service-pills service-pills--tight" style={{ marginTop: 12 }}>
+            {vehicleCapacityBandOptions.map((band) => (
+              <button
+                key={band}
+                type="button"
+                className={`pill pill-button ${selectedCapacityBand === band ? '' : 'pill--muted'}`}
+                onClick={() => setSelectedCapacityBand(band)}
+              >
+                {getVehicleCapacityBandLabel(band)}
+              </button>
+            ))}
+          </div>
           <label className="checkbox-inline" style={{ marginTop: 12 }}>
             <input type="checkbox" checked={luxuryOnly} onChange={(e) => setLuxuryOnly(e.target.checked)} />
             Luxury only
@@ -276,6 +308,7 @@ export default function FleetView() {
                 <p>
                   {vehicle.location} • {vehicle.capacity} pax
                 </p>
+                <p className="muted">Capacity band: {getVehicleCapacityBandLabel(getVehicleCapacityBand(vehicle.capacity))}</p>
                 <p className="muted">{vehicle.features.slice(0, 2).join(' • ')}</p>
                 <div className="service-pills">
                   {vehicle.services.map((service) => (
