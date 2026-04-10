@@ -21,6 +21,7 @@ import {
 import AdminDashboardView from './AdminDashboardView';
 import AuthWorkspace from './AuthWorkspace';
 import BookingLandingView from './BookingLandingView';
+import BookingConfirmationView from './BookingConfirmationView';
 import BookingDemoView from './BookingDemoView';
 import FleetView from './FleetView';
 import HowToBookView from './HowToBookView';
@@ -614,6 +615,10 @@ export default function App() {
         data: bookingResponse.data,
         payment: bookingResponse.payment,
       });
+      sessionStorage.setItem('zbk_last_booking_confirmation', JSON.stringify(bookingResponse));
+      window.location.assign(
+        `#/booking/confirmation?reference=${encodeURIComponent(bookingResponse.data.reference)}&email=${encodeURIComponent(bookingResponse.data.customerEmail)}`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error submitting booking');
       setBookingResult(null);
@@ -721,6 +726,17 @@ export default function App() {
 
   if (routeState.pathname === '/fleet') {
     return <FleetView />;
+  }
+
+  if (routeState.pathname === '/booking/confirmation') {
+    return (
+      <BookingConfirmationView
+        bookingDemoHref="#/booking-demo"
+        bookingWorkspaceHref="#/"
+        fleetHref="#/fleet"
+        searchParams={routeState.searchParams}
+      />
+    );
   }
 
   if (routeState.pathname === '/booking') {
