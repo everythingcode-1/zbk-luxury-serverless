@@ -44,6 +44,7 @@ textarea { resize: vertical; min-height: 120px; }
 .quote-box__amount span { font-size: 1.3rem; font-weight: 700; }
 .alert { padding: 14px 16px; border-radius: 12px; margin-bottom: 20px; }
 .alert.error { background: rgba(255, 88, 88, 0.12); border: 1px solid rgba(255, 88, 88, 0.2); color: #ffc9c9; }
+.alert.success { background: rgba(92, 255, 171, 0.12); border: 1px solid rgba(92, 255, 171, 0.2); color: #c9ffe6; }
 .detail-list { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px; }
 .vehicle-detail__name { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
 .booking-form-grid { display: grid; gap: 14px 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -102,4 +103,8 @@ textarea { resize: vertical; min-height: 120px; }
 .payment-return-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .secondary-link { display: inline-flex; align-items: center; justify-content: center; min-width: 220px; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); color: #f4f7fb; text-decoration: none; }
 .secondary-link:hover { border-color: #8db3ff; }
+.field-group { display: grid; gap: 8px; margin-bottom: 0; }
+.field-label { display: block; font-size: 14px; font-weight: 600; color: #d7ddf0; }
+.text-input { width: 100%; }
+.stack-form { margin-top: 8px; }
 @media (max-width: 880px) { .payment-return-summary { flex-direction: column; } }

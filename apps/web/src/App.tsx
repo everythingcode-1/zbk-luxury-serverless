@@ -23,6 +23,7 @@ import AuthWorkspace from './AuthWorkspace';
 import BookingLandingView from './BookingLandingView';
 import BookingConfirmationView from './BookingConfirmationView';
 import BookingDemoView from './BookingDemoView';
+import ContactView from './ContactView';
 import FleetView from './FleetView';
 import ServicesView from './ServicesView';
 import HowToBookView from './HowToBookView';
@@ -783,6 +784,10 @@ export default function App() {
     );
   }
 
+  if (routeState.pathname === '/contact') {
+    return <ContactView />;
+  }
+
   return (
     <main className="page">
       <section className="hero">
@@ -809,6 +814,9 @@ export default function App() {
           </a>
           <a className="secondary-link" href="#/how-to-book" style={{ minWidth: 0 }}>
             How to book
+          </a>
+          <a className="secondary-link" href="#/contact" style={{ minWidth: 0 }}>
+            Contact
           </a>
         </div>
       </section>
