@@ -95,6 +95,9 @@ export default function BookingLandingView({
           <a className="secondary-link" href={fleetHref} style={{ minWidth: 0 }}>
             Open public fleet
           </a>
+          <a className="secondary-link" href="#/services" style={{ minWidth: 0 }}>
+            Services
+          </a>
           <a className="secondary-link" href={bookingDemoHref} style={{ minWidth: 0 }}>
             Open booking demo
           </a>

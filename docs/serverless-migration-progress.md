@@ -1,15 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-10 15:32 WIB
-- Estimated migration progress: 94%
-- Justification: the auth workspace now includes a Workers-authenticated customer booking snapshot backed by a dedicated protected API route, which moves the legacy email-based “my bookings” experience into the new session shape without widening the slice too far.
+- Last updated: 2026-04-10 17:38 WIB
+- Estimated migration progress: 95%
+- Justification: the new serverless workspace now covers another public legacy surface — the services page — as a hash-routed Vite view with clear booking/fleet CTAs, so the remaining work is increasingly concentrated in persistence and the smaller long-tail website pages.
 
 ## Completed this run
 
-- Added a protected `/api/customer/bookings` Workers route that resolves the active auth session, enforces customer-only access, and returns booking history from the in-memory Worker draft store.
-- Reused the booking-history response builder for both public and authenticated booking history lookups so the contract stays consistent.
-- Extended the React/Vite auth workspace with an authenticated customer bookings snapshot that auto-loads after login/register and can be refreshed manually.
-- Kept the workspace/build pipeline green after the auth/bookings update (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
+- Migrated the legacy public services page into a new hash-routed React/Vite `#/services` view with booking/fleet CTAs and legacy-inspired service cards.
+- Added services links to the main landing page and booking landing bridge so the new page is discoverable from the migrated public flow.
+- Reused the existing serverless workspace patterns and kept the workspace/build pipeline green after the services update (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
 
@@ -18,10 +17,11 @@
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
 - Shared vehicle capacity-band helpers and filter contract.
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, and admin overview reporting.
-- Shared public vehicle detail response contract for the fleet spotlight view.
-- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book guide routes built on top of the live fleet data.
+- Public vehicle detail response contract for the fleet spotlight view.
+- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / services routes built on top of the live fleet data.
 - Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, image gallery spotlighting, and deep-linkable fleet-to-booking handoff.
 - Public booking quote request flow.
+- Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
 - Public booking reference lookup flow using booking reference + customer email.
 - Public customer booking history snapshot flow using customer email as a transitional bridge.
@@ -41,7 +41,7 @@
 - Stripe receipt/invoice retrieval and durable payment confirmation data wired into the new return flow.
 - Deeper admin CRUD/dashboard migration beyond the current overview slice.
 - Replacement of Node-only dependencies/workflows (email sending, uploads, background/admin assumptions).
-- Legacy feature parity review for remaining website pages and operational flows.
+- Legacy feature parity review for remaining website pages and operational flows, especially the smaller static/public pages and any long-tail content routes.
 
 ## Blockers / risks
 
