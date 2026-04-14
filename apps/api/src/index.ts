@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import { zValidator } from '@hono/zod-validator';
-import { buildBlogArticlesResponse, buildBlogRssXml } from './blogArticles';
+import { buildBlogArticleResponse, buildBlogArticlesResponse, buildBlogRssXml } from './blogArticles';
 import {
   authLoginRequestSchema,
   authLogoutResponseSchema,
@@ -1006,6 +1006,17 @@ app.get('/api/public/vehicles/:id', (c) => {
 
 app.get('/api/public/articles', (c) => {
   return c.json(buildBlogArticlesResponse());
+});
+
+app.get('/api/public/articles/:slug', (c) => {
+  const slug = c.req.param('slug');
+  const payload = buildBlogArticleResponse(slug);
+
+  if (!payload) {
+    return c.json({ message: 'Blog article not found' }, 404);
+  }
+
+  return c.json(payload);
 });
 
 app.get('/api/public/articles/rss.xml', (c) => {

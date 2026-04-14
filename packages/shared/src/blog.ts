@@ -29,3 +29,14 @@ export const blogArticlesResponseSchema = z.object({
 });
 
 export type BlogArticlesResponse = z.infer<typeof blogArticlesResponseSchema>;
+
+export const blogArticleResponseSchema = z.object({
+  message: z.string(),
+  data: blogArticleSchema,
+  meta: z.object({
+    source: z.string(),
+    readingMinutes: z.number().int().positive().optional(),
+  }),
+});
+
+export type BlogArticleResponse = z.infer<typeof blogArticleResponseSchema>;

@@ -1,4 +1,5 @@
 import {
+  blogArticleResponseSchema,
   blogArticleSchema,
   blogArticlesResponseSchema,
   type BlogArticle,
@@ -57,6 +58,10 @@ const rawBlogArticles = [
 
 export const blogArticles = blogArticleSchema.array().parse(rawBlogArticles);
 
+export function findBlogArticleBySlug(slug: string) {
+  return blogArticles.find((article) => article.slug === slug);
+}
+
 export function buildBlogArticlesResponse() {
   return blogArticlesResponseSchema.parse({
     message: 'Blog article list migrated into the Workers-backed public content API.',
@@ -69,12 +74,29 @@ export function buildBlogArticlesResponse() {
   });
 }
 
+export function buildBlogArticleResponse(slug: string) {
+  const article = findBlogArticleBySlug(slug);
+
+  if (!article) {
+    return null;
+  }
+
+  return blogArticleResponseSchema.parse({
+    message: 'Blog article detail loaded from the Workers-backed public content API.',
+    data: article,
+    meta: {
+      source: 'workers-seed',
+      readingMinutes: article.readingMinutes,
+    },
+  });
+}
+
 export function buildBlogRssXml(baseUrl: string) {
   const items = blogArticles
     .filter((article) => article.isPublished)
     .map((article) => {
       const publishedAt = article.publishedAt || article.createdAt;
-      const articleUrl = `${baseUrl}/blog`;
+      const articleUrl = `${baseUrl}/#/blog/${encodeURIComponent(article.slug)}`;
       const content = article.content;
       const tags = article.tags.map((tag) => `      <category><![CDATA[${tag}]]></category>`).join('\n');
 
@@ -99,7 +121,7 @@ export function buildBlogRssXml(baseUrl: string) {
      xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>ZBK Luxury Blog</title>
-    <link>${baseUrl}/blog</link>
+    <link>${baseUrl}/#/blog</link>
     <description>Insights about luxury transport, booking notes, and the migration toward a serverless booking stack.</description>
     <language>en-US</language>
     <lastBuildDate>${new Date(latestPublishedAt).toUTCString()}</lastBuildDate>
@@ -107,7 +129,7 @@ export function buildBlogRssXml(baseUrl: string) {
     <image>
       <url>${baseUrl}/favicon.svg</url>
       <title>ZBK Luxury Blog</title>
-      <link>${baseUrl}/blog</link>
+      <link>${baseUrl}/#/blog</link>
     </image>
 ${items}
   </channel>

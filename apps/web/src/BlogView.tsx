@@ -100,6 +100,13 @@ export default function BlogView() {
               </span>
             </div>
           ) : null}
+          {latestArticle ? (
+            <div className="service-pills service-pills--tight" style={{ marginTop: 16 }}>
+              <a className="primary-button primary-button--inline" href={`#/blog/${encodeURIComponent(latestArticle.slug)}`}>
+                Read featured article
+              </a>
+            </div>
+          ) : null}
         </article>
       </section>
 
@@ -126,6 +133,11 @@ export default function BlogView() {
                 {article.tags.slice(0, 3).map((tag) => (
                   <span key={tag} className="pill pill--muted">#{tag}</span>
                 ))}
+              </div>
+              <div className="service-pills service-pills--tight" style={{ marginTop: 16 }}>
+                <a className="secondary-link" href={`#/blog/${encodeURIComponent(article.slug)}`} style={{ minWidth: 0 }}>
+                  Read article
+                </a>
               </div>
             </article>
           ))}

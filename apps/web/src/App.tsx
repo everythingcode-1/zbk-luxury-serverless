@@ -24,6 +24,7 @@ import BookingLandingView from './BookingLandingView';
 import BookingConfirmationView from './BookingConfirmationView';
 import BookingDemoView from './BookingDemoView';
 import BlogView from './BlogView';
+import BlogArticleView from './BlogArticleView';
 import ContactView from './ContactView';
 import FleetView from './FleetView';
 import MyBookingsView from './MyBookingsView';
@@ -809,6 +810,11 @@ export default function App() {
 
   if (routeState.pathname === '/blog') {
     return <BlogView />;
+  }
+
+  if (routeState.pathname.startsWith('/blog/')) {
+    const slug = decodeURIComponent(routeState.pathname.slice('/blog/'.length));
+    return <BlogArticleView slug={slug} />;
   }
 
   if (routeState.pathname === '/booking/confirmation') {

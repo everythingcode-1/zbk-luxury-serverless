@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 01:39 WIB
-- Estimated migration progress: 99.5%
-- Justification: the serverless stack now covers the legacy public blog entry point with a Workers-backed article feed and RSS output on top of the existing booking handoff, fleet, services, auth, and payment slices. Reviewers can now follow another legacy content route in the new stack instead of hitting a Next.js-only page.
+- Last updated: 2026-04-15 04:25 WIB
+- Estimated migration progress: 99.6%
+- Justification: the serverless stack now covers the legacy public blog entry point plus a dedicated article-detail route with a Workers-backed article feed and RSS output on top of the existing booking handoff, fleet, services, auth, and payment slices. Reviewers can now follow another legacy content route in the new stack instead of hitting a Next.js-only page.
 
 ## Completed this run
 
-- Added a shared blog article schema plus seeded Workers-safe article data for the legacy public blog surface.
-- Exposed `GET /api/public/articles` and `GET /api/public/articles/rss.xml` from the Cloudflare Worker so the blog can be consumed as JSON or RSS without Next.js.
-- Added a new hash-routed React/Vite blog landing page that lists the migrated articles and links readers back into the booking/fleet flow.
-- Added a blog CTA to the main landing page so the new content route is visible from the root workspace.
+- Added a shared blog article detail response contract plus a Workers-safe helper to look up articles by slug.
+- Exposed `GET /api/public/articles/:slug` from the Cloudflare Worker so the blog detail page can be consumed as JSON without Next.js.
+- Switched the RSS links to the hash-routed blog detail URLs so the feed points at the migrated static-friendly pages.
+- Added a new hash-routed React/Vite blog article-detail page and linked the blog landing page cards into it.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -37,7 +37,7 @@
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
 - Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.
 - Public contact/support page bridge with legacy-inspired support details and inquiry form.
-- Public blog landing page plus Workers-backed article JSON/RSS feed for the legacy content surface.
+- Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
 - Legacy booking landing handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
 
 ## Remaining major areas
