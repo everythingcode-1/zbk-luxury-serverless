@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-14 19:18 WIB
-- Estimated migration progress: 99%
-- Justification: the serverless stack now includes a Workers-safe auth profile update slice, so sessions can be rehydrated, edited, and persisted back into the new shape without leaving the React/Vite + Workers flow. The remaining work is now concentrated in durability and the long-tail operational surfaces.
+- Last updated: 2026-04-14 21:25 WIB
+- Estimated migration progress: 99.2%
+- Justification: the serverless stack now carries Stripe payment trail metadata through the checkout, webhook, return, lookup, and admin views, so reviewers can see the migrated payment flow and its latest webhook activity end-to-end in the new React/Vite + Workers app. The remaining work is still concentrated in durability and the long-tail operational surfaces.
 
 ## Completed this run
 
-- Added a Workers-safe `PATCH /api/auth/me` endpoint that updates the active auth session, keeps the cookie/session map in sync, and returns the normalized session envelope.
-- Added shared auth profile update request/response schemas so the web app and API use the same contract.
-- Extended the React/Vite auth workspace with a profile management panel that can edit display name, email, and phone, then rehydrate the updated session back into browser storage.
+- Added Stripe payment trail metadata to booking records and payment state so the latest checkout session, webhook event, and last update timestamp are preserved in the Workers runtime snapshot.
+- Wired the payment trail into the public booking return and lookup views so customers can see the latest checkout session and webhook-confirmed state directly in the migrated UI.
+- Extended the admin dashboard booking cards to surface the checkout session, webhook event, and trail update timestamp for recent bookings.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -31,7 +31,7 @@
 - Dedicated customer bookings route (`#/my-bookings`) that now serves as the customer-facing auth landing page.
 - Workers-safe Stripe checkout-session handoff endpoint and web UI trigger for deposit payment initialization.
 - Hash-routed payment success/cancel return views plus a public payment-return summary endpoint for the latest checkout attempt.
-- Stripe webhook intake with signature verification support and in-memory booking/payment confirmation tracking.
+- Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
 - Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.

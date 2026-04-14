@@ -194,6 +194,10 @@ export const bookingRecordSchema = z.object({
   depositAmount: z.number().nonnegative(),
   notes: z.string().optional(),
   createdAt: z.string(),
+  checkoutSessionId: z.string().optional(),
+  checkoutWebhookEventId: z.string().optional(),
+  checkoutWebhookEventType: z.string().optional(),
+  paymentTrailUpdatedAt: z.string().optional(),
 });
 
 export type BookingRecord = z.infer<typeof bookingRecordSchema>;
@@ -202,6 +206,10 @@ export const bookingPaymentStateSchema = z.object({
   status: z.enum(paymentFlowStatusOptions),
   nextStep: z.string(),
   checkoutReady: z.boolean().default(false),
+  sessionId: z.string().optional(),
+  webhookEventId: z.string().optional(),
+  webhookEventType: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 export type BookingPaymentState = z.infer<typeof bookingPaymentStateSchema>;

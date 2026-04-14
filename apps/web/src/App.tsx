@@ -247,6 +247,13 @@ function PaymentReturnView({ routeState }: { routeState: RouteState }) {
                   {booking.dropoffNote ? ` (${booking.dropoffNote})` : ''}
                 </p>
                 <p className="muted">Next: {result.payment.nextStep}</p>
+                {result.payment.sessionId ? <p className="muted">Payment trail session: {result.payment.sessionId}</p> : null}
+                {result.payment.webhookEventId ? (
+                  <p className="muted">
+                    Last webhook: {result.payment.webhookEventType || 'unknown'} ({result.payment.webhookEventId})
+                  </p>
+                ) : null}
+                {result.payment.updatedAt ? <p className="muted">Trail updated: {result.payment.updatedAt}</p> : null}
                 {result.data.sessionId ? <p className="muted">Stripe session: {result.data.sessionId}</p> : null}
                 {result.data.expiresAt ? <p className="muted">Checkout expires: {result.data.expiresAt}</p> : null}
               </div>
@@ -1260,6 +1267,13 @@ export default function App() {
                   {bookingResult.payment.checkoutReady ? 'Yes' : 'Not yet'}
                 </p>
                 <p className="muted">Next: {bookingResult.payment.nextStep}</p>
+                {bookingResult.payment.sessionId ? <p className="muted">Payment trail session: {bookingResult.payment.sessionId}</p> : null}
+                {bookingResult.payment.webhookEventId ? (
+                  <p className="muted">
+                    Last webhook: {bookingResult.payment.webhookEventType || 'unknown'} ({bookingResult.payment.webhookEventId})
+                  </p>
+                ) : null}
+                {bookingResult.payment.updatedAt ? <p className="muted">Trail updated: {bookingResult.payment.updatedAt}</p> : null}
                 {checkoutMessage && checkoutMessageFor === bookingResult.data.reference ? (
                   <p className="muted">Checkout: {checkoutMessage}</p>
                 ) : null}
@@ -1341,6 +1355,13 @@ export default function App() {
                 </p>
                 <p className="muted">Payment: {lookupResult.payment.status} • Checkout ready: {lookupResult.payment.checkoutReady ? 'Yes' : 'Not yet'}</p>
                 <p className="muted">Next: {lookupResult.payment.nextStep}</p>
+                {lookupResult.payment.sessionId ? <p className="muted">Payment trail session: {lookupResult.payment.sessionId}</p> : null}
+                {lookupResult.payment.webhookEventId ? (
+                  <p className="muted">
+                    Last webhook: {lookupResult.payment.webhookEventType || 'unknown'} ({lookupResult.payment.webhookEventId})
+                  </p>
+                ) : null}
+                {lookupResult.payment.updatedAt ? <p className="muted">Trail updated: {lookupResult.payment.updatedAt}</p> : null}
                 {checkoutMessage && checkoutMessageFor === lookupResult.data.reference ? (
                   <p className="muted">Checkout: {checkoutMessage}</p>
                 ) : null}

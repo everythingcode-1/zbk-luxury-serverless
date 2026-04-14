@@ -292,6 +292,21 @@ export default function AdminDashboardView() {
                   <p className="muted" style={{ marginBottom: 0 }}>
                     {formatDateTime(booking.createdAt)} • Deposit ${booking.depositAmount.toFixed(2)}
                   </p>
+                  {booking.checkoutSessionId ? (
+                    <p className="muted" style={{ marginBottom: 0 }}>
+                      Checkout session: {booking.checkoutSessionId}
+                    </p>
+                  ) : null}
+                  {booking.checkoutWebhookEventId ? (
+                    <p className="muted" style={{ marginBottom: 0 }}>
+                      Last webhook: {booking.checkoutWebhookEventType || 'unknown'} ({booking.checkoutWebhookEventId})
+                    </p>
+                  ) : null}
+                  {booking.paymentTrailUpdatedAt ? (
+                    <p className="muted" style={{ marginBottom: 0 }}>
+                      Trail updated: {formatDateTime(booking.paymentTrailUpdatedAt)}
+                    </p>
+                  ) : null}
                 </article>
               ))}
             </div>

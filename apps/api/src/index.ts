@@ -72,6 +72,7 @@ const bookingCheckoutSessions = new Map<string, {
   webhookEventId?: string;
   webhookEventType?: string;
   paymentStatus?: BookingPaymentState['status'];
+  paymentUpdatedAt?: string;
 }>();
 const bookingPaymentStates = new Map<string, BookingPaymentState>();
 const defaultWebAppBaseUrl = 'http://localhost:5173';
@@ -104,10 +105,32 @@ function getBookingPaymentState(reference: string, env: EnvBindings, stage?: 'SU
   return bookingPaymentStates.get(normalizedReference) || (stage === 'SUCCESS' ? buildReturnPendingPaymentState(env) : buildDefaultPaymentState(env));
 }
 
+type BookingPaymentTrailUpdate = Pick<
+  BookingRecord,
+  'checkoutSessionId' | 'checkoutWebhookEventId' | 'checkoutWebhookEventType' | 'paymentTrailUpdatedAt'
+>;
+
 function setBookingPaymentState(reference: string, paymentState: BookingPaymentState) {
   const normalizedReference = reference.trim().toUpperCase();
   const parsed = bookingPaymentStateSchema.parse(paymentState);
   bookingPaymentStates.set(normalizedReference, parsed);
+  return parsed;
+}
+
+function updateBookingRecordPaymentTrail(reference: string, trailUpdate: BookingPaymentTrailUpdate) {
+  const normalizedReference = reference.trim().toUpperCase();
+  const bookingRecord = bookingDrafts.find((item) => item.reference.toUpperCase() === normalizedReference);
+
+  if (bookingRecord) {
+    Object.assign(bookingRecord, trailUpdate);
+  }
+
+  return bookingRecord;
+}
+
+function syncBookingPaymentState(reference: string, paymentState: BookingPaymentState, trailUpdate: BookingPaymentTrailUpdate) {
+  const parsed = setBookingPaymentState(reference, paymentState);
+  updateBookingRecordPaymentTrail(reference, trailUpdate);
   return parsed;
 }
 
@@ -122,8 +145,13 @@ function updateBookingRecordStatus(reference: string, status: BookingRecord['sta
   return bookingRecord;
 }
 
-function applyConfirmedBookingState(reference: string, paymentState: BookingPaymentState, status: BookingRecord['status']) {
-  const parsed = setBookingPaymentState(reference, paymentState);
+function applyConfirmedBookingState(
+  reference: string,
+  paymentState: BookingPaymentState,
+  status: BookingRecord['status'],
+  trailUpdate: BookingPaymentTrailUpdate,
+) {
+  const parsed = syncBookingPaymentState(reference, paymentState, trailUpdate);
   updateBookingRecordStatus(reference, status);
   return parsed;
 }
@@ -1067,6 +1095,7 @@ app.post('/api/public/bookings', zValidator('json', createBookingSchema), async 
     depositAmount: quote.depositAmount,
     notes: payload.notes,
     createdAt: createdAt.toISOString(),
+    paymentTrailUpdatedAt: createdAt.toISOString(),
   });
 
   bookingDrafts.unshift(bookingRecord);
@@ -1110,7 +1139,19 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
   try {
     const returnToken = createReturnToken();
     const session = await createStripeCheckoutSession(c.env, bookingRecord, returnToken, payload.origin);
-    const checkoutPaymentState = setBookingPaymentState(bookingRecord.reference, buildReturnPendingPaymentState(c.env));
+    const paymentTrailUpdatedAt = new Date().toISOString();
+    const checkoutPaymentState = syncBookingPaymentState(
+      bookingRecord.reference,
+      {
+        ...buildReturnPendingPaymentState(c.env),
+        sessionId: session.sessionId,
+        updatedAt: paymentTrailUpdatedAt,
+      },
+      {
+        checkoutSessionId: session.sessionId,
+        paymentTrailUpdatedAt,
+      },
+    );
 
     bookingCheckoutSessions.set(bookingRecord.reference, {
       returnToken,
@@ -1119,8 +1160,9 @@ app.post('/api/public/bookings/:reference/checkout', zValidator('json', createCh
       successUrl: session.successUrl,
       cancelUrl: session.cancelUrl,
       expiresAt: session.expiresAt,
-      createdAt: new Date().toISOString(),
+      createdAt: paymentTrailUpdatedAt,
       paymentStatus: checkoutPaymentState.status,
+      paymentUpdatedAt: paymentTrailUpdatedAt,
     });
 
     return c.json(
@@ -1235,7 +1277,22 @@ async function handleStripeWebhook(c: any) {
   const checkoutSession = bookingCheckoutSessions.get(normalizedReference);
 
   if (paymentUpdate) {
-    applyConfirmedBookingState(normalizedReference, paymentUpdate.paymentState, paymentUpdate.bookingStatus);
+    const paymentTrailUpdatedAt = new Date().toISOString();
+    applyConfirmedBookingState(
+      normalizedReference,
+      {
+        ...paymentUpdate.paymentState,
+        webhookEventId: event.id,
+        webhookEventType: event.type,
+        updatedAt: paymentTrailUpdatedAt,
+      },
+      paymentUpdate.bookingStatus,
+      {
+        checkoutWebhookEventId: event.id,
+        checkoutWebhookEventType: event.type,
+        paymentTrailUpdatedAt,
+      },
+    );
   }
 
   if (checkoutSession) {
@@ -1244,6 +1301,7 @@ async function handleStripeWebhook(c: any) {
       webhookEventId: event.id,
       webhookEventType: event.type,
       paymentStatus: paymentUpdate?.paymentState.status || checkoutSession.paymentStatus,
+      paymentUpdatedAt: new Date().toISOString(),
     });
   }
 
