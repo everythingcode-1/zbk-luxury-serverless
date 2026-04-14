@@ -1,13 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-14 17:12 WIB
-- Estimated migration progress: 98%
-- Justification: the serverless stack now also includes the legacy About/company profile page as a static-friendly React/Vite route, closing another public marketing surface while keeping the workspace/build pipeline green.
+- Last updated: 2026-04-14 19:18 WIB
+- Estimated migration progress: 99%
+- Justification: the serverless stack now includes a Workers-safe auth profile update slice, so sessions can be rehydrated, edited, and persisted back into the new shape without leaving the React/Vite + Workers flow. The remaining work is now concentrated in durability and the long-tail operational surfaces.
 
 ## Completed this run
 
-- Added a dedicated hash-routed `#/about` React/Vite page that mirrors the legacy company-profile surface with static-friendly story, values, stats, and booking CTAs.
-- Wired the new about route into the main app router and surfaced an About link from the home hero so the migration is easy to review.
+- Added a Workers-safe `PATCH /api/auth/me` endpoint that updates the active auth session, keeps the cookie/session map in sync, and returns the normalized session envelope.
+- Added shared auth profile update request/response schemas so the web app and API use the same contract.
+- Extended the React/Vite auth workspace with a profile management panel that can edit display name, email, and phone, then rehydrate the updated session back into browser storage.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -32,7 +33,7 @@
 - Hash-routed payment success/cancel return views plus a public payment-return summary endpoint for the latest checkout attempt.
 - Stripe webhook intake with signature verification support and in-memory booking/payment confirmation tracking.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
-- Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, route-aware session surfacing, and authenticated booking history.
+- Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
 - Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.
 - Public contact/support page bridge with legacy-inspired support details and inquiry form.
 

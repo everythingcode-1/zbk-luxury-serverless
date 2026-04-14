@@ -5,11 +5,14 @@ import { zValidator } from '@hono/zod-validator';
 import {
   authLoginRequestSchema,
   authLogoutResponseSchema,
+  authProfileUpdateRequestSchema,
+  authProfileUpdateResponseSchema,
   authRegistrationRequestSchema,
   authRoleOptions,
   authTokenCookieName,
   authSessionResponseSchema,
   authSessionSchema,
+  type AuthProfileUpdateRequest,
   getAuthSessionCapabilities,
   getAuthSessionPrimaryRoute,
   normalizeAuthSession,
@@ -381,6 +384,58 @@ function registerCustomerAccount(payload: AuthRegistrationRequest) {
 
   authAccounts.set(normalizedEmail, account);
   return account;
+}
+
+function updateAuthAccountProfile(session: AuthSession, payload: AuthProfileUpdateRequest) {
+  const currentEmail = normalizeEmail(session.user.email);
+  const account = authAccounts.get(currentEmail);
+
+  if (!account) {
+    throw new Error('Current auth session could not be resolved.');
+  }
+
+  const nextEmail = payload.email ? normalizeEmail(payload.email) : currentEmail;
+  if (nextEmail !== currentEmail && authAccounts.has(nextEmail)) {
+    throw new Error('Email already exists.');
+  }
+
+  const nextDisplayName = payload.displayName?.trim() || account.displayName;
+  const nextPhone = payload.phone?.trim();
+  const nextAccount: AuthAccount = {
+    ...account,
+    email: nextEmail,
+    displayName: nextDisplayName,
+    ...(nextPhone ? { phone: nextPhone } : {}),
+  };
+
+  if (nextEmail !== currentEmail) {
+    authAccounts.delete(currentEmail);
+  }
+  authAccounts.set(nextEmail, nextAccount);
+
+  const updatedUser = authUserSchema.parse({
+    id: account.id,
+    email: nextEmail,
+    displayName: nextDisplayName,
+    role: account.role,
+    ...(nextPhone ? { phone: nextPhone } : {}),
+  });
+
+  const updatedSession = normalizeAuthSession(
+    authSessionSchema.parse({
+      ...session,
+      user: updatedUser,
+      primaryRoute: getAuthSessionPrimaryRoute(account.role),
+      capabilities: getAuthSessionCapabilities(account.role),
+    }),
+  );
+
+  for (const [token, storedSession] of authSessions.entries()) {
+    if (storedSession.user.id !== account.id) continue;
+    authSessions.set(token, updatedSession);
+  }
+
+  return updatedSession;
 }
 
 async function createStripeCheckoutSession(
@@ -775,6 +830,45 @@ app.get('/api/auth/me', (c) => {
 
   setAuthSessionCookie(c, session.token);
   return c.json(createAuthSessionStateResponse('Active auth session resolved from Workers memory.', session));
+});
+
+app.patch('/api/auth/me', zValidator('json', authProfileUpdateRequestSchema), (c) => {
+  const token = getAuthTokenFromRequest(c.req.raw);
+  const session = getActiveAuthSession(token);
+
+  if (!session) {
+    if (token) {
+      clearAuthSessionCookie(c);
+    }
+
+    return c.json(
+      {
+        message: 'Authentication required to update the profile.',
+      },
+      401,
+    );
+  }
+
+  try {
+    const updatedSession = updateAuthAccountProfile(session, c.req.valid('json'));
+    setAuthSessionCookie(c, updatedSession.token);
+
+    return c.json(
+      authProfileUpdateResponseSchema.parse({
+        message: `Updated the profile for ${updatedSession.user.displayName}.`,
+        data: {
+          session: updatedSession,
+        },
+      }),
+    );
+  } catch (error) {
+    return c.json(
+      {
+        message: error instanceof Error ? error.message : 'Unable to update the profile.',
+      },
+      error instanceof Error && error.message === 'Email already exists.' ? 409 : 400,
+    );
+  }
 });
 
 app.post('/api/auth/logout', (c) => {

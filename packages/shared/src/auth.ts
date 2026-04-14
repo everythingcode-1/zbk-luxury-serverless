@@ -77,6 +77,23 @@ export const authSessionResponseSchema = z.object({
 
 export type AuthSessionResponse = z.infer<typeof authSessionResponseSchema>;
 
+export const authProfileUpdateRequestSchema = z.object({
+  displayName: z.string().min(2).max(80).optional(),
+  email: z.string().email().optional(),
+  phone: z.string().trim().min(5).max(30).optional(),
+});
+
+export type AuthProfileUpdateRequest = z.infer<typeof authProfileUpdateRequestSchema>;
+
+export const authProfileUpdateResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    session: authSessionSchema,
+  }),
+});
+
+export type AuthProfileUpdateResponse = z.infer<typeof authProfileUpdateResponseSchema>;
+
 export const authSessionStateResponseSchema = z.object({
   message: z.string(),
   data: z.object({

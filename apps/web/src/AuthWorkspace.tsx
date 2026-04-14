@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   authLoginRequestSchema,
   authLogoutResponseSchema,
+  authProfileUpdateRequestSchema,
+  authProfileUpdateResponseSchema,
   authRegistrationRequestSchema,
   authRoleOptions,
   authSessionResponseSchema,
@@ -38,7 +40,13 @@ type AuthFormState = {
   phone: string;
 };
 
-type PendingAction = 'login' | 'register' | 'refresh' | 'logout' | null;
+type ProfileFormState = {
+  displayName: string;
+  email: string;
+  phone: string;
+};
+
+type PendingAction = 'login' | 'register' | 'refresh' | 'logout' | 'save-profile' | null;
 
 function formatSessionCapability(capability: string) {
   switch (capability) {
@@ -211,6 +219,11 @@ function CustomerBookingsSummary({
 export default function AuthWorkspace() {
   const [form, setForm] = useState<AuthFormState>(initialFormState);
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [profileForm, setProfileForm] = useState<ProfileFormState>({
+    displayName: initialFormState.displayName,
+    email: initialFormState.email,
+    phone: initialFormState.phone,
+  });
   const [statusMessage, setStatusMessage] = useState<string>('Ready to exercise the migrated auth session contract.');
   const [error, setError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
@@ -281,6 +294,23 @@ export default function AuthWorkspace() {
     void bootstrapSession();
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setProfileForm({
+        displayName: initialFormState.displayName,
+        email: initialFormState.email,
+        phone: initialFormState.phone,
+      });
+      return;
+    }
+
+    setProfileForm({
+      displayName: session.user.displayName,
+      email: session.user.email,
+      phone: session.user.phone || '',
+    });
+  }, [session]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -464,6 +494,52 @@ export default function AuthWorkspace() {
     }
   }
 
+  async function updateProfile() {
+    if (!session) {
+      setError('Sign in before updating the profile.');
+      return;
+    }
+
+    const payload = authProfileUpdateRequestSchema.parse({
+      displayName: profileForm.displayName,
+      email: profileForm.email,
+      phone: profileForm.phone || undefined,
+    });
+
+    setPendingAction('save-profile');
+    try {
+      setError(null);
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+
+      const result = await parseResponse(response, authProfileUpdateResponseSchema);
+      persistSession(result.data.session);
+      setStatusMessage(result.message);
+      setForm((prev) => ({
+        ...prev,
+        email: result.data.session.user.email,
+        displayName: result.data.session.user.displayName,
+        phone: result.data.session.user.phone || prev.phone,
+      }));
+      setProfileForm({
+        displayName: result.data.session.user.displayName,
+        email: result.data.session.user.email,
+        phone: result.data.session.user.phone || '',
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update the profile.');
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
   async function refreshCustomerBookings(signal?: AbortSignal) {
     if (!session || session.user.role !== 'CUSTOMER' || !token) {
       setCustomerBookings(null);
@@ -610,6 +686,60 @@ export default function AuthWorkspace() {
 
         <SessionSummary session={session} />
       </div>
+
+      <section className="auth-session-panel auth-profile-panel" style={{ marginTop: 20 }}>
+        <div className="section-title-row">
+          <div>
+            <h3>Profile management</h3>
+            <p className="muted">
+              This Workers-safe PATCH route updates the session shape in place so the migrated app can change profile details without leaving the serverless stack.
+            </p>
+          </div>
+          <span className="pill pill--muted">{session ? session.user.role : 'SIGNED OUT'}</span>
+        </div>
+
+        {session ? (
+          <div className="auth-workspace__form" style={{ maxWidth: 560 }}>
+            <label>
+              Display name
+              <input
+                value={profileForm.displayName}
+                onChange={(event) => setProfileForm((prev) => ({ ...prev, displayName: event.target.value }))}
+                type="text"
+              />
+            </label>
+
+            <label>
+              Email
+              <input
+                value={profileForm.email}
+                onChange={(event) => setProfileForm((prev) => ({ ...prev, email: event.target.value }))}
+                type="email"
+              />
+            </label>
+
+            <label>
+              Phone
+              <input
+                value={profileForm.phone}
+                onChange={(event) => setProfileForm((prev) => ({ ...prev, phone: event.target.value }))}
+                type="text"
+              />
+            </label>
+
+            <div className="auth-session-panel__cta">
+              <button className="primary-button primary-button--inline" type="button" onClick={() => void updateProfile()} disabled={pendingAction === 'save-profile'}>
+                {pendingAction === 'save-profile' ? 'Saving…' : 'Save profile update'}
+              </button>
+              <p className="muted">
+                Session primary route: {session.primaryRoute} • Capabilities: {session.capabilities.join(', ')}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="muted">Sign in first to edit the active auth session profile.</p>
+        )}
+      </section>
 
       <CustomerBookingsSummary
         bookings={customerBookings}
