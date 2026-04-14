@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-14 23:33 WIB
-- Estimated migration progress: 99.4%
-- Justification: the serverless stack now restores the legacy booking handoff path end-to-end by carrying vehicle and draft metadata from the booking landing route into the main React/Vite workspace. Reviewers can now follow a legacy-style booking link, land on the new serverless entry page, and continue with the preloaded workspace state instead of starting from a blank form.
+- Last updated: 2026-04-15 01:39 WIB
+- Estimated migration progress: 99.5%
+- Justification: the serverless stack now covers the legacy public blog entry point with a Workers-backed article feed and RSS output on top of the existing booking handoff, fleet, services, auth, and payment slices. Reviewers can now follow another legacy content route in the new stack instead of hitting a Next.js-only page.
 
 ## Completed this run
 
-- Added a shared legacy booking-data helper for parsing old encoded booking payloads and building a hash-routed workspace handoff URL.
-- Updated the legacy booking landing page so its primary continue-to-workspace CTA preserves the selected vehicle and any encoded draft metadata when it returns to the main booking workspace.
-- Taught the root booking workspace to bootstrap its selected vehicle and booking form from legacy booking links, including query-based vehicle selection and round-trip/date field prefill.
-- Added a visible success banner in the main workspace when a legacy booking handoff has been restored.
+- Added a shared blog article schema plus seeded Workers-safe article data for the legacy public blog surface.
+- Exposed `GET /api/public/articles` and `GET /api/public/articles/rss.xml` from the Cloudflare Worker so the blog can be consumed as JSON or RSS without Next.js.
+- Added a new hash-routed React/Vite blog landing page that lists the migrated articles and links readers back into the booking/fleet flow.
+- Added a blog CTA to the main landing page so the new content route is visible from the root workspace.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -37,6 +37,7 @@
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
 - Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.
 - Public contact/support page bridge with legacy-inspired support details and inquiry form.
+- Public blog landing page plus Workers-backed article JSON/RSS feed for the legacy content surface.
 - Legacy booking landing handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
 
 ## Remaining major areas
@@ -47,7 +48,7 @@
 - Stripe receipt/invoice retrieval and durable payment confirmation data wired into the new return flow.
 - Deeper admin CRUD/dashboard migration beyond the current overview slice.
 - Replacement of Node-only dependencies/workflows (email sending, uploads, background/admin assumptions).
-- Legacy feature parity review for remaining website pages and operational flows, especially the smaller static/public pages and any long-tail content routes.
+- Legacy feature parity review for remaining website pages and operational flows, especially article detail pages, the smaller static/public pages, and any long-tail content routes.
 
 ## Blockers / risks
 

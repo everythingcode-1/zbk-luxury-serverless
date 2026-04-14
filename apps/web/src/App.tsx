@@ -23,6 +23,7 @@ import AuthWorkspace from './AuthWorkspace';
 import BookingLandingView from './BookingLandingView';
 import BookingConfirmationView from './BookingConfirmationView';
 import BookingDemoView from './BookingDemoView';
+import BlogView from './BlogView';
 import ContactView from './ContactView';
 import FleetView from './FleetView';
 import MyBookingsView from './MyBookingsView';
@@ -806,6 +807,10 @@ export default function App() {
     return <AboutView />;
   }
 
+  if (routeState.pathname === '/blog') {
+    return <BlogView />;
+  }
+
   if (routeState.pathname === '/booking/confirmation') {
     return (
       <BookingConfirmationView
@@ -890,6 +895,9 @@ export default function App() {
           </a>
           <a className="secondary-link" href="#/about" style={{ minWidth: 0 }}>
             About
+          </a>
+          <a className="secondary-link" href="#/blog" style={{ minWidth: 0 }}>
+            Blog
           </a>
           <a className="secondary-link" href="#/booking" style={{ minWidth: 0 }}>
             Open booking landing

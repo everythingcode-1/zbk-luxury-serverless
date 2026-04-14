@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import { zValidator } from '@hono/zod-validator';
+import { buildBlogArticlesResponse, buildBlogRssXml } from './blogArticles';
 import {
   authLoginRequestSchema,
   authLogoutResponseSchema,
@@ -1001,6 +1002,22 @@ app.get('/api/public/vehicles/:id', (c) => {
       },
     }),
   );
+});
+
+app.get('/api/public/articles', (c) => {
+  return c.json(buildBlogArticlesResponse());
+});
+
+app.get('/api/public/articles/rss.xml', (c) => {
+  const baseUrl = resolveAppBaseUrl(c.env, c.req.header('origin') || undefined);
+  const rss = buildBlogRssXml(baseUrl);
+
+  return new Response(rss, {
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  });
 });
 
 app.post('/api/public/booking/quote', zValidator('json', bookingQuoteRequestSchema), async (c) => {
