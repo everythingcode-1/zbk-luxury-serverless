@@ -28,6 +28,7 @@ import FleetView from './FleetView';
 import MyBookingsView from './MyBookingsView';
 import ServicesView from './ServicesView';
 import HowToBookView from './HowToBookView';
+import AboutView from './AboutView';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
 
@@ -735,6 +736,10 @@ export default function App() {
     return <ServicesView />;
   }
 
+  if (routeState.pathname === '/about') {
+    return <AboutView />;
+  }
+
   if (routeState.pathname === '/booking/confirmation') {
     return (
       <BookingConfirmationView
@@ -816,6 +821,9 @@ export default function App() {
           </a>
           <a className="secondary-link" href="#/services" style={{ minWidth: 0 }}>
             Services
+          </a>
+          <a className="secondary-link" href="#/about" style={{ minWidth: 0 }}>
+            About
           </a>
           <a className="secondary-link" href="#/booking" style={{ minWidth: 0 }}>
             Open booking landing

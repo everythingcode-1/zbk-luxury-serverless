@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-14 15:08 WIB
-- Estimated migration progress: 97%
-- Justification: the serverless stack now has a dedicated customer bookings route that uses the Workers auth session and booking-history endpoint, closing one more legacy customer-area entry point while keeping the workspace/build pipeline green.
+- Last updated: 2026-04-14 17:12 WIB
+- Estimated migration progress: 98%
+- Justification: the serverless stack now also includes the legacy About/company profile page as a static-friendly React/Vite route, closing another public marketing surface while keeping the workspace/build pipeline green.
 
 ## Completed this run
 
-- Added a dedicated hash-routed `#/my-bookings` React/Vite page that boots the Workers auth session, loads authenticated booking history, and mirrors the legacy customer bookings experience in the serverless app.
-- Updated the shared auth session primary-route contract so customer sessions now land on `#/my-bookings` instead of the generic root route.
+- Added a dedicated hash-routed `#/about` React/Vite page that mirrors the legacy company-profile surface with static-friendly story, values, stats, and booking CTAs.
+- Wired the new about route into the main app router and surfaced an About link from the home hero so the migration is easy to review.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -22,6 +22,7 @@
 - Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, image gallery spotlighting, and deep-linkable fleet-to-booking handoff.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
+- Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
 - Public booking reference lookup flow using booking reference + customer email.
 - Public customer booking history snapshot flow using customer email as a transitional bridge.
