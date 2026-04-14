@@ -1,14 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-14 21:25 WIB
-- Estimated migration progress: 99.2%
-- Justification: the serverless stack now carries Stripe payment trail metadata through the checkout, webhook, return, lookup, and admin views, so reviewers can see the migrated payment flow and its latest webhook activity end-to-end in the new React/Vite + Workers app. The remaining work is still concentrated in durability and the long-tail operational surfaces.
+- Last updated: 2026-04-14 23:33 WIB
+- Estimated migration progress: 99.4%
+- Justification: the serverless stack now restores the legacy booking handoff path end-to-end by carrying vehicle and draft metadata from the booking landing route into the main React/Vite workspace. Reviewers can now follow a legacy-style booking link, land on the new serverless entry page, and continue with the preloaded workspace state instead of starting from a blank form.
 
 ## Completed this run
 
-- Added Stripe payment trail metadata to booking records and payment state so the latest checkout session, webhook event, and last update timestamp are preserved in the Workers runtime snapshot.
-- Wired the payment trail into the public booking return and lookup views so customers can see the latest checkout session and webhook-confirmed state directly in the migrated UI.
-- Extended the admin dashboard booking cards to surface the checkout session, webhook event, and trail update timestamp for recent bookings.
+- Added a shared legacy booking-data helper for parsing old encoded booking payloads and building a hash-routed workspace handoff URL.
+- Updated the legacy booking landing page so its primary continue-to-workspace CTA preserves the selected vehicle and any encoded draft metadata when it returns to the main booking workspace.
+- Taught the root booking workspace to bootstrap its selected vehicle and booking form from legacy booking links, including query-based vehicle selection and round-trip/date field prefill.
+- Added a visible success banner in the main workspace when a legacy booking handoff has been restored.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -36,6 +37,7 @@
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
 - Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.
 - Public contact/support page bridge with legacy-inspired support details and inquiry form.
+- Legacy booking landing handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
 
 ## Remaining major areas
 
@@ -58,3 +60,4 @@
 - Vehicle catalog still comes from curated Worker seed data; category/capacity/filter contracts are migrated, but the source is not yet database-backed or admin-editable.
 - Public history snapshot remains email-based and unauthenticated, but it is now clearly transitional because the authenticated customer booking view exists alongside it.
 - Contact submissions remain local-only until a Workers-backed contact endpoint or email provider is introduced.
+- The legacy booking handoff is now preserved in the workspace UI, but the underlying state is still browser/runtime-backed rather than durable session storage.

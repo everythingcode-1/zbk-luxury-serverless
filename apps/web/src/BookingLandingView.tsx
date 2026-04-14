@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Vehicle } from '@zbk/shared';
+import { buildLegacyBookingWorkspaceHref, parseLegacyBookingData } from './legacyBookingData';
 
 type BookingLandingViewProps = {
   vehicles: Vehicle[];
@@ -9,33 +10,10 @@ type BookingLandingViewProps = {
   bookingDemoHref: string;
 };
 
-type LegacyBookingData = {
-  tripType?: string;
-  pickupDate?: string;
-  pickupTime?: string;
-  returnDate?: string;
-  returnTime?: string;
-  pickupLocation?: string;
-  dropOffLocation?: string;
-  dropoffLocation?: string;
-  vehicleId?: string;
-  selectedVehicleId?: string;
-  hours?: string | number;
-};
 
 function formatTripType(value?: string) {
   if (!value) return 'One way';
   return value.toLowerCase().includes('round') ? 'Round trip' : 'One way';
-}
-
-function parseLegacyBookingData(raw: string | null): LegacyBookingData | null {
-  if (!raw) return null;
-
-  try {
-    return JSON.parse(raw) as LegacyBookingData;
-  } catch {
-    return null;
-  }
 }
 
 function getVehicleImage(vehicle?: Vehicle | null) {
@@ -57,6 +35,10 @@ export default function BookingLandingView({
 }: BookingLandingViewProps) {
   const bookingData = useMemo(() => parseLegacyBookingData(searchParams.get('bookingData')), [searchParams]);
   const vehicleId = searchParams.get('vehicleId') || bookingData?.vehicleId || bookingData?.selectedVehicleId || '';
+  const bookingWorkspaceLink = useMemo(
+    () => buildLegacyBookingWorkspaceHref(bookingWorkspaceHref, bookingData, vehicleId),
+    [bookingData, bookingWorkspaceHref, vehicleId],
+  );
   const selectedVehicle = useMemo(
     () => vehicles.find((vehicle) => vehicle.id === vehicleId) || vehicles[0] || null,
     [vehicleId, vehicles],
@@ -89,7 +71,7 @@ export default function BookingLandingView({
         <div className="service-pills">
           <span className="pill">{vehicles.length} live vehicles</span>
           <span className="pill pill--muted">#{bookingWorkspaceHref.replace('#/', '') || 'workspace'}</span>
-          <a className="primary-button primary-button--inline" href={bookingWorkspaceHref}>
+          <a className="primary-button primary-button--inline" href={bookingWorkspaceLink}>
             Open booking workspace
           </a>
           <a className="secondary-link" href={fleetHref} style={{ minWidth: 0 }}>
@@ -186,7 +168,7 @@ export default function BookingLandingView({
         </div>
 
         <div className="service-pills">
-          <a className="primary-button primary-button--inline" href={bookingWorkspaceHref}>
+          <a className="primary-button primary-button--inline" href={bookingWorkspaceLink}>
             Continue to booking workspace
           </a>
           <a className="secondary-link" href={fleetHref} style={{ minWidth: 0 }}>

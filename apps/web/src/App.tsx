@@ -29,6 +29,7 @@ import MyBookingsView from './MyBookingsView';
 import ServicesView from './ServicesView';
 import HowToBookView from './HowToBookView';
 import AboutView from './AboutView';
+import { getLegacyBookingVehicleId, parseLegacyBookingData } from './legacyBookingData';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
 
@@ -112,6 +113,22 @@ const initialLookupForm: BookingLookupFormState = {
 const initialHistoryForm: BookingHistoryFormState = {
   email: '',
 };
+
+function buildBookingFormFromLegacyData(draft: ReturnType<typeof parseLegacyBookingData>): BookingFormState {
+  const tripType =
+    draft?.tripType?.toLowerCase().includes('round') || draft?.returnDate || draft?.returnTime ? 'ROUND_TRIP' : 'ONE_WAY';
+
+  return {
+    ...initialBookingForm,
+    tripType,
+    startDate: draft?.pickupDate || '',
+    endDate: draft?.returnDate || draft?.pickupDate || '',
+    pickupTime: draft?.pickupTime || initialBookingForm.pickupTime,
+    endTime: draft?.returnTime || initialBookingForm.endTime,
+    pickupLocation: draft?.pickupLocation || '',
+    dropoffLocation: draft?.dropOffLocation || draft?.dropoffLocation || '',
+  };
+}
 
 function getDefaultQuoteRequest(vehicle?: Vehicle): BookingQuoteRequest {
   return {
@@ -282,17 +299,22 @@ function PaymentReturnView({ routeState }: { routeState: RouteState }) {
 }
 
 export default function App() {
-  const [routeState, setRouteState] = useState<RouteState>(() => getRouteState());
+  const initialRouteState = getRouteState();
+  const initialLegacyBookingDraft =
+    initialRouteState.pathname === '/' ? parseLegacyBookingData(initialRouteState.searchParams.get('bookingData')) : null;
+  const initialLegacyVehicleId = initialRouteState.pathname === '/' ? getLegacyBookingVehicleId(initialRouteState.searchParams) : '';
+
+  const [routeState, setRouteState] = useState<RouteState>(initialRouteState);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [vehicleCategories, setVehicleCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<(typeof vehicleCategoryOptions)[number] | 'ALL'>('ALL');
   const [luxuryOnly, setLuxuryOnly] = useState(false);
-  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+  const [selectedVehicleId, setSelectedVehicleId] = useState(initialLegacyVehicleId);
   const [selectedVehicleDetail, setSelectedVehicleDetail] = useState<VehicleDetailResponse | null>(null);
   const [isLoadingVehicleDetail, setIsLoadingVehicleDetail] = useState(true);
   const [vehicleDetailError, setVehicleDetailError] = useState<string | null>(null);
   const [activeVehicleImageIndex, setActiveVehicleImageIndex] = useState(0);
-  const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingForm);
+  const [bookingForm, setBookingForm] = useState<BookingFormState>(() => buildBookingFormFromLegacyData(initialLegacyBookingDraft));
   const [lookupForm, setLookupForm] = useState<BookingLookupFormState>(initialLookupForm);
   const [historyForm, setHistoryForm] = useState<BookingHistoryFormState>(initialHistoryForm);
   const [remoteQuote, setRemoteQuote] = useState<BookingQuoteResponse | null>(null);
@@ -320,6 +342,27 @@ export default function App() {
       window.removeEventListener('popstate', syncRouteState);
     };
   }, []);
+
+  const routeSearchQuery = routeState.searchParams.toString();
+  const legacyBookingDraft = useMemo(
+    () => (routeState.pathname === '/' ? parseLegacyBookingData(routeState.searchParams.get('bookingData')) : null),
+    [routeState.pathname, routeSearchQuery],
+  );
+  const legacyBookingVehicleId = useMemo(
+    () => (routeState.pathname === '/' ? getLegacyBookingVehicleId(routeState.searchParams) : ''),
+    [routeState.pathname, routeSearchQuery],
+  );
+
+  useEffect(() => {
+    if (routeState.pathname !== '/') {
+      return;
+    }
+
+    setSelectedVehicleId(legacyBookingVehicleId);
+    setBookingForm(buildBookingFormFromLegacyData(legacyBookingDraft));
+    setLookupForm(initialLookupForm);
+    setHistoryForm(initialHistoryForm);
+  }, [legacyBookingDraft, legacyBookingVehicleId, routeState.pathname]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -368,6 +411,22 @@ export default function App() {
     () => vehicles.find((vehicle) => vehicle.id === selectedVehicleId),
     [selectedVehicleId, vehicles],
   );
+  const workspacePrefillMessage = useMemo(() => {
+    if (routeState.pathname !== '/' || (!legacyBookingDraft && !legacyBookingVehicleId)) {
+      return null;
+    }
+
+    const details = [
+      legacyBookingVehicleId ? `vehicle ${selectedVehicle?.name || legacyBookingVehicleId}` : null,
+      legacyBookingDraft?.tripType ? `trip ${formatTripTypeLabel(buildBookingFormFromLegacyData(legacyBookingDraft).tripType)}` : null,
+      legacyBookingDraft?.pickupLocation ? `pickup ${legacyBookingDraft.pickupLocation}` : null,
+      legacyBookingDraft?.pickupDate ? `pickup date ${legacyBookingDraft.pickupDate}` : null,
+    ].filter(Boolean);
+
+    return details.length
+      ? `Legacy booking handoff restored: ${details.join(' • ')} has been preloaded into the workspace.`
+      : 'Legacy booking handoff restored into the workspace.';
+  }, [legacyBookingDraft, legacyBookingVehicleId, routeState.pathname, selectedVehicle?.name]);
 
   useEffect(() => {
     if (!selectedVehicleId) {
@@ -846,6 +905,8 @@ export default function App() {
           </a>
         </div>
       </section>
+
+      {workspacePrefillMessage ? <div className="alert success">{workspacePrefillMessage}</div> : null}
 
       <AuthWorkspace />
 
