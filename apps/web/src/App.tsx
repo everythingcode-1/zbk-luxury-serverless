@@ -25,6 +25,7 @@ import BookingConfirmationView from './BookingConfirmationView';
 import BookingDemoView from './BookingDemoView';
 import ContactView from './ContactView';
 import FleetView from './FleetView';
+import MyBookingsView from './MyBookingsView';
 import ServicesView from './ServicesView';
 import HowToBookView from './HowToBookView';
 
@@ -759,6 +760,16 @@ export default function App() {
 
   if (routeState.pathname === '/admin') {
     return <AdminDashboardView />;
+  }
+
+  if (routeState.pathname === '/my-bookings') {
+    return (
+      <MyBookingsView
+        authWorkspaceHref="#/auth"
+        bookingWorkspaceHref="#/booking"
+        fleetHref="#/fleet"
+      />
+    );
   }
 
   if (routeState.pathname === '/booking-demo') {

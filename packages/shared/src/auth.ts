@@ -19,7 +19,7 @@ export function getAuthSessionCapabilities(role: AuthRole) {
 }
 
 export function getAuthSessionPrimaryRoute(role: AuthRole) {
-  return role === 'ADMIN' ? '#/admin' : '#/';
+  return role === 'ADMIN' ? '#/admin' : '#/my-bookings';
 }
 
 export const authLoginRequestSchema = z.object({

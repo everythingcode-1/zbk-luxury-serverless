@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-10 18:05 WIB
-- Estimated migration progress: 96%
-- Justification: the new serverless workspace now includes a migrated public contact/support surface alongside the booking and vehicle flows, filling in another long-tail legacy website page while keeping the build and typecheck pipeline green.
+- Last updated: 2026-04-14 15:08 WIB
+- Estimated migration progress: 97%
+- Justification: the serverless stack now has a dedicated customer bookings route that uses the Workers auth session and booking-history endpoint, closing one more legacy customer-area entry point while keeping the workspace/build pipeline green.
 
 ## Completed this run
 
-- Migrated the legacy public contact page into a new hash-routed React/Vite `#/contact` view with support cards, emergency phone/email links, and a lightweight inquiry form.
-- Added a Contact CTA to the main landing hero so the new support route is discoverable from the migrated public surface.
-- Kept the workspace/build pipeline green after the contact slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
+- Added a dedicated hash-routed `#/my-bookings` React/Vite page that boots the Workers auth session, loads authenticated booking history, and mirrors the legacy customer bookings experience in the serverless app.
+- Updated the shared auth session primary-route contract so customer sessions now land on `#/my-bookings` instead of the generic root route.
+- Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
 
@@ -18,7 +18,7 @@
 - Shared vehicle capacity-band helpers and filter contract.
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, and admin overview reporting.
 - Public vehicle detail response contract for the fleet spotlight view.
-- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / contact / services routes built on top of the live fleet data.
+- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
 - Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, image gallery spotlighting, and deep-linkable fleet-to-booking handoff.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
@@ -26,6 +26,7 @@
 - Public booking reference lookup flow using booking reference + customer email.
 - Public customer booking history snapshot flow using customer email as a transitional bridge.
 - Authenticated customer booking history snapshot flow using the Workers auth session and protected customer route.
+- Dedicated customer bookings route (`#/my-bookings`) that now serves as the customer-facing auth landing page.
 - Workers-safe Stripe checkout-session handoff endpoint and web UI trigger for deposit payment initialization.
 - Hash-routed payment success/cancel return views plus a public payment-return summary endpoint for the latest checkout attempt.
 - Stripe webhook intake with signature verification support and in-memory booking/payment confirmation tracking.
