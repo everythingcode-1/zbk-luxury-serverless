@@ -739,6 +739,25 @@ const vehicleCatalog: Vehicle[] = [
   }),
 ];
 
+function buildFeaturedVehicles() {
+  return [...vehicleCatalog]
+    .sort((left, right) => {
+      const leftPriority = left.status === 'AVAILABLE' ? 0 : 1;
+      const rightPriority = right.status === 'AVAILABLE' ? 0 : 1;
+
+      if (leftPriority !== rightPriority) {
+        return leftPriority - rightPriority;
+      }
+
+      if (left.category !== right.category) {
+        return left.category.localeCompare(right.category);
+      }
+
+      return (right.rating ?? 0) - (left.rating ?? 0);
+    })
+    .slice(0, 4);
+}
+
 function buildAdminDashboardPayload(session: AuthSession) {
   const categories = [...new Set(vehicleCatalog.map((vehicle) => vehicle.category))].map((category) => {
     const vehiclesInCategory = vehicleCatalog.filter((vehicle) => vehicle.category === category);
@@ -749,6 +768,7 @@ function buildAdminDashboardPayload(session: AuthSession) {
     };
   });
 
+  const featuredVehicles = buildFeaturedVehicles();
   const latestBookings = [...bookingDrafts].slice(-5).reverse();
   const adminSessions = [...authSessions.values()].filter((item) => item.user.role === 'ADMIN').length;
   const customerSessions = [...authSessions.values()].filter((item) => item.user.role === 'CUSTOMER').length;
@@ -772,6 +792,7 @@ function buildAdminDashboardPayload(session: AuthSession) {
         customerSessions,
       },
       vehicleCategories: categories,
+      featuredVehicles,
       latestBookings,
     },
   });

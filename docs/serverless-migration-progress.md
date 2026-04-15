@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 16:40 WIB
-- Estimated migration progress: 99.82%
-- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run tightened the public fleet cards to surface legacy-inspired vehicle spec parity (transmission, rating, luggage, minimum-hours hints) alongside the migrated booking deep links, so the remaining work is now mostly durable persistence and deeper CRUD/operational hardening rather than broad missing public flow coverage.
+- Last updated: 2026-04-15 17:09 WIB
+- Estimated migration progress: 99.84%
+- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run added a read-only featured vehicle roster to the serverless admin dashboard, exposing richer legacy-style fleet details (status, rating, transmission, pricing, minimum-hours hints, and imagery) so the remaining work is even more focused on durable persistence, CRUD, and operational hardening rather than missing admin visibility.
 
 ## Completed this run
 
-- Tightened the public fleet cards to mirror more of the legacy vehicle-card detail stack, surfacing transmission, rating, luggage, and minimum-booking-window hints directly in the React/Vite catalog.
-- Kept the selected-vehicle booking deep links and fleet detail spotlight intact so the public catalog still hands off cleanly into the migrated booking landing page.
-- Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
+- Added a featured vehicle roster panel to the serverless admin dashboard so reviewers can see individual fleet entries, status, pricing, and legacy-style operational hints directly in the React/Vite admin view.
+- Extended the Workers admin overview payload and shared response contract to include the featured vehicle snapshot alongside the existing category/bookings/session summary.
+- Kept the admin/auth bootstrap, booking summary, and existing dashboard flows intact while broadening the admin slice without touching persistence yet.
 
 ## Current migrated areas
 
@@ -34,7 +34,7 @@
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
-- Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.
+- Serverless admin overview endpoint and hash-routed admin dashboard that now includes a featured vehicle roster snapshot for legacy-style fleet inspection.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
 - Legacy booking landing handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
@@ -45,7 +45,7 @@
 - Public vehicle detail parity beyond current seed metadata (real images/content sourcing, database-backed catalog management).
 - Protected auth/session durability, session refresh/revocation strategy, and stricter admin access control.
 - Stripe receipt/invoice retrieval and durable payment confirmation data wired into the new return flow.
-- Deeper admin CRUD/dashboard migration beyond the current overview slice.
+- Deeper admin CRUD/dashboard migration beyond the current overview + featured-roster slice.
 - Replacement of Node-only dependencies/workflows (email sending, uploads, background/admin assumptions).
 - Legacy feature parity review for remaining website pages and operational flows, especially article detail pages, the smaller static/public pages, and any long-tail content routes.
 

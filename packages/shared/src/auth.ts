@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { bookingRecordSchema, vehicleCategorySchema } from './types';
+import { bookingRecordSchema, vehicleCategorySchema, vehicleSchema } from './types';
 
 export const authRoleOptions = ['ADMIN', 'CUSTOMER'] as const;
 export const authTokenCookieName = 'auth-token' as const;
@@ -142,6 +142,7 @@ export const adminDashboardResponseSchema = z.object({
     sessionUser: authUserSchema,
     summary: adminDashboardSummarySchema,
     vehicleCategories: z.array(adminDashboardCategorySummarySchema),
+    featuredVehicles: z.array(vehicleSchema),
     latestBookings: z.array(bookingRecordSchema),
   }),
 });

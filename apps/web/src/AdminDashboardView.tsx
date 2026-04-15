@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { AdminDashboardResponse, AuthSession } from '@zbk/shared';
+import type { AdminDashboardResponse, AuthSession, Vehicle } from '@zbk/shared';
 import { AUTH_SESSION_STORAGE_KEY, loadAuthSessionFromApi, normalizeStoredSession } from './authSession';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
@@ -43,6 +43,27 @@ function formatSessionCapability(capability: string) {
     default:
       return capability;
   }
+}
+
+function formatVehicleService(service: Vehicle['services'][number]) {
+  switch (service) {
+    case 'AIRPORT_TRANSFER':
+      return 'Airport transfer';
+    case 'TRIP':
+      return 'One-way trip';
+    case 'RENTAL':
+      return 'Rental';
+    default:
+      return service;
+  }
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(value);
 }
 
 export default function AdminDashboardView() {
@@ -140,6 +161,7 @@ export default function AdminDashboardView() {
   const summary = dashboard?.data.summary;
   const latestBookings = dashboard?.data.latestBookings ?? [];
   const vehicleCategories = dashboard?.data.vehicleCategories ?? [];
+  const featuredVehicles = dashboard?.data.featuredVehicles ?? [];
 
   const bookingStatusCounts = useMemo(() => {
     if (!latestBookings.length) {
@@ -256,6 +278,69 @@ export default function AdminDashboardView() {
             </div>
           ) : (
             <p className="muted">No fleet categories were returned yet.</p>
+          )}
+        </article>
+
+        <article className="card">
+          <div className="section-title-row">
+            <div>
+              <h2>Featured vehicle roster</h2>
+              <p className="muted">A read-only snapshot that mirrors the legacy admin vehicle-management detail surface without requiring CRUD yet.</p>
+            </div>
+            <span className="pill pill--muted">{featuredVehicles.length} vehicles</span>
+          </div>
+
+          {featuredVehicles.length ? (
+            <div className="admin-vehicle-snapshot-list">
+              {featuredVehicles.map((vehicle) => {
+                const vehicleImage = vehicle.imageUrl || vehicle.images[0] || '';
+                return (
+                  <article key={vehicle.id} className="admin-vehicle-snapshot-item">
+                    <div className="admin-vehicle-snapshot__media">
+                      {vehicleImage ? (
+                        <img className="admin-vehicle-snapshot__image" src={vehicleImage} alt={vehicle.name} loading="lazy" />
+                      ) : (
+                        <div className="admin-vehicle-snapshot__placeholder">No image available</div>
+                      )}
+                    </div>
+
+                    <div className="admin-vehicle-snapshot__body">
+                      <div className="section-title-row" style={{ marginBottom: 0 }}>
+                        <div>
+                          <strong>{vehicle.name}</strong>
+                          <p className="muted" style={{ margin: '4px 0 0' }}>
+                            {vehicle.category} • {vehicle.year} • {vehicle.location}
+                          </p>
+                        </div>
+                        <span className={`pill ${vehicle.status === 'AVAILABLE' ? '' : 'pill--muted'}`}>{vehicle.status}</span>
+                      </div>
+
+                      <p className="muted" style={{ margin: 0 }}>
+                        {vehicle.capacity} pax • {vehicle.luggage ?? 0} luggage • {vehicle.transmission ?? 'Transmission pending'}
+                      </p>
+                      {vehicle.rating != null ? <p className="muted" style={{ margin: 0 }}>Rating {vehicle.rating.toFixed(1)} / 5</p> : null}
+                      {vehicle.minimumHours ? <p className="muted" style={{ margin: 0 }}>Minimum booking window: {vehicle.minimumHours} hours</p> : null}
+
+                      <div className="service-pills service-pills--tight">
+                        {vehicle.services.map((service) => (
+                          <span key={service} className="pill pill--muted">
+                            {formatVehicleService(service)}
+                          </span>
+                        ))}
+                      </div>
+
+                      <ul className="detail-list" style={{ marginTop: 4 }}>
+                        <li>Airport transfer: {formatCurrency(vehicle.pricing.airportTransfer)}</li>
+                        <li>6-hour charter: {formatCurrency(vehicle.pricing.sixHours)}</li>
+                        <li>12-hour charter: {formatCurrency(vehicle.pricing.twelveHours)}</li>
+                      </ul>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="muted">No featured vehicles were returned yet.</p>
           )}
         </article>
 

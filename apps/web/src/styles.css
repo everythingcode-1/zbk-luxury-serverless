@@ -82,6 +82,12 @@ textarea { resize: vertical; min-height: 120px; }
 .admin-category-list { display: grid; gap: 12px; }
 .admin-category-item, .admin-booking-item { display: grid; gap: 10px; padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
 .admin-booking-list { display: grid; gap: 12px; }
+.admin-vehicle-snapshot-list { display: grid; gap: 12px; }
+.admin-vehicle-snapshot-item { display: grid; gap: 14px; grid-template-columns: minmax(0, 160px) minmax(0, 1fr); padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+.admin-vehicle-snapshot__media { min-height: 100%; }
+.admin-vehicle-snapshot__image { width: 100%; height: 100%; max-height: 160px; object-fit: cover; border-radius: 12px; background: #091022; display: block; }
+.admin-vehicle-snapshot__placeholder { min-height: 160px; display: grid; place-items: center; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.14); color: #b2bdd8; background: rgba(255,255,255,0.03); text-align: center; padding: 16px; }
+.admin-vehicle-snapshot__body { display: grid; gap: 10px; align-content: start; }
 .admin-session-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: start; }
 @media (max-width: 880px) {
   .card-grid { grid-template-columns: 1fr; }
@@ -92,6 +98,7 @@ textarea { resize: vertical; min-height: 120px; }
   .primary-button--inline { width: 100%; }
   .vehicle-spotlight { grid-template-columns: 1fr; }
   .admin-dashboard__summary-grid { grid-template-columns: 1fr; }
+  .admin-vehicle-snapshot-item { grid-template-columns: 1fr; }
   .admin-session-grid { grid-template-columns: 1fr; }
 }
 
