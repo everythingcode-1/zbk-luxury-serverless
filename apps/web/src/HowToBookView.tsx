@@ -1,3 +1,5 @@
+import PageSeo from './PageSeo';
+
 type HowToBookViewProps = {
   vehicleCount: number;
   vehicleCategoryCount: number;
@@ -9,19 +11,31 @@ type HowToBookViewProps = {
 
 const faqItems = [
   {
-    question: 'Do I need an account before I can book?',
-    answer:
-      'No. The serverless booking workspace still accepts a guest-style booking draft, then offers a typed auth session when the user wants to sign in later.',
+    question: 'Do I need to create an account before I can book?',
+    answer: 'No. You can draft a booking as a guest and continue into the authenticated flow later if needed.',
   },
   {
     question: 'How do I choose the right vehicle?',
     answer:
-      'Start from the public fleet preview, filter by category or luxury-only, then open the spotlighted detail card before submitting the quote.',
+      'Start from the live fleet preview, filter by category or luxury-only, then open the spotlighted detail card before submitting the quote.',
   },
   {
     question: 'What happens after I submit the booking?',
     answer:
-      'The Workers API generates a booking reference, stores the draft in the runtime snapshot, and can hand off to the Stripe checkout slice when payment is configured.',
+      'The Workers API generates a booking reference, stores the draft in the runtime snapshot, and hands off to the Stripe checkout slice when payment is configured.',
+  },
+  {
+    question: 'What payment methods are accepted?',
+    answer:
+      'The active serverless payment path is Stripe checkout for deposit payment. Additional legacy rails remain on the migration backlog.',
+  },
+  {
+    question: 'When will I receive my booking confirmation?',
+    answer: 'You will receive a confirmation email immediately after successful payment with your booking details.',
+  },
+  {
+    question: 'Can I cancel or modify my booking?',
+    answer: 'Please contact support via WhatsApp or email as soon as possible if you need to cancel or modify it.',
   },
   {
     question: 'Is this flow ready for static hosting?',
@@ -29,6 +43,32 @@ const faqItems = [
       'Yes. The guide uses hash routes, so the booking workspace, booking demo, and payment return screens can all live behind static hosting plus Workers.',
   },
 ];
+
+const pageSeo = {
+  title: 'How to Book - Step by Step Booking Guide | ZBK Limousine Tours',
+  description:
+    'Learn how to book your premium limousine ride with ZBK Limousine Tours in Singapore. Choose your ride, select a vehicle, and continue through the serverless checkout flow.',
+  canonicalUrl: 'https://www.zbktransportservices.com/how-to-book',
+  keywords: [
+    'how to book limousine Singapore',
+    'ZBK booking guide',
+    'limousine booking process',
+    'book airport transfer Singapore',
+    'luxury car booking online',
+  ],
+  jsonLd: {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  },
+};
 
 export default function HowToBookView({
   vehicleCount,
@@ -40,6 +80,7 @@ export default function HowToBookView({
 }: HowToBookViewProps) {
   return (
     <main className="page">
+      <PageSeo {...pageSeo} />
       <section className="hero">
         <p className="eyebrow">ZBK Luxury Serverless</p>
         <h1>How to book now lives in the React/Vite migration.</h1>

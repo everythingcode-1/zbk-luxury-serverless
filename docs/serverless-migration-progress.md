@@ -1,14 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 17:09 WIB
-- Estimated migration progress: 99.84%
-- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run added a read-only featured vehicle roster to the serverless admin dashboard, exposing richer legacy-style fleet details (status, rating, transmission, pricing, minimum-hours hints, and imagery) so the remaining work is even more focused on durable persistence, CRUD, and operational hardening rather than missing admin visibility.
+- Last updated: 2026-04-15 21:02 WIB
+- Estimated migration progress: 99.86%
+- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run tightened the last public-support parity gap by adding route-aware SEO/structured-data handling, the legacy how-to-book FAQ schema, the contact-page business metadata, and the showroom map reference so the remaining work is increasingly about durable persistence, CRUD, and operational hardening rather than missing public-page fidelity.
 
 ## Completed this run
 
-- Added a featured vehicle roster panel to the serverless admin dashboard so reviewers can see individual fleet entries, status, pricing, and legacy-style operational hints directly in the React/Vite admin view.
-- Extended the Workers admin overview payload and shared response contract to include the featured vehicle snapshot alongside the existing category/bookings/session summary.
-- Kept the admin/auth bootstrap, booking summary, and existing dashboard flows intact while broadening the admin slice without touching persistence yet.
+- Added a reusable `PageSeo` helper for the Vite app so hash-routed public pages can update document title, description, canonical URL, keywords, and JSON-LD from React components.
+- Migrated the serverless how-to-book page closer to the legacy Next.js guide by restoring the full FAQ set and emitting FAQPage structured data.
+- Migrated the serverless contact page closer to the legacy contact layout by restoring the legacy business metadata/keywords, switching support contact details back to the legacy address/email, and adding the showroom map embed.
+- Kept the booking, auth, admin, and payment flows untouched while broadening the public-support surface in a reviewable way.
 
 ## Current migrated areas
 
@@ -35,7 +36,8 @@
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
 - Serverless admin overview endpoint and hash-routed admin dashboard that now includes a featured vehicle roster snapshot for legacy-style fleet inspection.
-- Public contact/support page bridge with a Workers-backed support inquiry submission flow.
+- Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
+- Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
 - Legacy booking landing handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
 

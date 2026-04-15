@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { contactSubjectOptions, type ContactInquiryResponse } from '@zbk/shared';
+import PageSeo from './PageSeo';
 
 type ContactFormState = {
   name: string;
@@ -37,14 +38,59 @@ const contactCards: Array<{ title: string; content: string; href?: string }> = [
   },
   {
     title: 'Email',
-    content: 'info@zbkluxury.com',
-    href: 'mailto:info@zbkluxury.com',
+    content: 'zbklimo@gmail.com',
+    href: 'mailto:zbklimo@gmail.com',
   },
   {
     title: 'Hours',
     content: 'Mon - Sun: 24/7 Available',
   },
 ] as const;
+
+const contactPageSeo = {
+  title: 'Contact ZBK Limousine Tours - Book Premium Transport in Singapore | 24/7 Support',
+  description:
+    'Contact ZBK Limousine Tours for premium car rental inquiries. Call +65 9747 6453 or email zbklimo@gmail.com. 24/7 customer support for airport transfers, hourly rentals, and corporate transport in Singapore.',
+  canonicalUrl: 'https://www.zbktransportservices.com/contact',
+  keywords: [
+    'contact ZBK Limousine',
+    'book limousine Singapore',
+    'car rental inquiry',
+    'Singapore transport contact',
+    'limousine booking hotline',
+    '24/7 car rental support',
+    'ZBK customer service',
+    'luxury transport booking',
+    'Changi airport transfer booking',
+  ],
+  jsonLd: {
+    '@context': 'https://schema.org',
+    '@type': 'LimousineService',
+    name: 'ZBK Limousine Tours',
+    url: 'https://www.zbktransportservices.com',
+    logo: 'https://www.zbktransportservices.com/Logo.png',
+    image: 'https://www.zbktransportservices.com/Hero.jpg',
+    description:
+      'Premium limousine service in Singapore with Toyota Alphard, Noah & Hiace. Professional chauffeur service for airport transfers, corporate events, city tours, and special occasions.',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Jurong West Street 65',
+      addressLocality: 'Singapore',
+      postalCode: '640635',
+      addressCountry: 'SG',
+    },
+    telephone: '+65 9747 6453',
+    email: 'zbklimo@gmail.com',
+    openingHours: 'Mo-Su 00:00-24:00',
+    areaServed: {
+      '@type': 'City',
+      name: 'Singapore',
+    },
+    priceRange: '$$',
+    currenciesAccepted: 'SGD',
+    paymentAccepted: 'Credit Card, PayNow, Stripe',
+  },
+};
 
 export default function ContactView() {
   const [formData, setFormData] = useState<ContactFormState>(initialContactForm);
@@ -95,6 +141,7 @@ export default function ContactView() {
 
   return (
     <main className="page">
+      <PageSeo {...contactPageSeo} />
       <section className="hero">
         <p className="eyebrow">ZBK Luxury Serverless</p>
         <h1>Contact support now lives in the React/Vite migration.</h1>
@@ -106,7 +153,7 @@ export default function ContactView() {
           <a className="primary-button primary-button--inline" href="tel:+6597476453">
             Call +65 9747 6453
           </a>
-          <a className="secondary-link" href="mailto:info@zbkluxury.com" style={{ minWidth: 0 }}>
+          <a className="secondary-link" href="mailto:zbklimo@gmail.com" style={{ minWidth: 0 }}>
             Email support
           </a>
           <a className="secondary-link" href="#/booking" style={{ minWidth: 0 }}>
@@ -255,6 +302,29 @@ export default function ContactView() {
             </button>
           </form>
         </article>
+      </section>
+
+      <section className="card" style={{ marginTop: 20 }}>
+        <div className="section-title-row">
+          <div>
+            <h2>Find us</h2>
+            <p className="muted">
+              The legacy contact page included a showroom map, so the serverless migration keeps the location reference
+              visible for customers who want to call in or visit.
+            </p>
+          </div>
+        </div>
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <iframe
+            title="ZBK Limousine Tours location map"
+            src="https://www.google.com/maps?q=Jurong+West+Street+65,+ZBK+Limo+Tours+%26+Transportation+Services,+Singapore+640635&output=embed"
+            width="100%"
+            height="400"
+            style={{ border: 0, display: 'block' }}
+            loading="lazy"
+            allowFullScreen
+          />
+        </div>
       </section>
     </main>
   );
