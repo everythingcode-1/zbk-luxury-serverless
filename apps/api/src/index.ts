@@ -24,6 +24,9 @@ import {
   bookingHistoryQuerySchema,
   bookingHistoryResponseSchema,
   bookingLookupQuerySchema,
+  contactInquiryResponseSchema,
+  contactInquirySchema,
+  type ContactInquiry,
   bookingPaymentReturnQuerySchema,
   bookingPaymentReturnResponseSchema,
   bookingLookupResponseSchema,
@@ -62,6 +65,16 @@ type EnvBindings = {
 const app = new Hono<{ Bindings: EnvBindings }>();
 
 const bookingDrafts: BookingRecord[] = [];
+const contactInquiries: Array<{
+  reference: string;
+  submittedAt: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: ContactInquiry['subject'];
+  message: string;
+  messagePreview: string;
+}> = [];
 const bookingCheckoutSessions = new Map<string, {
   returnToken: string;
   sessionId: string;
@@ -161,6 +174,17 @@ function createBookingReference(date: Date) {
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
   const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `BK-${datePart}-${randomPart}`;
+}
+
+function createContactReference(date: Date) {
+  const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
+  const randomPart = Math.random().toString(36).slice(2, 5).toUpperCase();
+  return `CT-${datePart}-${randomPart}`;
+}
+
+function buildContactMessagePreview(message: string) {
+  const trimmed = message.trim().replace(/\s+/g, ' ');
+  return trimmed.length > 120 ? `${trimmed.slice(0, 117)}...` : trimmed;
 }
 
 function createReturnToken() {
@@ -728,6 +752,7 @@ function buildAdminDashboardPayload(session: AuthSession) {
   const latestBookings = [...bookingDrafts].slice(-5).reverse();
   const adminSessions = [...authSessions.values()].filter((item) => item.user.role === 'ADMIN').length;
   const customerSessions = [...authSessions.values()].filter((item) => item.user.role === 'CUSTOMER').length;
+  const contactInquiryCount = contactInquiries.length;
 
   return adminDashboardResponseSchema.parse({
     message: 'Admin dashboard loaded from the Workers runtime snapshot.',
@@ -741,6 +766,7 @@ function buildAdminDashboardPayload(session: AuthSession) {
         pendingBookings: bookingDrafts.filter((booking) => booking.status === 'PENDING_PAYMENT').length,
         confirmedBookings: bookingDrafts.filter((booking) => booking.status === 'CONFIRMED').length,
         failedBookings: bookingDrafts.filter((booking) => booking.status === 'PAYMENT_FAILED').length,
+        contactInquiries: contactInquiryCount,
         activeSessions: authSessions.size,
         adminSessions,
         customerSessions,
@@ -954,6 +980,33 @@ app.get('/api/admin/overview', (c) => {
   }
 
   return c.json(buildAdminDashboardPayload(session));
+});
+
+app.post('/api/public/contact', zValidator('json', contactInquirySchema), (c) => {
+  const payload = c.req.valid('json');
+  const now = new Date();
+  const reference = createContactReference(now);
+  const submittedAt = now.toISOString();
+  const record = {
+    reference,
+    submittedAt,
+    name: payload.name.trim(),
+    email: payload.email.trim().toLowerCase(),
+    ...(payload.phone ? { phone: payload.phone.trim() } : {}),
+    subject: payload.subject,
+    message: payload.message.trim(),
+    messagePreview: buildContactMessagePreview(payload.message),
+  };
+
+  contactInquiries.push(record);
+
+  return c.json(
+    contactInquiryResponseSchema.parse({
+      message: 'Support inquiry accepted by the Workers-backed contact intake.',
+      data: record,
+    }),
+    201,
+  );
 });
 
 app.get('/api/public/vehicles', zValidator('query', vehiclesFilterSchema), (c) => {

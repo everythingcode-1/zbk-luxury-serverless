@@ -213,6 +213,11 @@ export default function AdminDashboardView() {
           note={summary ? `${summary.failedBookings} failed • ${summary.pendingBookings} pending` : 'Useful for tracking Stripe migration progress.'}
         />
         <StatCard
+          label="Support inquiries"
+          value={summary?.contactInquiries ?? '—'}
+          note={summary ? 'Workers contact intake is now visible from the admin overview.' : 'Contact submissions are still loading.'}
+        />
+        <StatCard
           label="Active sessions"
           value={summary?.activeSessions ?? '—'}
           note={summary ? `${summary.adminSessions} admin session(s) currently active` : 'Auth is still using in-memory Worker sessions.'}

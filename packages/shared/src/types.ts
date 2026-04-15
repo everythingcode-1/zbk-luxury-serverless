@@ -5,6 +5,7 @@ export const vehicleStatusOptions = ['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RESE
 export const vehicleCategoryOptions = ['Executive', 'Wedding', 'Group'] as const;
 export const vehicleCapacityBandOptions = ['ALL', 'COMPACT', 'MID_SIZE', 'GROUP'] as const;
 export const tripTypeOptions = ['ONE_WAY', 'ROUND_TRIP'] as const;
+export const contactSubjectOptions = ['booking', 'inquiry', 'support', 'feedback', 'partnership'] as const;
 
 export const serviceTypeSchema = z.enum(serviceTypeOptions);
 export const vehicleStatusSchema = z.enum(vehicleStatusOptions);
@@ -303,6 +304,31 @@ export const bookingHistoryResponseSchema = z.object({
 });
 
 export type BookingHistoryResponse = z.infer<typeof bookingHistoryResponseSchema>;
+
+export const contactInquirySchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  phone: z.string().trim().max(30).optional(),
+  subject: z.enum(contactSubjectOptions),
+  message: z.string().min(10).max(1000),
+});
+
+export type ContactInquiry = z.infer<typeof contactInquirySchema>;
+
+export const contactInquiryResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    reference: z.string(),
+    submittedAt: z.string(),
+    subject: z.enum(contactSubjectOptions),
+    name: z.string(),
+    email: z.string().email(),
+    phone: z.string().optional(),
+    messagePreview: z.string(),
+  }),
+});
+
+export type ContactInquiryResponse = z.infer<typeof contactInquiryResponseSchema>;
 
 export const healthResponseSchema = z.object({
   status: z.literal('ok'),

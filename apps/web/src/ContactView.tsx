@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { contactSubjectOptions, type ContactInquiryResponse } from '@zbk/shared';
 
 type ContactFormState = {
   name: string;
@@ -14,6 +15,14 @@ const initialContactForm: ContactFormState = {
   phone: '',
   subject: '',
   message: '',
+};
+
+const contactSubjectLabels: Record<(typeof contactSubjectOptions)[number], string> = {
+  booking: 'New Booking',
+  inquiry: 'General Inquiry',
+  support: 'Customer Support',
+  feedback: 'Feedback',
+  partnership: 'Partnership',
 };
 
 const contactCards: Array<{ title: string; content: string; href?: string }> = [
@@ -39,7 +48,9 @@ const contactCards: Array<{ title: string; content: string; href?: string }> = [
 
 export default function ContactView() {
   const [formData, setFormData] = useState<ContactFormState>(initialContactForm);
-  const [submittedName, setSubmittedName] = useState('');
+  const [submission, setSubmission] = useState<ContactInquiryResponse | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     setFormData((current) => ({
@@ -48,10 +59,38 @@ export default function ContactView() {
     }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmittedName(formData.name.trim() || 'there');
-    setFormData(initialContactForm);
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787'}/api/public/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim() || undefined,
+          subject: formData.subject,
+          message: formData.message.trim(),
+        }),
+      });
+
+      const payload: ContactInquiryResponse | { message?: string } = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.message || `Contact submission failed: ${response.status}`);
+      }
+
+      setSubmission(payload as ContactInquiryResponse);
+      setFormData(initialContactForm);
+    } catch (err) {
+      setSubmission(null);
+      setError(err instanceof Error ? err.message : 'Unknown error submitting support inquiry');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -79,10 +118,15 @@ export default function ContactView() {
         </div>
       </section>
 
-      {submittedName ? (
+      {submission ? (
         <div className="alert success" style={{ marginBottom: 20 }}>
-          Thanks {submittedName}! The local contact draft has been cleared, and the support entry point is ready for the
-          next inquiry.
+          Thanks {submission.data.name}! Your support inquiry #{submission.data.reference} was accepted by the Workers
+          contact intake. We’ll follow up by email at {submission.data.email}.
+        </div>
+      ) : null}
+      {error ? (
+        <div className="alert error" style={{ marginBottom: 20 }}>
+          {error}
         </div>
       ) : null}
 
@@ -180,11 +224,11 @@ export default function ContactView() {
                 className="text-input"
               >
                 <option value="">Select a subject</option>
-                <option value="booking">New Booking</option>
-                <option value="inquiry">General Inquiry</option>
-                <option value="support">Customer Support</option>
-                <option value="feedback">Feedback</option>
-                <option value="partnership">Partnership</option>
+                {contactSubjectOptions.map((subject) => (
+                  <option key={subject} value={subject}>
+                    {contactSubjectLabels[subject]}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -201,8 +245,13 @@ export default function ContactView() {
               />
             </label>
 
-            <button type="submit" className="primary-button primary-button--inline" style={{ justifyContent: 'center' }}>
-              Send message
+            <button
+              type="submit"
+              className="primary-button primary-button--inline"
+              style={{ justifyContent: 'center' }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Sending…' : 'Send message'}
             </button>
           </form>
         </article>

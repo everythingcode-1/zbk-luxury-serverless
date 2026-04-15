@@ -1,15 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 04:25 WIB
-- Estimated migration progress: 99.6%
-- Justification: the serverless stack now covers the legacy public blog entry point plus a dedicated article-detail route with a Workers-backed article feed and RSS output on top of the existing booking handoff, fleet, services, auth, and payment slices. Reviewers can now follow another legacy content route in the new stack instead of hitting a Next.js-only page.
+- Last updated: 2026-04-15 12:29 WIB
+- Estimated migration progress: 99.7%
+- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. What remains is mostly durable persistence and deeper CRUD/operational hardening rather than broad missing public flow coverage.
 
 ## Completed this run
 
-- Added a shared blog article detail response contract plus a Workers-safe helper to look up articles by slug.
-- Exposed `GET /api/public/articles/:slug` from the Cloudflare Worker so the blog detail page can be consumed as JSON without Next.js.
-- Switched the RSS links to the hash-routed blog detail URLs so the feed points at the migrated static-friendly pages.
-- Added a new hash-routed React/Vite blog article-detail page and linked the blog landing page cards into it.
+- Migrated the public contact/support form from a local-only draft into a Workers-backed `POST /api/public/contact` intake with typed shared request/response contracts.
+- Added contact inquiry tracking to the Worker runtime snapshot so submissions receive a support reference and timestamp instead of disappearing on submit.
+- Exposed the new contact inquiry count in the admin overview payload and dashboard so the support intake is visible from the serverless admin surface.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -36,7 +35,7 @@
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
 - Serverless admin overview endpoint and hash-routed admin dashboard that can bootstrap the stored auth session from the Workers API.
-- Public contact/support page bridge with legacy-inspired support details and inquiry form.
+- Public contact/support page bridge with a Workers-backed support inquiry submission flow.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
 - Legacy booking landing handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
 
@@ -59,6 +58,5 @@
 - The return pages now reflect webhook-confirmed/failed states, but they still do not persist authoritative paid state outside the Worker runtime.
 - Actual hosted checkout creation still depends on `STRIPE_SECRET_KEY` being configured in the deployed Worker environment.
 - Vehicle catalog still comes from curated Worker seed data; category/capacity/filter contracts are migrated, but the source is not yet database-backed or admin-editable.
-- Public history snapshot remains email-based and unauthenticated, but it is now clearly transitional because the authenticated customer booking view exists alongside it.
-- Contact submissions remain local-only until a Workers-backed contact endpoint or email provider is introduced.
+- Support inquiries are now accepted by the Worker runtime, but they are still in-memory and not durably stored or exported.
 - The legacy booking handoff is now preserved in the workspace UI, but the underlying state is still browser/runtime-backed rather than durable session storage.

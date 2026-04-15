@@ -127,6 +127,7 @@ export const adminDashboardSummarySchema = z.object({
   pendingBookings: z.number().int().nonnegative(),
   confirmedBookings: z.number().int().nonnegative(),
   failedBookings: z.number().int().nonnegative(),
+  contactInquiries: z.number().int().nonnegative(),
   activeSessions: z.number().int().nonnegative(),
   adminSessions: z.number().int().nonnegative(),
   customerSessions: z.number().int().nonnegative(),
