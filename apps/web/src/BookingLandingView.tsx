@@ -1,5 +1,13 @@
 import { useMemo } from 'react';
-import type { Vehicle } from '@zbk/shared';
+import {
+  calculateTripHours,
+  deriveAdditionalHours,
+  inferServiceTypeFromTrip,
+  isAirportLocation,
+  type ServiceType,
+  type TripType,
+  type Vehicle,
+} from '@zbk/shared';
 import { buildLegacyBookingWorkspaceHref, parseLegacyBookingData } from './legacyBookingData';
 
 type BookingLandingViewProps = {
@@ -26,6 +34,31 @@ function getVehiclePrice(vehicle?: Vehicle | null) {
   return vehicle.pricing?.airportTransfer ?? vehicle.pricing?.perHour ?? 0;
 }
 
+function normalizeTripType(value?: string): TripType {
+  return value?.toLowerCase().includes('round') ? 'ROUND_TRIP' : 'ONE_WAY';
+}
+
+function formatServiceTypeLabel(serviceType: ServiceType) {
+  switch (serviceType) {
+    case 'AIRPORT_TRANSFER':
+      return 'Airport transfer';
+    case 'TRIP':
+      return 'One-way trip';
+    case 'RENTAL':
+      return 'Round-trip rental';
+    default:
+      return serviceType;
+  }
+}
+
+function formatCalculatedHours(hours: number, additionalHours: number) {
+  if (additionalHours > 0) {
+    return `${hours} hours (${additionalHours} additional)`;
+  }
+
+  return `${hours} hours`;
+}
+
 export default function BookingLandingView({
   vehicles,
   searchParams,
@@ -45,8 +78,22 @@ export default function BookingLandingView({
   );
   const selectedVehicleImage = getVehicleImage(selectedVehicle);
   const selectedVehiclePrice = getVehiclePrice(selectedVehicle);
+  const tripType = normalizeTripType(bookingData?.tripType);
+  const pickupLocation = bookingData?.pickupLocation || '';
+  const dropoffLocation = bookingData?.dropOffLocation || bookingData?.dropoffLocation || '';
+  const derivedServiceType = inferServiceTypeFromTrip(tripType, pickupLocation, dropoffLocation);
+  const calculatedTripHours =
+    tripType === 'ROUND_TRIP' && bookingData?.pickupDate && bookingData?.pickupTime && bookingData?.returnDate && bookingData?.returnTime
+      ? calculateTripHours(bookingData.pickupDate, bookingData.pickupTime, bookingData.returnDate, bookingData.returnTime)
+      : null;
+  const derivedHours = tripType === 'ROUND_TRIP' ? calculatedTripHours || Number(bookingData?.hours || 1) : Number(bookingData?.hours || 1);
+  const derivedAdditionalHours = derivedServiceType === 'RENTAL' ? deriveAdditionalHours(derivedHours) : 0;
+  const airportNotesPrompt = isAirportLocation(pickupLocation) || isAirportLocation(dropoffLocation)
+    ? 'Airport note fields stay visible in the workspace because the route looks airport-related.'
+    : 'Airport note fields remain hidden unless one of the locations looks airport-related.';
   const bookingSummaryItems = [
     bookingData?.tripType ? ['Trip type', formatTripType(bookingData.tripType)] : null,
+    ['Service type', formatServiceTypeLabel(derivedServiceType)],
     bookingData?.pickupDate ? ['Pickup date', bookingData.pickupDate] : null,
     bookingData?.pickupTime ? ['Pickup time', bookingData.pickupTime] : null,
     bookingData?.returnDate ? ['Return date', bookingData.returnDate] : null,
@@ -55,7 +102,8 @@ export default function BookingLandingView({
     bookingData?.dropOffLocation || bookingData?.dropoffLocation
       ? ['Dropoff', bookingData.dropOffLocation || bookingData?.dropoffLocation || '']
       : null,
-    bookingData?.hours ? ['Hours', String(bookingData.hours)] : null,
+    ['Calculated hours', formatCalculatedHours(derivedHours, derivedAdditionalHours)],
+    bookingData?.hours ? ['Legacy payload hours', String(bookingData.hours)] : null,
   ].filter((item): item is [string, string] => Boolean(item));
 
   return (
@@ -154,6 +202,51 @@ export default function BookingLandingView({
             <p className="muted">No encoded booking payload was supplied, so the page is using the live catalog preview only.</p>
           )}
         </article>
+      </section>
+
+      <section className="card" style={{ marginTop: 20 }}>
+        <div className="section-title-row">
+          <div>
+            <h2>Legacy ride-detail parity</h2>
+            <p className="muted">
+              The migrated landing page now mirrors the old round-trip logic by deriving service type, rental hours,
+              and airport note prompts from the shared booking contract.
+            </p>
+          </div>
+          <span className="pill pill--muted">{formatServiceTypeLabel(derivedServiceType)}</span>
+        </div>
+
+        <div className="card-grid">
+          <article className="card">
+            <p className="eyebrow">Trip math</p>
+            <h3 style={{ marginTop: 0 }}>{formatCalculatedHours(derivedHours, derivedAdditionalHours)}</h3>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              {tripType === 'ROUND_TRIP'
+                ? 'Round-trip bookings recalculate hours from pickup and return timestamps so the Workers API stays authoritative.'
+                : 'One-way bookings keep the legacy one-hour default unless a draft explicitly passes a different value.'}
+            </p>
+          </article>
+
+          <article className="card">
+            <p className="eyebrow">Service logic</p>
+            <h3 style={{ marginTop: 0 }}>{formatServiceTypeLabel(derivedServiceType)}</h3>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              {derivedServiceType === 'AIRPORT_TRANSFER'
+                ? 'Airport keywords on either end of the route keep the booking aligned with the airport transfer quote.'
+                : derivedServiceType === 'RENTAL'
+                  ? 'Round trips map to the rental workflow so the checkout summary can carry the longer-duration pricing.'
+                  : 'Standard one-way routes stay on the trip pricing path.'}
+            </p>
+          </article>
+
+          <article className="card">
+            <p className="eyebrow">Notes</p>
+            <h3 style={{ marginTop: 0 }}>Airport guidance</h3>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              {airportNotesPrompt}
+            </p>
+          </article>
+        </div>
       </section>
 
       <section className="card" style={{ marginTop: 20 }}>

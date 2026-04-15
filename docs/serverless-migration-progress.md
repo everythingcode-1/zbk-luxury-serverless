@@ -1,14 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 12:29 WIB
-- Estimated migration progress: 99.7%
-- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. What remains is mostly durable persistence and deeper CRUD/operational hardening rather than broad missing public flow coverage.
+- Last updated: 2026-04-15 14:33 WIB
+- Estimated migration progress: 99.8%
+- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run added the last visible booking-landing parity step for round-trip/service-type/hour derivation, so the remaining work is mostly durable persistence and deeper CRUD/operational hardening rather than broad missing public flow coverage.
 
 ## Completed this run
 
-- Migrated the public contact/support form from a local-only draft into a Workers-backed `POST /api/public/contact` intake with typed shared request/response contracts.
-- Added contact inquiry tracking to the Worker runtime snapshot so submissions receive a support reference and timestamp instead of disappearing on submit.
-- Exposed the new contact inquiry count in the admin overview payload and dashboard so the support intake is visible from the serverless admin surface.
+- Added a dedicated legacy ride-detail parity section to the booking landing page so the React/Vite shell now surfaces derived trip type, service type, and round-trip hour math from the shared contract.
+- Wired the booking landing page to the shared airport detection and duration helpers so airport-note guidance and rental-hour derivation are visible before the user continues into the workspace.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -25,6 +24,7 @@
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
+- Public booking landing page now shows the legacy ride-detail parity card for trip math, service inference, and airport note guidance before handoff.
 - Public booking reference lookup flow using booking reference + customer email.
 - Public customer booking history snapshot flow using customer email as a transitional bridge.
 - Authenticated customer booking history snapshot flow using the Workers auth session and protected customer route.
