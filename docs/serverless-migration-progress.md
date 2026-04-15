@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 14:33 WIB
-- Estimated migration progress: 99.8%
-- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run added the last visible booking-landing parity step for round-trip/service-type/hour derivation, so the remaining work is mostly durable persistence and deeper CRUD/operational hardening rather than broad missing public flow coverage.
+- Last updated: 2026-04-15 16:40 WIB
+- Estimated migration progress: 99.82%
+- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run tightened the public fleet cards to surface legacy-inspired vehicle spec parity (transmission, rating, luggage, minimum-hours hints) alongside the migrated booking deep links, so the remaining work is now mostly durable persistence and deeper CRUD/operational hardening rather than broad missing public flow coverage.
 
 ## Completed this run
 
-- Added a dedicated legacy ride-detail parity section to the booking landing page so the React/Vite shell now surfaces derived trip type, service type, and round-trip hour math from the shared contract.
-- Wired the booking landing page to the shared airport detection and duration helpers so airport-note guidance and rental-hour derivation are visible before the user continues into the workspace.
+- Tightened the public fleet cards to mirror more of the legacy vehicle-card detail stack, surfacing transmission, rating, luggage, and minimum-booking-window hints directly in the React/Vite catalog.
+- Kept the selected-vehicle booking deep links and fleet detail spotlight intact so the public catalog still hands off cleanly into the migrated booking landing page.
 - Kept the workspace/build pipeline green after the migration slice (`npm run typecheck`, `npm run build:web`, and `npm run build:api` all pass).
 
 ## Current migrated areas
@@ -19,7 +19,7 @@
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, and admin overview reporting.
 - Public vehicle detail response contract for the fleet spotlight view.
 - Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, image gallery spotlighting, and deep-linkable fleet-to-booking handoff.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, and deep-linkable fleet-to-booking handoff.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.

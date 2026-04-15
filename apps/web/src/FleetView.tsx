@@ -25,6 +25,20 @@ function formatPrice(vehicle?: Vehicle | null) {
   return price.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
+function formatTransmission(vehicle?: Vehicle | null) {
+  return vehicle?.transmission?.trim() || 'Automatic';
+}
+
+function formatRating(vehicle?: Vehicle | null) {
+  if (!vehicle?.rating) return 'No rating yet';
+  return `${vehicle.rating.toFixed(1)} rating`;
+}
+
+function formatLuggage(vehicle?: Vehicle | null) {
+  if (vehicle?.luggage === null || vehicle?.luggage === undefined) return 'Luggage n/a';
+  return `${vehicle.luggage} bags`;
+}
+
 function getVehicleImage(vehicle?: Vehicle | null) {
   if (!vehicle) return [];
   if (vehicle.images?.length) return vehicle.images;
@@ -308,8 +322,16 @@ export default function FleetView() {
                 <p>
                   {vehicle.location} • {vehicle.capacity} pax
                 </p>
+                <div className="service-pills service-pills--tight">
+                  <span className="pill pill--muted">{formatTransmission(vehicle)}</span>
+                  <span className="pill pill--muted">{formatRating(vehicle)}</span>
+                  <span className="pill pill--muted">{formatLuggage(vehicle)}</span>
+                </div>
                 <p className="muted">Capacity band: {getVehicleCapacityBandLabel(getVehicleCapacityBand(vehicle.capacity))}</p>
-                <p className="muted">{vehicle.features.slice(0, 2).join(' • ')}</p>
+                {vehicle.minimumHours ? (
+                  <p className="muted">Minimum booking window: {vehicle.minimumHours} hour{vehicle.minimumHours > 1 ? 's' : ''}</p>
+                ) : null}
+                {vehicle.features.length > 0 ? <p className="muted">{vehicle.features.slice(0, 2).join(' • ')}</p> : null}
                 <div className="service-pills">
                   {vehicle.services.map((service) => (
                     <span key={service} className="pill pill--muted">
