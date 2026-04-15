@@ -122,6 +122,22 @@ function getVehicleImage(vehicle?: Vehicle | null) {
   return vehicle.imageUrl ? [vehicle.imageUrl] : [];
 }
 
+function sortVehiclesByCarouselOrder(left: Vehicle, right: Vehicle) {
+  const leftOrder = left.carouselOrder ?? Number.MAX_SAFE_INTEGER;
+  const rightOrder = right.carouselOrder ?? Number.MAX_SAFE_INTEGER;
+
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+
+  const nameDelta = left.name.localeCompare(right.name);
+  if (nameDelta !== 0) {
+    return nameDelta;
+  }
+
+  return left.id.localeCompare(right.id);
+}
+
 export default function FleetView() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [vehicleCategories, setVehicleCategories] = useState<string[]>([]);
@@ -189,12 +205,14 @@ export default function FleetView() {
 
   const visibleVehicles = useMemo(
     () =>
-      vehicles.filter((vehicle) => {
-        if (selectedCategory !== 'ALL' && vehicle.category !== selectedCategory) return false;
-        if (selectedCapacityBand !== 'ALL' && getVehicleCapacityBand(vehicle.capacity) !== selectedCapacityBand) return false;
-        if (luxuryOnly && !vehicle.isLuxury) return false;
-        return true;
-      }),
+      [...vehicles]
+        .filter((vehicle) => {
+          if (selectedCategory !== 'ALL' && vehicle.category !== selectedCategory) return false;
+          if (selectedCapacityBand !== 'ALL' && getVehicleCapacityBand(vehicle.capacity) !== selectedCapacityBand) return false;
+          if (luxuryOnly && !vehicle.isLuxury) return false;
+          return true;
+        })
+        .sort(sortVehiclesByCarouselOrder),
     [luxuryOnly, selectedCapacityBand, selectedCategory, vehicles],
   );
 
@@ -407,6 +425,7 @@ export default function FleetView() {
                     <strong>{vehicle.name}</strong>
                     <div className="service-pills service-pills--tight">
                       <span className="pill pill--muted">{vehicle.category}</span>
+                      {vehicle.carouselOrder ? <span className="pill">Order #{vehicle.carouselOrder}</span> : null}
                       {vehicle.isLuxury ? <span className="pill">Luxury</span> : null}
                     </div>
                   </div>
@@ -472,6 +491,7 @@ export default function FleetView() {
               )}
               <div className="vehicle-spotlight__meta">
                 <span className="pill">{selectedVehicle.category}</span>
+                {selectedVehicle.carouselOrder ? <span className="pill">Order #{selectedVehicle.carouselOrder}</span> : null}
                 {selectedVehicle.isLuxury ? <span className="pill">Luxury</span> : null}
                 <span className="pill pill--muted">{selectedVehicle.status}</span>
               </div>

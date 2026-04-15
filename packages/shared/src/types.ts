@@ -49,6 +49,7 @@ export const vehicleSchema = z.object({
   color: z.string(),
   imageUrl: z.string().url().optional(),
   images: z.array(z.string()).default([]),
+  carouselOrder: z.number().int().positive().optional(),
   description: z.string().optional(),
   features: z.array(z.string()).default([]),
   rating: z.number().min(0).max(5).optional(),

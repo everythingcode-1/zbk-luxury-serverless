@@ -59,6 +59,22 @@ function formatCalculatedHours(hours: number, additionalHours: number) {
   return `${hours} hours`;
 }
 
+function sortVehiclesByCarouselOrder(left: Vehicle, right: Vehicle) {
+  const leftOrder = left.carouselOrder ?? Number.MAX_SAFE_INTEGER;
+  const rightOrder = right.carouselOrder ?? Number.MAX_SAFE_INTEGER;
+
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+
+  const nameDelta = left.name.localeCompare(right.name);
+  if (nameDelta !== 0) {
+    return nameDelta;
+  }
+
+  return left.id.localeCompare(right.id);
+}
+
 export default function BookingLandingView({
   vehicles,
   searchParams,
@@ -72,9 +88,10 @@ export default function BookingLandingView({
     () => buildLegacyBookingWorkspaceHref(bookingWorkspaceHref, bookingData, vehicleId),
     [bookingData, bookingWorkspaceHref, vehicleId],
   );
+  const orderedVehicles = useMemo(() => [...vehicles].sort(sortVehiclesByCarouselOrder), [vehicles]);
   const selectedVehicle = useMemo(
-    () => vehicles.find((vehicle) => vehicle.id === vehicleId) || vehicles[0] || null,
-    [vehicleId, vehicles],
+    () => orderedVehicles.find((vehicle) => vehicle.id === vehicleId) || orderedVehicles[0] || null,
+    [orderedVehicles, vehicleId],
   );
   const selectedVehicleImage = getVehicleImage(selectedVehicle);
   const selectedVehiclePrice = getVehiclePrice(selectedVehicle);
@@ -172,6 +189,12 @@ export default function BookingLandingView({
                 <span>${selectedVehiclePrice.toFixed(2)}</span>
                 <small>from the Workers seed catalog</small>
               </div>
+            </div>
+          ) : null}
+          {selectedVehicle?.carouselOrder ? (
+            <div className="service-pills" style={{ marginTop: 12 }}>
+              <span className="pill">Order #{selectedVehicle.carouselOrder}</span>
+              <span className="pill pill--muted">Matches the legacy feature ordering</span>
             </div>
           ) : null}
           {selectedVehicleImage ? (

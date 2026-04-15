@@ -253,6 +253,27 @@ function matchesCapacityBand(capacity: number, capacityBand?: 'ALL' | 'COMPACT' 
   return getVehicleCapacityBand(capacity) === capacityBand;
 }
 
+function getVehicleCarouselOrder(vehicle: Vehicle) {
+  return vehicle.carouselOrder ?? Number.MAX_SAFE_INTEGER;
+}
+
+function sortVehiclesForDisplay(vehicles: Vehicle[]) {
+  return [...vehicles].sort((left, right) => {
+    const orderDelta = getVehicleCarouselOrder(left) - getVehicleCarouselOrder(right);
+
+    if (orderDelta !== 0) {
+      return orderDelta;
+    }
+
+    const nameDelta = left.name.localeCompare(right.name);
+    if (nameDelta !== 0) {
+      return nameDelta;
+    }
+
+    return left.id.localeCompare(right.id);
+  });
+}
+
 function buildPaymentReturnState(env: EnvBindings, stage: 'SUCCESS' | 'CANCEL'): BookingPaymentState {
   if (stage === 'SUCCESS') {
     return {
@@ -663,6 +684,7 @@ const vehicleCatalog: Vehicle[] = [
       'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
     ],
+    carouselOrder: 1,
     description: 'Premium MPV for airport transfer, wedding, and executive trips.',
     features: ['Premium captain seats', 'Professional chauffeur', 'Airport meet & greet'],
     rating: 4.9,
@@ -693,6 +715,7 @@ const vehicleCatalog: Vehicle[] = [
       'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
     ],
+    carouselOrder: 2,
     description: 'Luxury sedan for VIP transfer and corporate hospitality.',
     features: ['Wedding convoy ready', 'VIP privacy cabin', 'Corporate hospitality setup'],
     rating: 4.8,
@@ -723,6 +746,7 @@ const vehicleCatalog: Vehicle[] = [
       'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
     ],
+    carouselOrder: 3,
     description: 'Group transportation for tours, corporate teams, and event mobility.',
     features: ['10-passenger layout', 'Large luggage capacity', 'Event shuttle friendly'],
     rating: 4.7,
@@ -740,22 +764,7 @@ const vehicleCatalog: Vehicle[] = [
 ];
 
 function buildFeaturedVehicles() {
-  return [...vehicleCatalog]
-    .sort((left, right) => {
-      const leftPriority = left.status === 'AVAILABLE' ? 0 : 1;
-      const rightPriority = right.status === 'AVAILABLE' ? 0 : 1;
-
-      if (leftPriority !== rightPriority) {
-        return leftPriority - rightPriority;
-      }
-
-      if (left.category !== right.category) {
-        return left.category.localeCompare(right.category);
-      }
-
-      return (right.rating ?? 0) - (left.rating ?? 0);
-    })
-    .slice(0, 4);
+  return sortVehiclesForDisplay(vehicleCatalog).slice(0, 4);
 }
 
 function buildAdminDashboardPayload(session: AuthSession) {
@@ -1043,7 +1052,8 @@ app.get('/api/public/vehicles', zValidator('query', vehiclesFilterSchema), (c) =
     return true;
   });
 
-  const limited = query.limit ? filtered.slice(0, query.limit) : filtered;
+  const ordered = sortVehiclesForDisplay(filtered);
+  const limited = query.limit ? ordered.slice(0, query.limit) : ordered;
 
   return c.json(
     vehiclesResponseSchema.parse({

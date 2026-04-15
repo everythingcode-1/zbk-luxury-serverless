@@ -1,15 +1,16 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 23:10 WIB
-- Estimated migration progress: 99.89%
-- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run tightened the public fleet slice by adding route-aware SEO/structured-data handling, the legacy-style fleet feature blocks, and reviewable fleet metadata parity so the remaining work is increasingly about durable persistence, CRUD, and operational hardening rather than missing public-page fidelity.
+- Last updated: 2026-04-16 01:16 WIB
+- Estimated migration progress: 99.92%
+- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run added explicit legacy-style vehicle carousel ordering to the shared contract, Workers API, public fleet UI, and booking landing defaults, which improves parity without widening scope into the remaining durable persistence work.
 
 ## Completed this run
 
-- Added route-level SEO and structured data to the public fleet page using `PageSeo`, including a canonical URL, legacy-inspired keywords, and ItemList/Product JSON-LD for the visible vehicle catalog.
-- Added a legacy-style fleet feature block to the public fleet page so the new React/Vite view carries more of the original fleet-page marketing structure.
-- Kept the existing Workers-backed vehicle detail spotlight, filters, and booking handoff intact while making the public fleet surface more discoverable and reviewable.
-- Preserved the how-to-book, contact, booking, auth, and payment slices from previous runs without widening the migration scope.
+- Added `carouselOrder` to the shared vehicle contract and the Drizzle vehicle schema so the serverless stack can carry the same ordering field as the legacy app.
+- Populated the Workers seed fleet with explicit carousel order values and made the public vehicle API return vehicles sorted by that order before pagination/limits are applied.
+- Updated the public fleet view to respect the ordered catalog, surface each vehicle's order badge, and keep the spotlight aligned with the legacy priority.
+- Updated the booking landing page to pick the ordered vehicle list as its default selection and surface the legacy order badge for the currently focused vehicle.
+- Kept the admin and payment slices intact while improving public vehicle presentation parity.
 
 ## Current migrated areas
 
@@ -19,8 +20,8 @@
 - Shared vehicle capacity-band helpers and filter contract.
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, and admin overview reporting.
 - Public vehicle detail response contract for the fleet spotlight view.
-- Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, deep-linkable fleet-to-booking handoff, and route-level fleet SEO/structured data.
+- Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.

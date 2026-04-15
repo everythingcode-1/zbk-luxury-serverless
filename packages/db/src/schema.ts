@@ -45,6 +45,7 @@ export const vehicles = pgTable('vehicles', {
   price12Hours: numeric('price_12_hours', { precision: 12, scale: 2 }),
   pricePerHour: numeric('price_per_hour', { precision: 12, scale: 2 }),
   minimumHours: integer('minimum_hours'),
+  carouselOrder: integer('carousel_order'),
   description: text('description'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
