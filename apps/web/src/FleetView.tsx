@@ -7,6 +7,7 @@ import {
   type VehicleDetailResponse,
   vehicleCapacityBandOptions,
 } from '@zbk/shared';
+import PageSeo from './PageSeo';
 
 type VehiclesResponse = {
   data: Vehicle[];
@@ -18,6 +19,82 @@ type VehiclesResponse = {
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
+const FLEET_CANONICAL_URL = 'https://www.zbktransportservices.com/fleet';
+
+const fleetPageSeo = {
+  title: 'Premium Fleet - Toyota Alphard, Noah & Hiace Limousine Rental | ZBK Singapore',
+  description:
+    "Browse ZBK's premium fleet of luxury Toyota vehicles in Singapore. Choose from Alphard MPV (6 seats), Noah (6 seats), or Hiace Combi (9 seats). All vehicles feature professional chauffeurs, modern amenities, and competitive rates.",
+  canonicalUrl: FLEET_CANONICAL_URL,
+  keywords: [
+    'Toyota Alphard rental Singapore',
+    'Toyota Noah rental',
+    'Toyota Hiace Combi',
+    'luxury MPV rental Singapore',
+    'premium vehicle fleet',
+    '6 seater limousine',
+    '9 seater van rental',
+    'Singapore luxury car fleet',
+    'executive car rental',
+    'family car rental Singapore',
+  ],
+};
+
+function buildFleetJsonLd(vehicles: Vehicle[]) {
+  const topVehicles = vehicles.slice(0, 3);
+
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'ZBK Limousine Fleet — Singapore',
+    itemListElement: topVehicles.map((vehicle, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Product',
+        name: vehicle.name,
+        description: vehicle.description || `${vehicle.name} luxury vehicle`,
+        brand: {
+          '@type': 'Brand',
+          name: vehicle.model.split(' ')[0],
+        },
+        sku: vehicle.id,
+        image: vehicle.images?.[0] || vehicle.imageUrl,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'SGD',
+          price: vehicle.pricing.airportTransfer,
+          availability: `https://schema.org/${vehicle.status === 'AVAILABLE' ? 'InStock' : 'OutOfStock'}`,
+          seller: {
+            '@type': 'Organization',
+            name: 'ZBK Luxury Tours',
+          },
+        },
+      },
+    })),
+  };
+
+  return [itemList];
+}
+
+const fleetHighlights = [
+  {
+    title: 'Premium Quality',
+    description: 'All vehicles are regularly maintained and inspected for optimal performance.',
+  },
+  {
+    title: '24/7 Support',
+    description: 'Round-the-clock customer support and roadside assistance stay available with the new stack.',
+  },
+  {
+    title: 'Flexible Pickup',
+    description: 'Convenient pickup and drop-off planning remains aligned with the public booking flow.',
+  },
+  {
+    title: 'Competitive Rates',
+    description: 'Transparent pricing is surfaced directly from the shared vehicle catalog.',
+  },
+];
 
 function formatPrice(vehicle?: Vehicle | null) {
   if (!vehicle) return '0';
@@ -186,9 +263,17 @@ export default function FleetView() {
   const selectedVehicle = selectedVehicleDetail?.data || spotlightVehicle;
   const vehicleImages = useMemo(() => getVehicleImage(selectedVehicle), [selectedVehicle]);
   const activeVehicleImage = vehicleImages[activeVehicleImageIndex] || vehicleImages[0] || '';
+  const pageSeo = useMemo(
+    () => ({
+      ...fleetPageSeo,
+      jsonLd: visibleVehicles.length ? buildFleetJsonLd(visibleVehicles) : undefined,
+    }),
+    [visibleVehicles],
+  );
 
   return (
     <main className="page">
+      <PageSeo {...pageSeo} />
       <section className="hero">
         <p className="eyebrow">ZBK Luxury Serverless</p>
         <h1>Public fleet browsing now has its own hash-routed page.</h1>
@@ -209,6 +294,17 @@ export default function FleetView() {
             How to book
           </a>
         </div>
+      </section>
+
+      <section className="card-grid" style={{ marginTop: 20 }}>
+        {fleetHighlights.map((feature) => (
+          <article key={feature.title} className="card">
+            <h2 style={{ marginTop: 0 }}>{feature.title}</h2>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              {feature.description}
+            </p>
+          </article>
+        ))}
       </section>
 
       {error ? <div className="alert error">{error}</div> : null}

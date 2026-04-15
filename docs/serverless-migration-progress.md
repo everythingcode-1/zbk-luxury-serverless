@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-15 21:02 WIB
-- Estimated migration progress: 99.86%
-- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run tightened the last public-support parity gap by adding route-aware SEO/structured-data handling, the legacy how-to-book FAQ schema, the contact-page business metadata, and the showroom map reference so the remaining work is increasingly about durable persistence, CRUD, and operational hardening rather than missing public-page fidelity.
+- Last updated: 2026-04-15 23:10 WIB
+- Estimated migration progress: 99.89%
+- Justification: the serverless stack now covers the legacy public blog content, booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and the contact/support intake now posts to a Workers-backed endpoint with admin visibility. This run tightened the public fleet slice by adding route-aware SEO/structured-data handling, the legacy-style fleet feature blocks, and reviewable fleet metadata parity so the remaining work is increasingly about durable persistence, CRUD, and operational hardening rather than missing public-page fidelity.
 
 ## Completed this run
 
-- Added a reusable `PageSeo` helper for the Vite app so hash-routed public pages can update document title, description, canonical URL, keywords, and JSON-LD from React components.
-- Migrated the serverless how-to-book page closer to the legacy Next.js guide by restoring the full FAQ set and emitting FAQPage structured data.
-- Migrated the serverless contact page closer to the legacy contact layout by restoring the legacy business metadata/keywords, switching support contact details back to the legacy address/email, and adding the showroom map embed.
-- Kept the booking, auth, admin, and payment flows untouched while broadening the public-support surface in a reviewable way.
+- Added route-level SEO and structured data to the public fleet page using `PageSeo`, including a canonical URL, legacy-inspired keywords, and ItemList/Product JSON-LD for the visible vehicle catalog.
+- Added a legacy-style fleet feature block to the public fleet page so the new React/Vite view carries more of the original fleet-page marketing structure.
+- Kept the existing Workers-backed vehicle detail spotlight, filters, and booking handoff intact while making the public fleet surface more discoverable and reviewable.
+- Preserved the how-to-book, contact, booking, auth, and payment slices from previous runs without widening the migration scope.
 
 ## Current migrated areas
 
@@ -20,7 +20,7 @@
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, and admin overview reporting.
 - Public vehicle detail response contract for the fleet spotlight view.
 - Public vehicle catalog endpoints with seed data, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, and deep-linkable fleet-to-booking handoff.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, deep-linkable fleet-to-booking handoff, and route-level fleet SEO/structured data.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.
