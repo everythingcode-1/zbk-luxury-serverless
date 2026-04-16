@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-16 12:29 WIB
-- Estimated migration progress: 99.94%
-- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run extended the migrated vehicle contract to carry legacy plate numbers end-to-end, so the public fleet, booking demo/landing, and admin roster now expose the same fleet identity metadata that the legacy app used.
+- Last updated: 2026-04-16 16:50 WIB
+- Estimated migration progress: 99.95%
+- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run deepened the admin migration by adding booking-value analytics to the Workers overview, so the dashboard now shows booking volume, confirmed value, pending deposit exposure, and confirmation rate without falling back to the legacy Next.js app.
 
 ## Completed this run
 
-- Added `plateNumber` to the shared vehicle contract so the Workers API and React/Vite app can exchange the legacy fleet identity field without ad hoc casts.
-- Populated the Workers seed fleet with legacy-style plate numbers and surfaced them in the public booking demo, booking landing, fleet spotlight, and admin vehicle roster.
-- Kept the existing carousel-order migration intact while improving visible fleet parity for reviewers and operators.
+- Extended the admin overview contract with booking-value analytics so the Workers API can report total booking value, confirmed booking value, pending deposit exposure, average booking size, and confirmation rate.
+- Surfaced those new analytics in the React/Vite admin dashboard as visible summary cards, giving reviewers a clearer serverless replacement for the legacy admin analytics surface.
+- Kept the existing vehicle and booking migration slices intact while improving operational visibility in the new admin workspace.
 
 ## Current migrated areas
 
@@ -34,7 +34,7 @@
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
-- Serverless admin overview endpoint and hash-routed admin dashboard that now includes a featured vehicle roster snapshot for legacy-style fleet inspection.
+- Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots plus booking-value analytics for legacy-style operational inspection.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
 - Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.

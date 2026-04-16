@@ -66,6 +66,10 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
+function formatPercent(value: number) {
+  return `${value.toFixed(0)}%`;
+}
+
 export default function AdminDashboardView() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -233,6 +237,20 @@ export default function AdminDashboardView() {
           label="Payment states"
           value={summary?.confirmedBookings ?? '—'}
           note={summary ? `${summary.failedBookings} failed • ${summary.pendingBookings} pending` : 'Useful for tracking Stripe migration progress.'}
+        />
+        <StatCard
+          label="Booking value"
+          value={summary ? formatCurrency(summary.totalBookingValue) : '—'}
+          note={
+            summary
+              ? `${formatCurrency(summary.confirmedBookingValue)} confirmed • ${formatCurrency(summary.pendingDepositValue)} pending deposits`
+              : 'Total booking value across the current runtime snapshot.'
+          }
+        />
+        <StatCard
+          label="Average booking"
+          value={summary ? formatCurrency(summary.averageBookingValue) : '—'}
+          note={summary ? `${formatPercent(summary.confirmationRate)} confirmed from booked drafts` : 'Average booking value from the migrated booking slice.'}
         />
         <StatCard
           label="Support inquiries"

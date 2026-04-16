@@ -770,6 +770,37 @@ function buildFeaturedVehicles() {
   return sortVehiclesForDisplay(vehicleCatalog).slice(0, 4);
 }
 
+function buildBookingValueSummary() {
+  const totals = bookingDrafts.reduce(
+    (acc, booking) => {
+      acc.totalBookingValue += booking.totalAmount;
+
+      if (booking.status === 'CONFIRMED') {
+        acc.confirmedBookingValue += booking.totalAmount;
+      }
+
+      if (booking.status === 'PENDING_PAYMENT') {
+        acc.pendingDepositValue += booking.depositAmount;
+      }
+
+      return acc;
+    },
+    {
+      totalBookingValue: 0,
+      confirmedBookingValue: 0,
+      pendingDepositValue: 0,
+    },
+  );
+
+  const totalBookings = bookingDrafts.length;
+
+  return {
+    ...totals,
+    averageBookingValue: totalBookings ? totals.totalBookingValue / totalBookings : 0,
+    confirmationRate: totalBookings ? (bookingDrafts.filter((booking) => booking.status === 'CONFIRMED').length / totalBookings) * 100 : 0,
+  };
+}
+
 function buildAdminDashboardPayload(session: AuthSession) {
   const categories = [...new Set(vehicleCatalog.map((vehicle) => vehicle.category))].map((category) => {
     const vehiclesInCategory = vehicleCatalog.filter((vehicle) => vehicle.category === category);
@@ -785,6 +816,7 @@ function buildAdminDashboardPayload(session: AuthSession) {
   const adminSessions = [...authSessions.values()].filter((item) => item.user.role === 'ADMIN').length;
   const customerSessions = [...authSessions.values()].filter((item) => item.user.role === 'CUSTOMER').length;
   const contactInquiryCount = contactInquiries.length;
+  const bookingValueSummary = buildBookingValueSummary();
 
   return adminDashboardResponseSchema.parse({
     message: 'Admin dashboard loaded from the Workers runtime snapshot.',
@@ -802,6 +834,7 @@ function buildAdminDashboardPayload(session: AuthSession) {
         activeSessions: authSessions.size,
         adminSessions,
         customerSessions,
+        ...bookingValueSummary,
       },
       vehicleCategories: categories,
       featuredVehicles,

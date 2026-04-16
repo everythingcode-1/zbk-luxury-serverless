@@ -131,6 +131,11 @@ export const adminDashboardSummarySchema = z.object({
   activeSessions: z.number().int().nonnegative(),
   adminSessions: z.number().int().nonnegative(),
   customerSessions: z.number().int().nonnegative(),
+  totalBookingValue: z.number().nonnegative(),
+  confirmedBookingValue: z.number().nonnegative(),
+  pendingDepositValue: z.number().nonnegative(),
+  averageBookingValue: z.number().nonnegative(),
+  confirmationRate: z.number().min(0).max(100),
 });
 
 export type AdminDashboardSummary = z.infer<typeof adminDashboardSummarySchema>;
