@@ -169,6 +169,9 @@ export default function AdminVehiclesView() {
           <a className="secondary-link" href="#/admin">
             Back to dashboard
           </a>
+          <a className="secondary-link" href="#/admin/bookings">
+            Booking management
+          </a>
           <a className="secondary-link" href="#/fleet">
             Open public fleet
           </a>

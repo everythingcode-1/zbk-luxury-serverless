@@ -1118,6 +1118,33 @@ app.get('/api/admin/overview', (c) => {
   return c.json(buildAdminDashboardPayload(session));
 });
 
+app.get('/api/admin/bookings', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to view booking management.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Booking management access requires an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+
+  const bookings = [...bookingDrafts].sort(
+    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  );
+
+  return c.json(
+    buildBookingHistoryResponse(
+      bookings,
+      bookings.length
+        ? `Loaded ${bookings.length} booking records for the admin management snapshot.`
+        : 'No admin booking records found yet.',
+    ),
+  );
+});
+
 app.post('/api/public/contact', zValidator('json', contactInquirySchema), (c) => {
   const payload = c.req.valid('json');
   const now = new Date();

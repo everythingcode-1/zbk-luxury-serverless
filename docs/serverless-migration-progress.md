@@ -1,14 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-16 23:12 WIB
-- Estimated migration progress: 99.98%
-- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run added a dedicated serverless admin vehicle-management route on top of the existing overview, which moves the admin migration forward without widening scope into CRUD.
+- Last updated: 2026-04-17 01:19 WIB
+- Estimated migration progress: 99.985%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, and a new read-only admin booking management route backed by the Workers booking snapshot. The remaining work is increasingly about durability and replacement of the last runtime-scoped scaffolding rather than broad missing surfaces.
 
 ## Completed this run
 
-- Added a dedicated `#/admin/vehicles` route that shows a read-only vehicle-management snapshot from the Workers admin overview payload.
-- Added a serverless vehicle-management page with live fleet metadata, category breakdowns, status pills, pricing highlights, and legacy-style roster cards.
-- Linked the admin dashboard hero to the new vehicle-management route so the migrated admin surface is easy to reach.
+- Added a dedicated `#/admin/bookings` route that surfaces a read-only booking-management snapshot from the Workers admin booking roster endpoint.
+- Added a serverless booking management page with admin-session gating, summary cards, selected-booking inspection, and a clickable recent-booking roster.
+- Added a Workers API route at `/api/admin/bookings` that returns the booking snapshot for admin review using the existing booking history contract.
+- Linked the new booking management route from the admin dashboard and admin vehicle snapshot so the migrated admin surfaces are easy to reach.
 
 ## Current migrated areas
 
@@ -35,11 +36,11 @@
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, and legacy-compatible login portal routes.
-- Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, and a dedicated vehicle-management route for legacy-style operational inspection.
+- Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated vehicle-management route, and a dedicated booking-management route for legacy-style operational inspection.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
 - Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
-- Legacy booking landing handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
+- Legacy booking handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
 
 ## Remaining major areas
 
@@ -47,7 +48,7 @@
 - Public vehicle detail parity beyond current seed metadata (real images/content sourcing, database-backed catalog management).
 - Protected auth/session durability, session refresh/revocation strategy, and stricter admin access control.
 - Stripe receipt/invoice retrieval and durable payment confirmation data wired into the new return flow.
-- Deeper admin CRUD/dashboard migration beyond the current overview + featured-roster + vehicle-management snapshot slices.
+- Deeper admin CRUD/dashboard migration beyond the current overview + featured-roster + vehicle/booking snapshot slices.
 - Replacement of Node-only dependencies/workflows (email sending, uploads, background/admin assumptions).
 - Legacy feature parity review for remaining website pages and operational flows, especially article detail pages, the smaller static/public pages, and any long-tail content routes.
 
