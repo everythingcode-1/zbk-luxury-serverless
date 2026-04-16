@@ -311,6 +311,9 @@ export default function AdminDashboardView() {
                           <p className="muted" style={{ margin: '4px 0 0' }}>
                             {vehicle.category} • {vehicle.year} • {vehicle.location}
                           </p>
+                          <p className="muted" style={{ margin: '4px 0 0' }}>
+                            Plate number: {vehicle.plateNumber}
+                          </p>
                         </div>
                         <span className={`pill ${vehicle.status === 'AVAILABLE' ? '' : 'pill--muted'}`}>{vehicle.status}</span>
                       </div>

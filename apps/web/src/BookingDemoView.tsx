@@ -56,6 +56,7 @@ function BookingDemoVehicleCard({ vehicle }: { vehicle: Vehicle }) {
 
       <div className="service-pills service-pills--tight">
         <span className="pill">{vehicle.category}</span>
+        <span className="pill pill--muted">{vehicle.plateNumber}</span>
         {vehicle.isLuxury ? <span className="pill">Luxury</span> : null}
         {vehicle.rating ? <span className="pill pill--muted">{vehicle.rating.toFixed(1)} rating</span> : null}
       </div>

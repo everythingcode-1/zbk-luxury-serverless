@@ -1,16 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-16 01:16 WIB
-- Estimated migration progress: 99.92%
-- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run added explicit legacy-style vehicle carousel ordering to the shared contract, Workers API, public fleet UI, and booking landing defaults, which improves parity without widening scope into the remaining durable persistence work.
+- Last updated: 2026-04-16 12:29 WIB
+- Estimated migration progress: 99.94%
+- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run extended the migrated vehicle contract to carry legacy plate numbers end-to-end, so the public fleet, booking demo/landing, and admin roster now expose the same fleet identity metadata that the legacy app used.
 
 ## Completed this run
 
-- Added `carouselOrder` to the shared vehicle contract and the Drizzle vehicle schema so the serverless stack can carry the same ordering field as the legacy app.
-- Populated the Workers seed fleet with explicit carousel order values and made the public vehicle API return vehicles sorted by that order before pagination/limits are applied.
-- Updated the public fleet view to respect the ordered catalog, surface each vehicle's order badge, and keep the spotlight aligned with the legacy priority.
-- Updated the booking landing page to pick the ordered vehicle list as its default selection and surface the legacy order badge for the currently focused vehicle.
-- Kept the admin and payment slices intact while improving public vehicle presentation parity.
+- Added `plateNumber` to the shared vehicle contract so the Workers API and React/Vite app can exchange the legacy fleet identity field without ad hoc casts.
+- Populated the Workers seed fleet with legacy-style plate numbers and surfaced them in the public booking demo, booking landing, fleet spotlight, and admin vehicle roster.
+- Kept the existing carousel-order migration intact while improving visible fleet parity for reviewers and operators.
 
 ## Current migrated areas
 
@@ -19,7 +17,7 @@
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
 - Shared vehicle capacity-band helpers and filter contract.
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, and admin overview reporting.
-- Public vehicle detail response contract for the fleet spotlight view.
+- Public vehicle detail response contract for the fleet spotlight view, including legacy plate-number metadata.
 - Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
 - Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
 - Public booking quote request flow.

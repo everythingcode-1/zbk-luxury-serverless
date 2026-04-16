@@ -184,6 +184,9 @@ export default function BookingLandingView({
                 <p className="muted" style={{ margin: '4px 0 0' }}>
                   {selectedVehicle.location} • {selectedVehicle.category}
                 </p>
+                <p className="muted" style={{ margin: '4px 0 0' }}>
+                  Plate number: {selectedVehicle.plateNumber}
+                </p>
               </div>
               <div className="quote-box__amount">
                 <span>${selectedVehiclePrice.toFixed(2)}</span>
@@ -195,6 +198,7 @@ export default function BookingLandingView({
             <div className="service-pills" style={{ marginTop: 12 }}>
               <span className="pill">Order #{selectedVehicle.carouselOrder}</span>
               <span className="pill pill--muted">Matches the legacy feature ordering</span>
+              <span className="pill pill--muted">{selectedVehicle.plateNumber}</span>
             </div>
           ) : null}
           {selectedVehicleImage ? (

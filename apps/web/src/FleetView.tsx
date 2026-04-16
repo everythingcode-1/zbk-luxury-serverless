@@ -425,6 +425,7 @@ export default function FleetView() {
                     <strong>{vehicle.name}</strong>
                     <div className="service-pills service-pills--tight">
                       <span className="pill pill--muted">{vehicle.category}</span>
+                      <span className="pill pill--muted">{vehicle.plateNumber}</span>
                       {vehicle.carouselOrder ? <span className="pill">Order #{vehicle.carouselOrder}</span> : null}
                       {vehicle.isLuxury ? <span className="pill">Luxury</span> : null}
                     </div>
@@ -491,6 +492,7 @@ export default function FleetView() {
               )}
               <div className="vehicle-spotlight__meta">
                 <span className="pill">{selectedVehicle.category}</span>
+                <span className="pill pill--muted">{selectedVehicle.plateNumber}</span>
                 {selectedVehicle.carouselOrder ? <span className="pill">Order #{selectedVehicle.carouselOrder}</span> : null}
                 {selectedVehicle.isLuxury ? <span className="pill">Luxury</span> : null}
                 <span className="pill pill--muted">{selectedVehicle.status}</span>
@@ -507,6 +509,7 @@ export default function FleetView() {
 
               <ul className="detail-list">
                 <li>Model: {selectedVehicle.model}</li>
+                <li>Plate number: {selectedVehicle.plateNumber}</li>
                 <li>Location: {selectedVehicle.location}</li>
                 <li>Capacity: {selectedVehicle.capacity} pax</li>
                 <li>Luggage: {selectedVehicle.luggage ?? '-'} bags</li>
