@@ -48,6 +48,16 @@ type ProfileFormState = {
 
 type PendingAction = 'login' | 'register' | 'refresh' | 'logout' | 'save-profile' | null;
 
+type AuthWorkspaceProps = {
+  initialRole?: AuthRole;
+  initialEmail?: string;
+  initialPassword?: string;
+  initialDisplayName?: string;
+  initialPhone?: string;
+  workspaceTitle?: string;
+  workspaceDescription?: string;
+};
+
 function formatSessionCapability(capability: string) {
   switch (capability) {
     case 'AUTH_WORKSPACE':
@@ -70,6 +80,18 @@ const initialFormState: AuthFormState = {
   displayName: demoCredentials.CUSTOMER.displayName,
   phone: demoCredentials.CUSTOMER.phone,
 };
+
+function buildInitialAuthFormState(props: AuthWorkspaceProps): AuthFormState {
+  const role = props.initialRole ?? initialFormState.role;
+
+  return {
+    role,
+    email: props.initialEmail ?? (role === 'ADMIN' ? demoCredentials.ADMIN.email : initialFormState.email),
+    password: props.initialPassword ?? (role === 'ADMIN' ? demoCredentials.ADMIN.password : initialFormState.password),
+    displayName: props.initialDisplayName ?? (role === 'ADMIN' ? 'Operations Admin' : initialFormState.displayName),
+    phone: props.initialPhone ?? (role === 'ADMIN' ? '' : initialFormState.phone),
+  };
+}
 
 async function parseResponse<T>(response: Response, schema: { parse: (value: unknown) => T }) {
   const payload = await response.json().catch(() => ({}));
@@ -216,15 +238,20 @@ function CustomerBookingsSummary({
   );
 }
 
-export default function AuthWorkspace() {
-  const [form, setForm] = useState<AuthFormState>(initialFormState);
+export default function AuthWorkspace(props: AuthWorkspaceProps = {}) {
+  const [form, setForm] = useState<AuthFormState>(() => buildInitialAuthFormState(props));
   const [session, setSession] = useState<AuthSession | null>(null);
-  const [profileForm, setProfileForm] = useState<ProfileFormState>({
-    displayName: initialFormState.displayName,
-    email: initialFormState.email,
-    phone: initialFormState.phone,
+  const [profileForm, setProfileForm] = useState<ProfileFormState>(() => {
+    const initialForm = buildInitialAuthFormState(props);
+    return {
+      displayName: initialForm.displayName,
+      email: initialForm.email,
+      phone: initialForm.phone,
+    };
   });
-  const [statusMessage, setStatusMessage] = useState<string>('Ready to exercise the migrated auth session contract.');
+  const [statusMessage, setStatusMessage] = useState<string>(
+    props.workspaceDescription || 'Ready to exercise the migrated auth session contract.',
+  );
   const [error, setError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
@@ -585,9 +612,10 @@ export default function AuthWorkspace() {
     <article className="card card--wide auth-workspace">
       <div className="section-title-row">
         <div>
-          <h2>Auth session workspace</h2>
+          <h2>{props.workspaceTitle || 'Auth session workspace'}</h2>
           <p className="muted">
-            This slice migrates legacy auth endpoints into Workers-safe login, register, me, and logout routes with a typed session envelope.
+            {props.workspaceDescription ||
+              'This slice migrates legacy auth endpoints into Workers-safe login, register, me, and logout routes with a typed session envelope.'}
           </p>
         </div>
         <span className="pill">{sessionUser ? `${sessionUser.role} session` : 'SIGNED OUT'}</span>

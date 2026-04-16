@@ -32,6 +32,7 @@ import MyBookingsView from './MyBookingsView';
 import ServicesView from './ServicesView';
 import HowToBookView from './HowToBookView';
 import AboutView from './AboutView';
+import LoginPortalView from './LoginPortalView';
 import { getLegacyBookingVehicleId, parseLegacyBookingData } from './legacyBookingData';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
@@ -923,6 +924,37 @@ export default function App() {
     return <AdminDashboardView />;
   }
 
+  if (routeState.pathname === '/login') {
+    return <LoginPortalView />;
+  }
+
+  if (routeState.pathname === '/login/admin') {
+    return (
+      <AuthWorkspace
+        initialRole="ADMIN"
+        initialEmail="admin@zbk.local"
+        initialPassword="Admin123!"
+        initialDisplayName="Operations Admin"
+        workspaceTitle="Admin login workspace"
+        workspaceDescription="Pre-filled admin access mirrors the legacy login portal and launches the Workers auth workspace with the admin demo account."
+      />
+    );
+  }
+
+  if (routeState.pathname === '/login/customer') {
+    return (
+      <AuthWorkspace
+        initialRole="CUSTOMER"
+        initialEmail="customer@zbk.local"
+        initialPassword="Customer123!"
+        initialDisplayName="Demo Customer"
+        initialPhone="+62 812 3456 7890"
+        workspaceTitle="Customer login workspace"
+        workspaceDescription="Customer access now routes through the same Workers auth workspace so the legacy portal can land on the migrated booking-history flow."
+      />
+    );
+  }
+
   if (routeState.pathname === '/my-bookings') {
     return (
       <MyBookingsView
@@ -995,6 +1027,9 @@ export default function App() {
           </a>
           <a className="secondary-link" href="#/contact" style={{ minWidth: 0 }}>
             Contact
+          </a>
+          <a className="secondary-link" href="#/login" style={{ minWidth: 0 }}>
+            Login portal
           </a>
         </div>
       </section>

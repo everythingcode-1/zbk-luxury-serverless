@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-16 18:58 WIB
-- Estimated migration progress: 99.96%
-- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run extended the payment migration one step further by adding a Workers-safe receipt snapshot endpoint and wiring the React/Vite return view to surface receipt details from the migrated checkout trail.
+- Last updated: 2026-04-16 21:07 WIB
+- Estimated migration progress: 99.97%
+- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run added a legacy-compatible login portal bridge plus route-specific auth workspace entry points, which closes another user-facing gap without widening scope.
 
 ## Completed this run
 
-- Added a Workers-safe public booking receipt endpoint that reuses the migrated booking + checkout trail to produce a receipt snapshot for the latest Stripe-return flow.
-- Extended the React/Vite payment return page to fetch and render that receipt snapshot alongside the existing booking/payment return summary.
-- Added shared receipt schemas so the API and web app now agree on the new receipt response contract.
+- Added a legacy-compatible `#/login` portal bridge that mirrors the old Next.js login chooser while keeping the serverless app hash-routed.
+- Added route-specific auth workspace entry points for `#/login/admin` and `#/login/customer` with prefilled demo credentials and role-aware copy.
+- Extended the home hero with a direct login-portal link so the migrated auth entry point is visible from the public landing surface.
 
 ## Current migrated areas
 
@@ -34,7 +34,7 @@
 - Workers-safe receipt snapshot endpoint plus receipt rendering in the payment return view.
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
-- Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
+- Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, and legacy-compatible login portal routes.
 - Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots plus booking-value analytics for legacy-style operational inspection.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
 - Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
