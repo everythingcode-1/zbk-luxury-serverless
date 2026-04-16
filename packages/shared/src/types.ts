@@ -294,6 +294,56 @@ export const bookingPaymentReturnResponseSchema = z.object({
 
 export type BookingPaymentReturnResponse = z.infer<typeof bookingPaymentReturnResponseSchema>;
 
+export const bookingReceiptVehicleSchema = z.object({
+  name: z.string(),
+  model: z.string().optional(),
+  plateNumber: z.string().optional(),
+});
+
+export const bookingReceiptSchema = z.object({
+  receiptNumber: z.string(),
+  transactionId: z.string(),
+  bookingReference: z.string(),
+  paymentDate: z.string(),
+  customerName: z.string(),
+  customerEmail: z.string().email(),
+  customerPhone: z.string(),
+  vehicle: bookingReceiptVehicleSchema,
+  tripType: tripTypeSchema,
+  serviceType: serviceTypeSchema,
+  pickupLocation: z.string(),
+  dropoffLocation: z.string().optional(),
+  pickupNote: z.string().optional(),
+  dropoffNote: z.string().optional(),
+  startDate: z.string(),
+  endDate: z.string(),
+  pickupTime: z.string().optional(),
+  endTime: z.string().optional(),
+  hours: z.number().min(1),
+  additionalHours: z.number().int().nonnegative(),
+  totalAmount: z.number().nonnegative(),
+  depositAmount: z.number().nonnegative(),
+  amountPaid: z.number().nonnegative(),
+  currency: z.string(),
+  paymentStatus: z.enum(paymentFlowStatusOptions),
+  paymentMethod: z.string(),
+  cardBrand: z.string().nullable().optional(),
+  cardLast4: z.string().nullable().optional(),
+  bookingStatus: z.enum(bookingRecordStatusOptions),
+  checkoutSessionId: z.string().optional(),
+  checkoutSessionUrl: z.string().url().optional(),
+  invoiceUrl: z.string().url().nullable().optional(),
+});
+
+export type BookingReceipt = z.infer<typeof bookingReceiptSchema>;
+
+export const bookingReceiptResponseSchema = z.object({
+  message: z.string(),
+  data: bookingReceiptSchema,
+});
+
+export type BookingReceiptResponse = z.infer<typeof bookingReceiptResponseSchema>;
+
 export const bookingHistoryResponseSchema = z.object({
   message: z.string(),
   data: z.array(bookingRecordSchema),

@@ -8,6 +8,7 @@ import {
   type BookingHistoryResponse,
   type BookingLookupResponse,
   type BookingPaymentReturnResponse,
+  type BookingReceiptResponse,
   type BookingQuoteRequest,
   type BookingQuoteResponse,
   type CreateBookingResponse,
@@ -161,8 +162,11 @@ function formatTripTypeLabel(tripType: TripType) {
 
 function PaymentReturnView({ routeState }: { routeState: RouteState }) {
   const [result, setResult] = useState<BookingPaymentReturnResponse | null>(null);
+  const [receipt, setReceipt] = useState<BookingReceiptResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingReceipt, setIsLoadingReceipt] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
 
   const reference = routeState.searchParams.get('reference') || '';
   const token = routeState.searchParams.get('token') || '';
@@ -170,6 +174,18 @@ function PaymentReturnView({ routeState }: { routeState: RouteState }) {
   const stage = routeState.searchParams.get('stage') || (routeState.pathname === '/payment/cancel' ? 'CANCEL' : 'SUCCESS');
 
   const isCancel = stage === 'CANCEL';
+  const receiptUrl = useMemo(() => {
+    if (!reference || !token) {
+      return '';
+    }
+
+    const params = new URLSearchParams({ token, stage });
+    if (sessionId) {
+      params.set('session_id', sessionId);
+    }
+
+    return `${API_BASE_URL}/api/public/bookings/${encodeURIComponent(reference)}/receipt?${params.toString()}`;
+  }, [reference, sessionId, stage, token]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -200,13 +216,36 @@ function PaymentReturnView({ routeState }: { routeState: RouteState }) {
         }
 
         setResult(payload as BookingPaymentReturnResponse);
+
+        try {
+          setIsLoadingReceipt(true);
+          setReceiptError(null);
+          const receiptResponse = await fetch(
+            `${API_BASE_URL}/api/public/bookings/${encodeURIComponent(reference)}/receipt?${params.toString()}`,
+            { signal: controller.signal },
+          );
+          const receiptPayload: BookingReceiptResponse | { message?: string } = await receiptResponse.json();
+
+          if (!receiptResponse.ok) {
+            throw new Error(receiptPayload.message || `Receipt lookup failed: ${receiptResponse.status}`);
+          }
+
+          setReceipt(receiptPayload as BookingReceiptResponse);
+        } catch (receiptErr) {
+          if (controller.signal.aborted) return;
+          setReceiptError(receiptErr instanceof Error ? receiptErr.message : 'Unknown error loading receipt summary');
+          setReceipt(null);
+        }
       } catch (err) {
         if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : 'Unknown error loading payment return');
+        setReceiptError(null);
         setResult(null);
+        setReceipt(null);
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);
+          setIsLoadingReceipt(false);
         }
       }
     }
@@ -238,6 +277,8 @@ function PaymentReturnView({ routeState }: { routeState: RouteState }) {
 
       {isLoading ? <div className="card">Loading payment return summary…</div> : null}
       {error ? <div className="alert error">{error}</div> : null}
+      {receiptError ? <div className="alert error">{receiptError}</div> : null}
+      {isLoadingReceipt ? <div className="card">Loading receipt summary…</div> : null}
 
       {booking && result ? (
         <section className="card-grid payment-return-grid">
@@ -292,6 +333,44 @@ function PaymentReturnView({ routeState }: { routeState: RouteState }) {
               <a className="secondary-link" href="#/">
                 Back to booking workspace
               </a>
+            </div>
+          </article>
+        </section>
+      ) : null}
+
+      {receipt ? (
+        <section className="card-grid payment-return-grid">
+          <article className="card card--wide payment-return-card">
+            <div className="section-title-row">
+              <div>
+                <h2>{receipt.data.paymentStatus === 'CONFIRMED' ? 'Receipt snapshot' : 'Receipt preview'}</h2>
+                <p className="muted">Workers-safe receipt summary generated from the migrated booking and Stripe checkout trail.</p>
+              </div>
+              <span className="pill pill--muted">{receipt.data.paymentStatus}</span>
+            </div>
+
+            <div className="payment-return-summary">
+              <div>
+                <p><strong>{receipt.data.receiptNumber}</strong> • {receipt.data.customerName} • {receipt.data.vehicle.name}</p>
+                <p className="muted">{receipt.data.vehicle.model || 'Model pending'}{receipt.data.vehicle.plateNumber ? ` • ${receipt.data.vehicle.plateNumber}` : ''}</p>
+                <p className="muted">{formatTripTypeLabel(receipt.data.tripType)} • {formatServiceTypeLabel(receipt.data.serviceType)}</p>
+                <p className="muted">Paid {receipt.data.paymentDate}</p>
+                <p className="muted">Amount paid ${receipt.data.amountPaid.toFixed(2)} of ${receipt.data.depositAmount.toFixed(2)} deposit</p>
+                <p className="muted">Checkout session: {receipt.data.checkoutSessionId}</p>
+              </div>
+
+              <div className="quote-box__amount">
+                <span>${receipt.data.totalAmount.toFixed(2)}</span>
+                <small>Reference {receipt.data.bookingReference}</small>
+              </div>
+            </div>
+
+            <div className="payment-return-actions">
+              {receiptUrl ? (
+                <a className="secondary-link" href={receiptUrl} rel="noreferrer" target="_blank">
+                  Open receipt JSON
+                </a>
+              ) : null}
             </div>
           </article>
         </section>

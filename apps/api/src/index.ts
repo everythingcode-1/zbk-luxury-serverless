@@ -29,6 +29,7 @@ import {
   type ContactInquiry,
   bookingPaymentReturnQuerySchema,
   bookingPaymentReturnResponseSchema,
+  bookingReceiptResponseSchema,
   bookingLookupResponseSchema,
   bookingQuoteRequestSchema,
   bookingRecordSchema,
@@ -292,6 +293,75 @@ function buildPaymentReturnState(env: EnvBindings, stage: 'SUCCESS' | 'CANCEL'):
       ? 'Customer can reopen deposit checkout from this migrated cancel view when ready.'
       : paymentNextStep,
   };
+}
+
+function buildBookingReceiptPayload(
+  reference: string,
+  env: EnvBindings,
+  stage: 'SUCCESS' | 'CANCEL',
+  token: string,
+  sessionId?: string,
+) {
+  const normalizedReference = reference.trim().toUpperCase();
+  const bookingRecord = bookingDrafts.find((item) => item.reference.toUpperCase() === normalizedReference);
+  const checkoutSession = bookingCheckoutSessions.get(normalizedReference);
+
+  if (!bookingRecord || !checkoutSession || checkoutSession.returnToken !== token) {
+    return null;
+  }
+
+  if (sessionId && checkoutSession.sessionId !== sessionId) {
+    return null;
+  }
+
+  const vehicle = vehicleCatalog.find((item) => item.id === bookingRecord.vehicleId);
+  const paymentState = getBookingPaymentState(normalizedReference, env, stage);
+  const paymentDate = checkoutSession.paymentUpdatedAt || bookingRecord.paymentTrailUpdatedAt || bookingRecord.createdAt;
+  const amountPaid = paymentState.status === 'CONFIRMED' ? bookingRecord.depositAmount : 0;
+
+  return bookingReceiptResponseSchema.parse({
+    message: paymentState.status === 'CONFIRMED'
+      ? 'Receipt snapshot generated from the Workers booking trail and Stripe checkout session.'
+      : 'Receipt snapshot generated from the Workers booking trail while payment confirmation is still pending.',
+    data: {
+      receiptNumber: bookingRecord.reference,
+      transactionId: checkoutSession.sessionId,
+      bookingReference: bookingRecord.reference,
+      paymentDate,
+      customerName: bookingRecord.customerName,
+      customerEmail: bookingRecord.customerEmail,
+      customerPhone: bookingRecord.customerPhone,
+      vehicle: {
+        name: bookingRecord.vehicleName,
+        ...(vehicle?.model ? { model: vehicle.model } : {}),
+        ...(vehicle?.plateNumber ? { plateNumber: vehicle.plateNumber } : {}),
+      },
+      tripType: bookingRecord.tripType,
+      serviceType: bookingRecord.serviceType,
+      pickupLocation: bookingRecord.pickupLocation,
+      ...(bookingRecord.dropoffLocation ? { dropoffLocation: bookingRecord.dropoffLocation } : {}),
+      ...(bookingRecord.pickupNote ? { pickupNote: bookingRecord.pickupNote } : {}),
+      ...(bookingRecord.dropoffNote ? { dropoffNote: bookingRecord.dropoffNote } : {}),
+      startDate: bookingRecord.startDate,
+      endDate: bookingRecord.endDate,
+      ...(bookingRecord.pickupTime ? { pickupTime: bookingRecord.pickupTime } : {}),
+      ...(bookingRecord.endTime ? { endTime: bookingRecord.endTime } : {}),
+      hours: bookingRecord.hours,
+      additionalHours: bookingRecord.additionalHours,
+      totalAmount: bookingRecord.totalAmount,
+      depositAmount: bookingRecord.depositAmount,
+      amountPaid,
+      currency: 'SGD',
+      paymentStatus: paymentState.status,
+      paymentMethod: 'Stripe Checkout',
+      cardBrand: null,
+      cardLast4: null,
+      bookingStatus: bookingRecord.status,
+      checkoutSessionId: checkoutSession.sessionId,
+      checkoutSessionUrl: checkoutSession.checkoutUrl,
+      invoiceUrl: null,
+    },
+  });
 }
 
 type AuthRole = (typeof authRoleOptions)[number];
@@ -1377,6 +1447,17 @@ app.get('/api/public/bookings/:reference/payment-return', zValidator('query', bo
       payment: paymentState,
     }),
   );
+});
+
+app.get('/api/public/bookings/:reference/receipt', zValidator('query', bookingPaymentReturnQuerySchema), (c) => {
+  const query = c.req.valid('query');
+  const receipt = buildBookingReceiptPayload(c.req.param('reference'), c.env, query.stage, query.token, query.session_id);
+
+  if (!receipt) {
+    return c.json({ message: 'Booking receipt not found for the supplied return token.' }, 404);
+  }
+
+  return c.json(receipt);
 });
 
 app.get('/api/public/bookings/:reference', zValidator('query', bookingLookupQuerySchema), (c) => {

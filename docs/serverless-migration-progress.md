@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-16 16:50 WIB
-- Estimated migration progress: 99.95%
-- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run deepened the admin migration by adding booking-value analytics to the Workers overview, so the dashboard now shows booking volume, confirmed value, pending deposit exposure, and confirmation rate without falling back to the legacy Next.js app.
+- Last updated: 2026-04-16 18:58 WIB
+- Estimated migration progress: 99.96%
+- Justification: the serverless stack already covers the legacy blog, public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, and contact intake. This run extended the payment migration one step further by adding a Workers-safe receipt snapshot endpoint and wiring the React/Vite return view to surface receipt details from the migrated checkout trail.
 
 ## Completed this run
 
-- Extended the admin overview contract with booking-value analytics so the Workers API can report total booking value, confirmed booking value, pending deposit exposure, average booking size, and confirmation rate.
-- Surfaced those new analytics in the React/Vite admin dashboard as visible summary cards, giving reviewers a clearer serverless replacement for the legacy admin analytics surface.
-- Kept the existing vehicle and booking migration slices intact while improving operational visibility in the new admin workspace.
+- Added a Workers-safe public booking receipt endpoint that reuses the migrated booking + checkout trail to produce a receipt snapshot for the latest Stripe-return flow.
+- Extended the React/Vite payment return page to fetch and render that receipt snapshot alongside the existing booking/payment return summary.
+- Added shared receipt schemas so the API and web app now agree on the new receipt response contract.
 
 ## Current migrated areas
 
@@ -31,6 +31,7 @@
 - Dedicated customer bookings route (`#/my-bookings`) that now serves as the customer-facing auth landing page.
 - Workers-safe Stripe checkout-session handoff endpoint and web UI trigger for deposit payment initialization.
 - Hash-routed payment success/cancel return views plus a public payment-return summary endpoint for the latest checkout attempt.
+- Workers-safe receipt snapshot endpoint plus receipt rendering in the payment return view.
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, and authenticated booking history.
@@ -54,7 +55,8 @@
 
 - Auth sessions are still stored in the Worker’s in-memory map and browser localStorage; the auth-token cookie improves the transport path but not durability, so they still disappear on deploy/restart.
 - Demo credentials are intentionally seeded for the migration slice and should be replaced with real persistence before any protected admin/user flows rely on them.
-- Booking drafts, checkout return tokens, and latest checkout-session summaries still live in Worker memory; payment return and confirmation views therefore are not durable across deploys/restarts.
+- Booking drafts, checkout return tokens, and latest checkout-session summaries still live in Worker memory; payment return, receipt, and confirmation views therefore are not durable across deploys/restarts.
+- The new receipt snapshot is still synthesized from the in-memory checkout trail rather than a durable Stripe invoice/receipt lookup.
 - Webhook verification is Workers-safe, but it falls back to a dev bypass when `STRIPE_WEBHOOK_SECRET` is unset.
 - The return pages now reflect webhook-confirmed/failed states, but they still do not persist authoritative paid state outside the Worker runtime.
 - Actual hosted checkout creation still depends on `STRIPE_SECRET_KEY` being configured in the deployed Worker environment.
