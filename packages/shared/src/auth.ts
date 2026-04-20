@@ -103,6 +103,45 @@ export const authSessionStateResponseSchema = z.object({
 
 export type AuthSessionStateResponse = z.infer<typeof authSessionStateResponseSchema>;
 
+export const adminEmailRelaySettingsSchema = z.object({
+  host: z.string().min(1),
+  port: z.number().int().positive(),
+  username: z.string().min(1),
+  passwordConfigured: z.boolean(),
+  secure: z.boolean(),
+  notifyOnBookings: z.boolean(),
+  recipientsCsv: z.string(),
+  testEmail: z.string().email(),
+  updatedAt: z.string(),
+  lastTestAt: z.string().nullable(),
+  lastTestStatus: z.enum(['PENDING', 'READY', 'FAILED']),
+  lastTestMessage: z.string(),
+});
+
+export type AdminEmailRelaySettings = z.infer<typeof adminEmailRelaySettingsSchema>;
+
+export const adminEmailRelaySettingsUpdateRequestSchema = z.object({
+  host: z.string().min(1).max(255),
+  port: z.coerce.number().int().positive().max(65535),
+  username: z.string().min(1).max(255),
+  password: z.string().max(255).optional().default(''),
+  secure: z.coerce.boolean().default(false),
+  notifyOnBookings: z.coerce.boolean().default(true),
+  recipientsCsv: z.string().max(1000).default(''),
+  testEmail: z.string().email(),
+});
+
+export type AdminEmailRelaySettingsUpdateRequest = z.infer<typeof adminEmailRelaySettingsUpdateRequestSchema>;
+
+export const adminEmailRelaySettingsResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    settings: adminEmailRelaySettingsSchema,
+  }),
+});
+
+export type AdminEmailRelaySettingsResponse = z.infer<typeof adminEmailRelaySettingsResponseSchema>;
+
 export const authLogoutResponseSchema = z.object({
   message: z.string(),
   data: z.object({

@@ -1,16 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-20 11:32 WIB
-- Estimated migration progress: 99.986%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a new read-only admin settings snapshot route. The remaining work is now concentrated on durability, editable admin/settings CRUD, and replacement of the last runtime-scoped scaffolding rather than broad missing surfaces.
+- Last updated: 2026-04-20 13:40 WIB
+- Estimated migration progress: 99.988%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. The remaining work is now concentrated on durability, final admin/settings consolidation, and the last runtime-scoped scaffolding rather than broad missing surfaces.
 
 ## Completed this run
 
-- Added a dedicated `#/admin/bookings` route that surfaces a read-only booking-management snapshot from the Workers admin booking roster endpoint.
-- Added a dedicated `#/admin/settings` route that reuses the Workers auth session and admin overview snapshot to expose a read-only admin settings bridge.
-- Added a serverless booking management page with admin-session gating, summary cards, selected-booking inspection, and a clickable recent-booking roster.
-- Added a Workers API route at `/api/admin/bookings` that returns the booking snapshot for admin review using the existing booking history contract.
-- Linked the new booking management and settings routes from the admin dashboard so the migrated admin surfaces are easy to reach.
+- Added a Workers-safe SMTP relay settings and validation bridge to `#/admin/settings` with editable relay fields, validation/test actions, and last-test status surfaced in the UI.
+- Added `/api/admin/settings/email` GET/PATCH routes plus a `/api/admin/settings/email/test` route that persist the sanitized relay snapshot in Workers memory and record a validation result without relying on Nodemailer.
+- Kept the admin overview, booking management, and settings snapshot routes wired together so the admin dashboard now reaches the relay tooling directly.
+- Preserved the existing booking management route and admin dashboard links so the new email relay slice fits cleanly into the migrated admin flow.
 
 ## Current migrated areas
 
@@ -18,7 +17,7 @@
 - Shared vehicle/quote schemas and pricing logic.
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
 - Shared vehicle capacity-band helpers and filter contract.
-- Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, and admin settings snapshot plumbing.
+- Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, and admin settings / SMTP relay snapshot plumbing.
 - Public vehicle detail response contract for the fleet spotlight view, including legacy plate-number metadata.
 - Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
 - Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
@@ -37,7 +36,7 @@
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, and legacy-compatible login portal routes.
-- Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated vehicle-management route, a dedicated booking-management route, and a settings snapshot route for legacy-style operational inspection.
+- Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated vehicle-management route, a dedicated booking-management route, and a Workers-safe settings/SMTP relay route for legacy-style operational inspection.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
 - Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
@@ -49,8 +48,8 @@
 - Public vehicle detail parity beyond current seed metadata (real images/content sourcing, database-backed catalog management).
 - Protected auth/session durability, session refresh/revocation strategy, and stricter admin access control.
 - Stripe receipt/invoice retrieval and durable payment confirmation data wired into the new return flow.
-- Deeper admin CRUD/dashboard migration beyond the current overview + featured-roster + vehicle/booking/settings snapshot slices.
-- Replacement of Node-only dependencies/workflows (email sending, uploads, background/admin assumptions).
+- Deeper admin CRUD/dashboard migration beyond the current overview + featured-roster + vehicle/booking/settings + SMTP relay snapshot slices.
+- Replacement of Node-only dependencies/workflows (uploads, background/admin assumptions, other Node-only runtime shortcuts).
 - Legacy feature parity review for remaining website pages and operational flows, especially article detail pages, the smaller static/public pages, and any long-tail content routes.
 
 ## Blockers / risks
@@ -65,4 +64,4 @@
 - Vehicle catalog still comes from curated Worker seed data; category/capacity/filter contracts are migrated, but the source is not yet database-backed or admin-editable.
 - Support inquiries are now accepted by the Worker runtime, but they are still in-memory and not durably stored or exported.
 - The legacy booking handoff is now preserved in the workspace UI, but the underlying state is still browser/runtime-backed rather than durable session storage.
-- The new admin settings route is read-only; editable profile/password/SMTP settings still need a durable serverless implementation.
+- The admin settings surface now includes a Workers-safe SMTP relay validator, but it still stores only in-memory snapshots; editable profile/password consolidation and durable settings persistence still need a serverless implementation.

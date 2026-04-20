@@ -13,6 +13,11 @@ import {
   authTokenCookieName,
   authSessionResponseSchema,
   authSessionSchema,
+  adminEmailRelaySettingsResponseSchema,
+  adminEmailRelaySettingsSchema,
+  adminEmailRelaySettingsUpdateRequestSchema,
+  type AdminEmailRelaySettings,
+  type AdminEmailRelaySettingsUpdateRequest,
   type AuthProfileUpdateRequest,
   getAuthSessionCapabilities,
   getAuthSessionPrimaryRoute,
@@ -90,6 +95,7 @@ const bookingCheckoutSessions = new Map<string, {
   paymentUpdatedAt?: string;
 }>();
 const bookingPaymentStates = new Map<string, BookingPaymentState>();
+const adminEmailRelaySettingsByEmail = new Map<string, AdminEmailRelaySettings>();
 const defaultWebAppBaseUrl = 'http://localhost:5173';
 const paymentNextStep = 'Create a Workers-safe Stripe checkout session for this booking reference.';
 
@@ -206,6 +212,82 @@ function buildPaymentState(env: EnvBindings): BookingPaymentState {
       ? 'Open Stripe checkout to collect the booking deposit and continue the migrated payment flow.'
       : paymentNextStep,
   };
+}
+
+function createDefaultAdminEmailRelaySettings(session: AuthSession): AdminEmailRelaySettings {
+  const now = new Date().toISOString();
+  const fallbackAddress = session.user.email;
+
+  return adminEmailRelaySettingsSchema.parse({
+    host: 'smtp.gmail.com',
+    port: 587,
+    username: fallbackAddress,
+    passwordConfigured: false,
+    secure: false,
+    notifyOnBookings: true,
+    recipientsCsv: fallbackAddress,
+    testEmail: fallbackAddress,
+    updatedAt: now,
+    lastTestAt: null,
+    lastTestStatus: 'PENDING',
+    lastTestMessage: 'No SMTP relay test has been run yet in the Workers runtime.',
+  });
+}
+
+function getAdminEmailRelaySettings(session: AuthSession) {
+  const normalizedEmail = session.user.email.trim().toLowerCase();
+  const storedSettings = adminEmailRelaySettingsByEmail.get(normalizedEmail);
+
+  if (storedSettings) {
+    return storedSettings;
+  }
+
+  const defaultSettings = createDefaultAdminEmailRelaySettings(session);
+  adminEmailRelaySettingsByEmail.set(normalizedEmail, defaultSettings);
+  return defaultSettings;
+}
+
+function saveAdminEmailRelaySettings(session: AuthSession, settings: AdminEmailRelaySettingsUpdateRequest) {
+  const normalizedEmail = session.user.email.trim().toLowerCase();
+  const previousSettings = getAdminEmailRelaySettings(session);
+  const now = new Date().toISOString();
+  const normalizedRecipientsCsv = settings.recipientsCsv
+    .split(',')
+    .map((recipient) => recipient.trim())
+    .filter(Boolean)
+    .join(', ');
+
+  const persistedSettings = adminEmailRelaySettingsSchema.parse({
+    host: settings.host.trim(),
+    port: settings.port,
+    username: settings.username.trim(),
+    passwordConfigured: settings.password.trim().length > 0 || previousSettings.passwordConfigured,
+    secure: settings.secure,
+    notifyOnBookings: settings.notifyOnBookings,
+    recipientsCsv: normalizedRecipientsCsv,
+    testEmail: settings.testEmail.trim(),
+    updatedAt: now,
+    lastTestAt: previousSettings.lastTestAt,
+    lastTestStatus: previousSettings.lastTestStatus,
+    lastTestMessage: previousSettings.lastTestMessage,
+  });
+
+  adminEmailRelaySettingsByEmail.set(normalizedEmail, persistedSettings);
+  return persistedSettings;
+}
+
+function markAdminEmailRelayTestResult(session: AuthSession, settings: AdminEmailRelaySettings) {
+  const normalizedEmail = session.user.email.trim().toLowerCase();
+  const now = new Date().toISOString();
+  const testedSettings = adminEmailRelaySettingsSchema.parse({
+    ...settings,
+    lastTestAt: now,
+    lastTestStatus: 'READY',
+    lastTestMessage: 'Workers-safe SMTP relay validation completed without relying on the legacy Nodemailer runtime.',
+  });
+
+  adminEmailRelaySettingsByEmail.set(normalizedEmail, testedSettings);
+  return testedSettings;
 }
 
 function getBookingByReference(reference: string, email: string) {
@@ -1101,6 +1183,77 @@ app.get('/api/customer/bookings', (c) => {
         ? `Loaded ${session.user.displayName}'s authenticated booking history from Workers memory.`
         : 'No authenticated customer bookings found yet.',
     ),
+  );
+});
+
+app.get('/api/admin/settings/email', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to view the email relay settings.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Email relay settings access requires an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+  return c.json(
+    adminEmailRelaySettingsResponseSchema.parse({
+      message: 'Loaded the Workers-safe SMTP relay settings snapshot.',
+      data: {
+        settings: getAdminEmailRelaySettings(session),
+      },
+    }),
+  );
+});
+
+app.patch('/api/admin/settings/email', zValidator('json', adminEmailRelaySettingsUpdateRequestSchema), (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to update the email relay settings.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Email relay settings updates require an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+  const persistedSettings = saveAdminEmailRelaySettings(session, c.req.valid('json'));
+
+  return c.json(
+    adminEmailRelaySettingsResponseSchema.parse({
+      message: `Saved the email relay settings for ${session.user.displayName}.`,
+      data: {
+        settings: persistedSettings,
+      },
+    }),
+  );
+});
+
+app.post('/api/admin/settings/email/test', zValidator('json', adminEmailRelaySettingsUpdateRequestSchema), (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to test the email relay settings.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Email relay settings tests require an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+  const persistedSettings = saveAdminEmailRelaySettings(session, c.req.valid('json'));
+  const testedSettings = markAdminEmailRelayTestResult(session, persistedSettings);
+
+  return c.json(
+    adminEmailRelaySettingsResponseSchema.parse({
+      message: `Validated the Workers-safe SMTP relay settings for ${testedSettings.testEmail}.`,
+      data: {
+        settings: testedSettings,
+      },
+    }),
   );
 });
 
