@@ -275,15 +275,34 @@ export default function BookingConfirmationView({
           {isLoadingVehicle ? <p className="muted" style={{ marginTop: 12 }}>Loading selected vehicle details…</p> : null}
           {vehicleError ? <div className="alert error" style={{ marginTop: 12 }}>{vehicleError}</div> : null}
           {selectedVehicle ? (
-            <ul className="detail-list" style={{ marginTop: 16 }}>
-              <li>Plate number: {selectedVehicle.plateNumber}</li>
-              <li>Color: {selectedVehicle.color}</li>
-              <li>Luggage capacity: {formatLuggage(selectedVehicle)}</li>
-              <li>Supported services: {selectedVehicle.services.map(formatServiceTypeLabel).join(', ')}</li>
-              <li>6-hour charter: {formatCurrency(selectedVehicle.pricing.sixHours)}</li>
-              <li>12-hour charter: {formatCurrency(selectedVehicle.pricing.twelveHours)}</li>
-              <li>Per hour: {formatCurrency(selectedVehicle.pricing.perHour)}</li>
-            </ul>
+            <>
+              <ul className="detail-list" style={{ marginTop: 16 }}>
+                <li>Model: {selectedVehicle.model}</li>
+                <li>Year: {selectedVehicle.year}</li>
+                <li>Plate number: {selectedVehicle.plateNumber}</li>
+                <li>Color: {selectedVehicle.color}</li>
+                <li>Luggage capacity: {formatLuggage(selectedVehicle)}</li>
+                <li>Supported services: {selectedVehicle.services.map(formatServiceTypeLabel).join(', ')}</li>
+                <li>6-hour charter: {formatCurrency(selectedVehicle.pricing.sixHours)}</li>
+                <li>12-hour charter: {formatCurrency(selectedVehicle.pricing.twelveHours)}</li>
+                <li>Per hour: {formatCurrency(selectedVehicle.pricing.perHour)}</li>
+              </ul>
+
+              {selectedVehicle.features.length > 0 ? (
+                <div style={{ marginTop: 16 }}>
+                  <p className="muted" style={{ marginBottom: 8 }}>
+                    Vehicle highlights
+                  </p>
+                  <div className="service-pills service-pills--tight">
+                    {selectedVehicle.features.map((feature) => (
+                      <span key={feature} className="pill pill--muted">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </>
           ) : null}
 
           <ul className="detail-list" style={{ marginTop: 16 }}>

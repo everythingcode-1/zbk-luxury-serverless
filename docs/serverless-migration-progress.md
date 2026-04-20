@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-20 17:52 WIB
-- Estimated migration progress: 99.992%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run added more legacy-style vehicle pricing metadata to the public booking entry points by surfacing luggage capacity plus 6-hour, 12-hour, and per-hour rates in the booking landing and booking demo views, which reduces the remaining public-fleet parity gap a little further while keeping the migration incremental.
+- Last updated: 2026-04-20 19:59 WIB
+- Estimated migration progress: 99.993%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run tightened the booking confirmation handoff by surfacing the selected vehicle’s year plus legacy-style feature highlights alongside the existing plate/color/luggage/pricing snapshot, closing a small but visible gap in the migrated booking flow.
 
 ## Completed this run
 
-- Added legacy-style vehicle pricing metadata to the public booking demo cards so each visible fleet preview now shows luggage capacity plus 6-hour, 12-hour, and per-hour rates.
-- Expanded the booking landing selected-vehicle panel with the same luggage and price-ladder details, keeping the handoff page closer to the legacy booking experience.
-- Kept the booking CTA and vehicle spotlight aligned with the live seed catalog, including supported services, minimum booking window, luggage capacity, and charter pricing metadata for the selected vehicle.
-- Preserved the existing booking management route and admin dashboard links so the new public fleet/booking metadata slice fits cleanly into the migrated flow.
+- Added legacy-style vehicle identity and feature highlights to the booking confirmation vehicle snapshot so the return-to-checkout handoff now shows model, year, plate number, color, luggage capacity, supported services, and feature chips.
+- Kept the booking confirmation route aligned with the live vehicle detail response instead of relying only on the booking summary payload.
+- Preserved the existing checkout handoff and cross-navigation links so the migrated confirmation flow still moves cleanly back into booking, fleet, or booking demo surfaces.
+- Left the booking landing and booking demo parity work intact from prior runs, keeping the public fleet slice coherent across the broader booking journey.
 
 ## Current migrated areas
 
@@ -26,6 +26,7 @@
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
 - Public booking landing page now shows the legacy ride-detail parity card for trip math, service inference, luggage capacity, charter pricing, and airport note guidance before handoff.
+- Public booking confirmation handoff with live vehicle rehydration, including model/year/plate/color/service/feature details from the Workers API.
 - Public booking reference lookup flow using booking reference + customer email.
 - Public customer booking history snapshot flow using customer email as a transitional bridge.
 - Authenticated customer booking history snapshot flow using the Workers auth session and protected customer route.
