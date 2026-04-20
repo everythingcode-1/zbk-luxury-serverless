@@ -201,6 +201,9 @@ export default function AdminDashboardView() {
           <a className="secondary-link" href="#/admin/bookings">
             Booking management
           </a>
+          <a className="secondary-link" href="#/admin/settings">
+            Settings snapshot
+          </a>
           <button className="secondary-button admin-dashboard__refresh-button" type="button" onClick={() => setRefreshTick((tick) => tick + 1)}>
             Refresh overview
           </button>

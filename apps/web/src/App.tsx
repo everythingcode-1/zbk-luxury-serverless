@@ -21,6 +21,7 @@ import {
 } from '@zbk/shared';
 import AdminDashboardView from './AdminDashboardView';
 import AdminBookingsView from './AdminBookingsView';
+import AdminSettingsView from './AdminSettingsView';
 import AdminVehiclesView from './AdminVehiclesView';
 import AuthWorkspace from './AuthWorkspace';
 import BookingLandingView from './BookingLandingView';
@@ -924,6 +925,10 @@ export default function App() {
 
   if (routeState.pathname === '/admin') {
     return <AdminDashboardView />;
+  }
+
+  if (routeState.pathname === '/admin/settings') {
+    return <AdminSettingsView />;
   }
 
   if (routeState.pathname === '/admin/vehicles') {
