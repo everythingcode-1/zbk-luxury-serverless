@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   getVehicleCapacityBand,
   getVehicleCapacityBandLabel,
+  type ServiceType,
   type Vehicle,
   type VehicleCapacityBand,
   type VehicleDetailResponse,
@@ -114,6 +115,24 @@ function formatRating(vehicle?: Vehicle | null) {
 function formatLuggage(vehicle?: Vehicle | null) {
   if (vehicle?.luggage === null || vehicle?.luggage === undefined) return 'Luggage n/a';
   return `${vehicle.luggage} bags`;
+}
+
+function formatServiceLabel(serviceType: ServiceType) {
+  switch (serviceType) {
+    case 'AIRPORT_TRANSFER':
+      return 'Airport transfer';
+    case 'TRIP':
+      return 'One-way trip';
+    case 'RENTAL':
+      return 'Round-trip rental';
+    default:
+      return serviceType;
+  }
+}
+
+function formatMinimumHours(vehicle?: Vehicle | null) {
+  if (!vehicle?.minimumHours) return 'No minimum';
+  return `Min ${vehicle.minimumHours}h`;
 }
 
 function getVehicleImage(vehicle?: Vehicle | null) {
@@ -443,15 +462,20 @@ export default function FleetView() {
                   <span className="pill pill--muted">{formatRating(vehicle)}</span>
                   <span className="pill pill--muted">{formatLuggage(vehicle)}</span>
                 </div>
+                <div className="service-pills service-pills--tight" style={{ marginTop: 8 }}>
+                  {vehicle.services.slice(0, 3).map((service) => (
+                    <span key={service} className="pill pill--muted">
+                      {formatServiceLabel(service)}
+                    </span>
+                  ))}
+                  <span className="pill">{formatMinimumHours(vehicle)}</span>
+                </div>
                 <p className="muted">Capacity band: {getVehicleCapacityBandLabel(getVehicleCapacityBand(vehicle.capacity))}</p>
-                {vehicle.minimumHours ? (
-                  <p className="muted">Minimum booking window: {vehicle.minimumHours} hour{vehicle.minimumHours > 1 ? 's' : ''}</p>
-                ) : null}
                 {vehicle.features.length > 0 ? <p className="muted">{vehicle.features.slice(0, 2).join(' • ')}</p> : null}
                 <div className="service-pills">
                   {vehicle.services.map((service) => (
                     <span key={service} className="pill pill--muted">
-                      {service}
+                      {formatServiceLabel(service)}
                     </span>
                   ))}
                 </div>
@@ -497,6 +521,14 @@ export default function FleetView() {
                 {selectedVehicle.isLuxury ? <span className="pill">Luxury</span> : null}
                 <span className="pill pill--muted">{selectedVehicle.status}</span>
               </div>
+              <div className="service-pills service-pills--tight" style={{ marginTop: 12 }}>
+                {selectedVehicle.services.map((service) => (
+                  <span key={service} className="pill pill--muted">
+                    {formatServiceLabel(service)}
+                  </span>
+                ))}
+                <span className="pill">{formatMinimumHours(selectedVehicle)}</span>
+              </div>
             </div>
 
             <div className="vehicle-spotlight__summary">
@@ -510,10 +542,13 @@ export default function FleetView() {
               <ul className="detail-list">
                 <li>Model: {selectedVehicle.model}</li>
                 <li>Plate number: {selectedVehicle.plateNumber}</li>
+                <li>Color: {selectedVehicle.color}</li>
                 <li>Location: {selectedVehicle.location}</li>
                 <li>Capacity: {selectedVehicle.capacity} pax</li>
                 <li>Luggage: {selectedVehicle.luggage ?? '-'} bags</li>
                 <li>Transmission: {selectedVehicle.transmission || '-'}</li>
+                <li>Supported services: {selectedVehicle.services.map(formatServiceLabel).join(', ')}</li>
+                <li>Minimum booking window: {selectedVehicle.minimumHours ? `${selectedVehicle.minimumHours} hour(s)` : 'None'}</li>
                 <li>Rating: {selectedVehicle.rating ? `${selectedVehicle.rating.toFixed(1)} / 5` : '-'}</li>
                 <li>Airport transfer: ${selectedVehicle.pricing.airportTransfer}</li>
                 <li>6 hours: ${selectedVehicle.pricing.sixHours}</li>

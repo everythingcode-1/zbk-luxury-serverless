@@ -51,6 +51,10 @@ function formatServiceTypeLabel(serviceType: ServiceType) {
   }
 }
 
+function formatServiceLabel(serviceType: ServiceType) {
+  return formatServiceTypeLabel(serviceType);
+}
+
 function formatCalculatedHours(hours: number, additionalHours: number) {
   if (additionalHours > 0) {
     return `${hours} hours (${additionalHours} additional)`;
@@ -121,6 +125,8 @@ export default function BookingLandingView({
       : null,
     ['Calculated hours', formatCalculatedHours(derivedHours, derivedAdditionalHours)],
     bookingData?.hours ? ['Legacy payload hours', String(bookingData.hours)] : null,
+    selectedVehicle ? ['Supported services', selectedVehicle.services.map(formatServiceLabel).join(', ')] : null,
+    selectedVehicle?.minimumHours ? ['Minimum booking window', `${selectedVehicle.minimumHours} hour(s)`] : null,
   ].filter((item): item is [string, string] => Boolean(item));
 
   return (
@@ -194,11 +200,15 @@ export default function BookingLandingView({
               </div>
             </div>
           ) : null}
-          {selectedVehicle?.carouselOrder ? (
+          {selectedVehicle ? (
             <div className="service-pills" style={{ marginTop: 12 }}>
-              <span className="pill">Order #{selectedVehicle.carouselOrder}</span>
-              <span className="pill pill--muted">Matches the legacy feature ordering</span>
-              <span className="pill pill--muted">{selectedVehicle.plateNumber}</span>
+              {selectedVehicle.services.map((service) => (
+                <span key={service} className="pill pill--muted">
+                  {formatServiceLabel(service)}
+                </span>
+              ))}
+              <span className="pill">{selectedVehicle.minimumHours ? `Min ${selectedVehicle.minimumHours}h` : 'No minimum'}</span>
+              {selectedVehicle.carouselOrder ? <span className="pill pill--muted">Order #{selectedVehicle.carouselOrder}</span> : null}
             </div>
           ) : null}
           {selectedVehicleImage ? (

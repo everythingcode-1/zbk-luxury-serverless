@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-20 13:40 WIB
-- Estimated migration progress: 99.988%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. The remaining work is now concentrated on durability, final admin/settings consolidation, and the last runtime-scoped scaffolding rather than broad missing surfaces.
+- Last updated: 2026-04-20 15:48 WIB
+- Estimated migration progress: 99.991%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run tightened the public fleet-to-booking handoff by surfacing live supported-service and minimum-booking-window metadata in the fleet, booking landing, and booking workspace views, so the remaining work is now concentrated on durability, final admin/settings consolidation, and the last runtime-scoped scaffolding rather than broad missing surfaces.
 
 ## Completed this run
 
-- Added a Workers-safe SMTP relay settings and validation bridge to `#/admin/settings` with editable relay fields, validation/test actions, and last-test status surfaced in the UI.
-- Added `/api/admin/settings/email` GET/PATCH routes plus a `/api/admin/settings/email/test` route that persist the sanitized relay snapshot in Workers memory and record a validation result without relying on Nodemailer.
-- Kept the admin overview, booking management, and settings snapshot routes wired together so the admin dashboard now reaches the relay tooling directly.
-- Preserved the existing booking management route and admin dashboard links so the new email relay slice fits cleanly into the migrated admin flow.
+- Added live service-compatibility and minimum-booking-window badges to the public fleet cards and vehicle spotlight so the catalog now exposes more of the Workers vehicle contract.
+- Mirrored the same supported-service and minimum-hours metadata into the booking landing page and booking workspace spotlight so the fleet-to-booking handoff is clearer before checkout.
+- Kept the booking CTA and vehicle spotlight aligned with the live seed catalog, including color, supported services, and booking-window metadata for the selected vehicle.
+- Preserved the existing booking management route and admin dashboard links so the new public fleet/booking metadata slice fits cleanly into the migrated flow.
 
 ## Current migrated areas
 
@@ -20,7 +20,7 @@
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, and admin settings / SMTP relay snapshot plumbing.
 - Public vehicle detail response contract for the fleet spotlight view, including legacy plate-number metadata.
 - Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.

@@ -1181,12 +1181,15 @@ export default function App() {
 
                   <ul className="detail-list">
                     <li>Model: {spotlightVehicle.model}</li>
+                    <li>Plate number: {spotlightVehicle.plateNumber}</li>
+                    <li>Color: {spotlightVehicle.color}</li>
                     <li>Location: {spotlightVehicle.location}</li>
                     <li>Capacity: {spotlightVehicle.capacity} pax</li>
                     <li>Luggage: {spotlightVehicle.luggage ?? '-'} bags</li>
                     <li>Transmission: {spotlightVehicle.transmission || '-'}</li>
+                    <li>Supported services: {spotlightVehicle.services.map((service) => formatServiceTypeLabel(service)).join(', ')}</li>
+                    <li>Minimum booking window: {spotlightVehicle.minimumHours ? `${spotlightVehicle.minimumHours} hour(s)` : 'None'}</li>
                     <li>Rating: {spotlightVehicle.rating ? `${spotlightVehicle.rating.toFixed(1)} / 5` : '-'}</li>
-                    <li>Featured highlight: {selectedVehicleDetail?.meta.featuredFeature || spotlightVehicle.features[0] || '-'}</li>
                     <li>Airport transfer: ${spotlightVehicle.pricing.airportTransfer}</li>
                     <li>6 hours: ${spotlightVehicle.pricing.sixHours}</li>
                     <li>12 hours: ${spotlightVehicle.pricing.twelveHours}</li>
