@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-20 15:48 WIB
-- Estimated migration progress: 99.991%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run tightened the public fleet-to-booking handoff by surfacing live supported-service and minimum-booking-window metadata in the fleet, booking landing, and booking workspace views, so the remaining work is now concentrated on durability, final admin/settings consolidation, and the last runtime-scoped scaffolding rather than broad missing surfaces.
+- Last updated: 2026-04-20 17:52 WIB
+- Estimated migration progress: 99.992%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run added more legacy-style vehicle pricing metadata to the public booking entry points by surfacing luggage capacity plus 6-hour, 12-hour, and per-hour rates in the booking landing and booking demo views, which reduces the remaining public-fleet parity gap a little further while keeping the migration incremental.
 
 ## Completed this run
 
-- Added live service-compatibility and minimum-booking-window badges to the public fleet cards and vehicle spotlight so the catalog now exposes more of the Workers vehicle contract.
-- Mirrored the same supported-service and minimum-hours metadata into the booking landing page and booking workspace spotlight so the fleet-to-booking handoff is clearer before checkout.
-- Kept the booking CTA and vehicle spotlight aligned with the live seed catalog, including color, supported services, and booking-window metadata for the selected vehicle.
+- Added legacy-style vehicle pricing metadata to the public booking demo cards so each visible fleet preview now shows luggage capacity plus 6-hour, 12-hour, and per-hour rates.
+- Expanded the booking landing selected-vehicle panel with the same luggage and price-ladder details, keeping the handoff page closer to the legacy booking experience.
+- Kept the booking CTA and vehicle spotlight aligned with the live seed catalog, including supported services, minimum booking window, luggage capacity, and charter pricing metadata for the selected vehicle.
 - Preserved the existing booking management route and admin dashboard links so the new public fleet/booking metadata slice fits cleanly into the migrated flow.
 
 ## Current migrated areas
@@ -20,12 +20,12 @@
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, and admin settings / SMTP relay snapshot plumbing.
 - Public vehicle detail response contract for the fleet spotlight view, including legacy plate-number metadata.
 - Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, luggage and charter-price parity on the booking demo cards, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
-- Public booking landing page now shows the legacy ride-detail parity card for trip math, service inference, and airport note guidance before handoff.
+- Public booking landing page now shows the legacy ride-detail parity card for trip math, service inference, luggage capacity, charter pricing, and airport note guidance before handoff.
 - Public booking reference lookup flow using booking reference + customer email.
 - Public customer booking history snapshot flow using customer email as a transitional bridge.
 - Authenticated customer booking history snapshot flow using the Workers auth session and protected customer route.

@@ -11,6 +11,15 @@ function formatPrice(vehicle: Vehicle) {
   return price.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
+function formatCurrency(value: number) {
+  return `SGD ${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
+function formatLuggage(vehicle: Vehicle) {
+  if (vehicle.luggage === null || vehicle.luggage === undefined) return 'Luggage n/a';
+  return `${vehicle.luggage} bags`;
+}
+
 function BookingDemoVehicleCard({ vehicle }: { vehicle: Vehicle }) {
   const image = vehicle.images?.[0] || vehicle.imageUrl;
 
@@ -66,6 +75,13 @@ function BookingDemoVehicleCard({ vehicle }: { vehicle: Vehicle }) {
           {vehicle.features.slice(0, 3).join(' • ')}
         </p>
       ) : null}
+
+      <ul className="detail-list" style={{ marginTop: 12 }}>
+        <li>Luggage capacity: {formatLuggage(vehicle)}</li>
+        <li>6-hour charter: {formatCurrency(vehicle.pricing.sixHours)}</li>
+        <li>12-hour charter: {formatCurrency(vehicle.pricing.twelveHours)}</li>
+        <li>Per hour: {formatCurrency(vehicle.pricing.perHour)}</li>
+      </ul>
 
       <div className="quote-box" style={{ marginTop: 16 }}>
         <div>

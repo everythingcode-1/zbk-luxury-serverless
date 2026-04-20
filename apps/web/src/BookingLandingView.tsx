@@ -55,6 +55,15 @@ function formatServiceLabel(serviceType: ServiceType) {
   return formatServiceTypeLabel(serviceType);
 }
 
+function formatCurrency(value: number) {
+  return `SGD ${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
+function formatLuggage(vehicle?: Vehicle | null) {
+  if (vehicle?.luggage === null || vehicle?.luggage === undefined) return 'Luggage n/a';
+  return `${vehicle.luggage} bags`;
+}
+
 function formatCalculatedHours(hours: number, additionalHours: number) {
   if (additionalHours > 0) {
     return `${hours} hours (${additionalHours} additional)`;
@@ -126,7 +135,11 @@ export default function BookingLandingView({
     ['Calculated hours', formatCalculatedHours(derivedHours, derivedAdditionalHours)],
     bookingData?.hours ? ['Legacy payload hours', String(bookingData.hours)] : null,
     selectedVehicle ? ['Supported services', selectedVehicle.services.map(formatServiceLabel).join(', ')] : null,
+    selectedVehicle?.luggage != null ? ['Luggage capacity', formatLuggage(selectedVehicle)] : null,
     selectedVehicle?.minimumHours ? ['Minimum booking window', `${selectedVehicle.minimumHours} hour(s)`] : null,
+    selectedVehicle ? ['6-hour charter', formatCurrency(selectedVehicle.pricing.sixHours)] : null,
+    selectedVehicle ? ['12-hour charter', formatCurrency(selectedVehicle.pricing.twelveHours)] : null,
+    selectedVehicle ? ['Per hour', formatCurrency(selectedVehicle.pricing.perHour)] : null,
   ].filter((item): item is [string, string] => Boolean(item));
 
   return (
@@ -210,6 +223,14 @@ export default function BookingLandingView({
               <span className="pill">{selectedVehicle.minimumHours ? `Min ${selectedVehicle.minimumHours}h` : 'No minimum'}</span>
               {selectedVehicle.carouselOrder ? <span className="pill pill--muted">Order #{selectedVehicle.carouselOrder}</span> : null}
             </div>
+          ) : null}
+          {selectedVehicle ? (
+            <ul className="detail-list" style={{ marginTop: 12 }}>
+              <li>Luggage capacity: {formatLuggage(selectedVehicle)}</li>
+              <li>6-hour charter: {formatCurrency(selectedVehicle.pricing.sixHours)}</li>
+              <li>12-hour charter: {formatCurrency(selectedVehicle.pricing.twelveHours)}</li>
+              <li>Per hour: {formatCurrency(selectedVehicle.pricing.perHour)}</li>
+            </ul>
           ) : null}
           {selectedVehicleImage ? (
             <img

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { BookingLookupResponse, CreateCheckoutSessionResponse } from '@zbk/shared';
+import type { BookingLookupResponse, CreateCheckoutSessionResponse, VehicleDetailResponse } from '@zbk/shared';
 
 type BookingConfirmationViewProps = {
   searchParams: URLSearchParams;
@@ -27,6 +27,15 @@ function formatServiceTypeLabel(serviceType: BookingLookupResponse['data']['serv
   }
 }
 
+function formatCurrency(value: number) {
+  return `SGD ${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
+function formatLuggage(vehicle?: VehicleDetailResponse['data'] | null) {
+  if (vehicle?.luggage === null || vehicle?.luggage === undefined) return 'Luggage n/a';
+  return `${vehicle.luggage} bags`;
+}
+
 function buildConfirmationSummary(booking: BookingLookupResponse['data']) {
   return [
     ['Vehicle', booking.vehicleName],
@@ -50,9 +59,12 @@ export default function BookingConfirmationView({
   const reference = searchParams.get('reference')?.trim().toUpperCase() || '';
   const email = searchParams.get('email')?.trim().toLowerCase() || '';
   const [result, setResult] = useState<BookingLookupResponse | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<VehicleDetailResponse['data'] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingVehicle, setIsLoadingVehicle] = useState(false);
   const [isPreparingCheckout, setIsPreparingCheckout] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [vehicleError, setVehicleError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,6 +106,47 @@ export default function BookingConfirmationView({
     loadConfirmation();
     return () => controller.abort();
   }, [email, reference]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadVehicleDetails() {
+      const vehicleId = result?.data.vehicleId;
+      if (!vehicleId) {
+        setSelectedVehicle(null);
+        setVehicleError(null);
+        setIsLoadingVehicle(false);
+        return;
+      }
+
+      try {
+        setIsLoadingVehicle(true);
+        setVehicleError(null);
+
+        const response = await fetch(`${API_BASE_URL}/api/public/vehicles/${encodeURIComponent(vehicleId)}`, {
+          signal: controller.signal,
+        });
+        const payload: VehicleDetailResponse | { message?: string } = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.message || `Unable to load selected vehicle: ${response.status}`);
+        }
+
+        setSelectedVehicle((payload as VehicleDetailResponse).data);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setSelectedVehicle(null);
+        setVehicleError(err instanceof Error ? err.message : 'Unknown error loading selected vehicle');
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingVehicle(false);
+        }
+      }
+    }
+
+    loadVehicleDetails();
+    return () => controller.abort();
+  }, [result]);
 
   async function startCheckout() {
     if (!result) return;
@@ -218,6 +271,20 @@ export default function BookingConfirmationView({
               <small>Deposit ${booking.depositAmount.toFixed(2)}</small>
             </div>
           </div>
+
+          {isLoadingVehicle ? <p className="muted" style={{ marginTop: 12 }}>Loading selected vehicle details…</p> : null}
+          {vehicleError ? <div className="alert error" style={{ marginTop: 12 }}>{vehicleError}</div> : null}
+          {selectedVehicle ? (
+            <ul className="detail-list" style={{ marginTop: 16 }}>
+              <li>Plate number: {selectedVehicle.plateNumber}</li>
+              <li>Color: {selectedVehicle.color}</li>
+              <li>Luggage capacity: {formatLuggage(selectedVehicle)}</li>
+              <li>Supported services: {selectedVehicle.services.map(formatServiceTypeLabel).join(', ')}</li>
+              <li>6-hour charter: {formatCurrency(selectedVehicle.pricing.sixHours)}</li>
+              <li>12-hour charter: {formatCurrency(selectedVehicle.pricing.twelveHours)}</li>
+              <li>Per hour: {formatCurrency(selectedVehicle.pricing.perHour)}</li>
+            </ul>
+          ) : null}
 
           <ul className="detail-list" style={{ marginTop: 16 }}>
             {summaryItems.map(([label, value]) => (
