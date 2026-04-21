@@ -19,6 +19,7 @@ import {
   tripTypeOptions,
   vehicleCategoryOptions,
 } from '@zbk/shared';
+import AdminAnalysisView from './AdminAnalysisView';
 import AdminDashboardView from './AdminDashboardView';
 import AdminBookingsView from './AdminBookingsView';
 import AdminSettingsView from './AdminSettingsView';
@@ -925,6 +926,10 @@ export default function App() {
 
   if (routeState.pathname === '/admin') {
     return <AdminDashboardView />;
+  }
+
+  if (routeState.pathname === '/admin/analysis') {
+    return <AdminAnalysisView />;
   }
 
   if (routeState.pathname === '/admin/settings') {

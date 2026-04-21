@@ -195,6 +195,9 @@ export default function AdminDashboardView() {
           <a className="secondary-link" href="#/">
             Back to booking workspace
           </a>
+          <a className="secondary-link" href="#/admin/analysis">
+            Analysis snapshot
+          </a>
           <a className="secondary-link" href="#/admin/vehicles">
             Vehicle management
           </a>
