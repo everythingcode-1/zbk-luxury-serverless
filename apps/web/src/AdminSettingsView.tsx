@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { authProfileUpdateResponseSchema } from '@zbk/shared';
 import type {
   AdminDashboardResponse,
   AdminEmailRelaySettings,
@@ -19,6 +20,11 @@ type RelayFormState = {
   notifyOnBookings: boolean;
   recipientsCsv: string;
   testEmail: string;
+};
+
+type ProfileFormState = {
+  displayName: string;
+  phone: string;
 };
 
 function formatDateTime(value: string | null | undefined) {
@@ -86,6 +92,32 @@ function buildRelayPayload(form: RelayFormState): AdminEmailRelaySettingsUpdateR
   };
 }
 
+function buildProfileForm(session: AuthSession): ProfileFormState {
+  return {
+    displayName: session.user.displayName,
+    phone: session.user.phone || '',
+  };
+}
+
+function buildProfilePayload(form: ProfileFormState) {
+  const payload: {
+    displayName?: string;
+    phone?: string;
+  } = {};
+
+  const displayName = form.displayName.trim();
+  if (displayName) {
+    payload.displayName = displayName;
+  }
+
+  const phone = form.phone.trim();
+  if (phone) {
+    payload.phone = phone;
+  }
+
+  return payload;
+}
+
 export default function AdminSettingsView() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -101,11 +133,17 @@ export default function AdminSettingsView() {
     recipientsCsv: '',
     testEmail: '',
   });
+  const [profileForm, setProfileForm] = useState<ProfileFormState>({
+    displayName: '',
+    phone: '',
+  });
   const [isLoadingOverview, setIsLoadingOverview] = useState(true);
   const [isLoadingRelay, setIsLoadingRelay] = useState(true);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSavingRelay, setIsSavingRelay] = useState(false);
   const [isTestingRelay, setIsTestingRelay] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [relayMessage, setRelayMessage] = useState<string | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
 
@@ -147,6 +185,18 @@ export default function AdminSettingsView() {
     void bootstrapSession();
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (session) {
+      setProfileForm(buildProfileForm(session));
+      return;
+    }
+
+    setProfileForm({
+      displayName: '',
+      phone: '',
+    });
+  }, [session]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -247,6 +297,53 @@ export default function AdminSettingsView() {
     () => relayForm.recipientsCsv.split(',').map((item) => item.trim()).filter(Boolean).length,
     [relayForm.recipientsCsv],
   );
+
+  async function persistProfileSettings() {
+    if (!session || !isAdmin) {
+      return;
+    }
+
+    try {
+      setIsSavingProfile(true);
+      setProfileMessage(null);
+      setError(null);
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'PATCH',
+        signal: new AbortController().signal,
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(buildProfilePayload(profileForm)),
+      });
+      const payload: unknown = await response.json();
+
+      if (!response.ok) {
+        const responseMessage =
+          typeof payload === 'object' && payload && 'message' in payload
+            ? String((payload as { message?: string }).message || '')
+            : '';
+        throw new Error(responseMessage || 'Unable to save the admin profile.');
+      }
+
+      const responsePayload = authProfileUpdateResponseSchema.parse(payload);
+      setSession(responsePayload.data.session);
+      window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(responsePayload.data.session));
+      setProfileForm(buildProfileForm(responsePayload.data.session));
+      setProfileMessage(responsePayload.message || 'Admin profile updated.');
+      setRefreshTick((tick) => tick + 1);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
+      setProfileMessage(null);
+      setError(err instanceof Error ? err.message : 'Unable to save the admin profile.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  }
 
   async function persistRelaySettings(testOnly = false) {
     if (!session || !isAdmin) {
@@ -363,6 +460,7 @@ export default function AdminSettingsView() {
       ) : null}
 
       {error ? <div className="alert error">{error}</div> : null}
+      {profileMessage ? <div className="alert success">{profileMessage}</div> : null}
       {relayMessage ? <div className="alert success">{relayMessage}</div> : null}
 
       <section className="card-grid admin-dashboard__summary-grid">
@@ -425,29 +523,65 @@ export default function AdminSettingsView() {
         <article className="card">
           <div className="section-title-row">
             <div>
-              <h2>Current settings snapshot</h2>
-              <p className="muted">These values are safe to inspect in the browser while the durable settings backend is still pending.</p>
+              <h2>Current profile snapshot</h2>
+              <p className="muted">This keeps the legacy profile tab visible while the dedicated password flow still lives in the auth workspace.</p>
             </div>
+            <span className="pill pill--muted">{session?.user.role ?? 'SIGNED_OUT'}</span>
           </div>
 
           {session ? (
-            <div className="admin-session-grid">
-              <div>
-                <p className="muted">Display name</p>
-                <strong>{session.user.displayName}</strong>
-                <p className="muted">Email: {session.user.email}</p>
-                <p className="muted">Role: {session.user.role}</p>
-                {session.user.phone ? <p className="muted">Phone: {session.user.phone}</p> : null}
+            <div className="admin-settings-form">
+              <div className="admin-session-grid">
+                <label>
+                  Display name
+                  <input
+                    type="text"
+                    value={profileForm.displayName}
+                    onChange={(event) => setProfileForm((current) => ({ ...current, displayName: event.target.value }))}
+                    placeholder="Operations Admin"
+                  />
+                </label>
+                <label>
+                  Email address
+                  <input type="email" value={session.user.email} disabled />
+                </label>
               </div>
-              <ul className="detail-list">
-                <li>Token: {session.token.slice(0, 12)}…</li>
-                <li>Primary route: {session.primaryRoute}</li>
-                <li>Capabilities: {session.capabilities.map(formatCapability).join(', ')}</li>
-                <li>Last refreshed: {overview?.data.generatedAt ?? 'Waiting for overview payload'}</li>
-              </ul>
+
+              <div className="admin-session-grid">
+                <label>
+                  Phone number
+                  <input
+                    type="text"
+                    value={profileForm.phone}
+                    onChange={(event) => setProfileForm((current) => ({ ...current, phone: event.target.value }))}
+                    placeholder="+65 8123 4567"
+                  />
+                </label>
+                <div>
+                  <p className="muted">Security note</p>
+                  <p className="muted">
+                    Email and password changes remain available in the auth workspace for now, while this route updates the
+                    admin profile snapshot that the Workers session carries.
+                  </p>
+                  <ul className="detail-list">
+                    <li>Primary route: {session.primaryRoute}</li>
+                    <li>Capabilities: {session.capabilities.map(formatCapability).join(', ')}</li>
+                    <li>Last refreshed: {overview?.data.generatedAt ?? 'Waiting for overview payload'}</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="auth-session-panel__cta" style={{ marginTop: 20, alignItems: 'center' }}>
+                <button className="primary-button primary-button--inline" type="button" onClick={() => void persistProfileSettings()} disabled={isSavingProfile}>
+                  {isSavingProfile ? 'Saving…' : 'Save profile changes'}
+                </button>
+                <a className="secondary-link" href="#/auth">
+                  Open auth workspace
+                </a>
+              </div>
             </div>
           ) : (
-            <p className="muted">Sign in from the auth workspace to see the settings snapshot and route metadata.</p>
+            <p className="muted">Sign in from the auth workspace to update the profile snapshot and route metadata.</p>
           )}
         </article>
       </section>
@@ -590,8 +724,8 @@ export default function AdminSettingsView() {
         </div>
 
         <div className="service-pills service-pills--tight">
-          <span className="pill pill--muted">Profile edit form</span>
           <span className="pill pill--muted">Password update</span>
+          <span className="pill pill--muted">Email change handoff</span>
           <span className="pill pill--muted">Durable settings persistence</span>
           <span className="pill pill--muted">Server-side settings history</span>
         </div>

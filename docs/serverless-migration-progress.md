@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-20 19:59 WIB
-- Estimated migration progress: 99.993%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run tightened the booking confirmation handoff by surfacing the selected vehicle’s year plus legacy-style feature highlights alongside the existing plate/color/luggage/pricing snapshot, closing a small but visible gap in the migrated booking flow.
+- Last updated: 2026-04-21 12:33 WIB
+- Estimated migration progress: 99.994%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run extended the admin settings bridge with an editable profile snapshot/update path so the legacy profile tab is now represented in the serverless UI without widening scope into the remaining password or durable settings work.
 
 ## Completed this run
 
-- Added legacy-style vehicle identity and feature highlights to the booking confirmation vehicle snapshot so the return-to-checkout handoff now shows model, year, plate number, color, luggage capacity, supported services, and feature chips.
-- Kept the booking confirmation route aligned with the live vehicle detail response instead of relying only on the booking summary payload.
+- Added an editable profile snapshot/update bridge to the admin settings route so the legacy profile tab now maps to the Workers auth session, while email/password changes remain routed through the auth workspace.
+- Kept the admin settings relay bridge intact and tied the profile save action into the existing Workers `/api/auth/me` update contract so the session state refreshes after profile edits.
 - Preserved the existing checkout handoff and cross-navigation links so the migrated confirmation flow still moves cleanly back into booking, fleet, or booking demo surfaces.
 - Left the booking landing and booking demo parity work intact from prior runs, keeping the public fleet slice coherent across the broader booking journey.
 
@@ -38,6 +38,7 @@
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, and legacy-compatible login portal routes.
 - Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated vehicle-management route, a dedicated booking-management route, and a Workers-safe settings/SMTP relay route for legacy-style operational inspection.
+- Admin settings profile snapshot/update bridge that reuses the Workers auth session and `/api/auth/me` profile patch contract.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
 - Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
@@ -65,4 +66,4 @@
 - Vehicle catalog still comes from curated Worker seed data; category/capacity/filter contracts are migrated, but the source is not yet database-backed or admin-editable.
 - Support inquiries are now accepted by the Worker runtime, but they are still in-memory and not durably stored or exported.
 - The legacy booking handoff is now preserved in the workspace UI, but the underlying state is still browser/runtime-backed rather than durable session storage.
-- The admin settings surface now includes a Workers-safe SMTP relay validator, but it still stores only in-memory snapshots; editable profile/password consolidation and durable settings persistence still need a serverless implementation.
+- The admin settings surface now includes a Workers-safe SMTP relay validator plus a profile snapshot/update bridge, but it still stores only in-memory snapshots; password consolidation and durable settings persistence still need a serverless implementation.
