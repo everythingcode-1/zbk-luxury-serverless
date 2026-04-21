@@ -1298,6 +1298,26 @@ app.get('/api/admin/bookings', (c) => {
   );
 });
 
+app.get('/api/admin/blog', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to view blog management.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Blog management access requires an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+  const payload = buildBlogArticlesResponse();
+
+  return c.json({
+    ...payload,
+    message: 'Loaded the Workers-backed admin blog snapshot.',
+  });
+});
+
 app.post('/api/public/contact', zValidator('json', contactInquirySchema), (c) => {
   const payload = c.req.valid('json');
   const now = new Date();

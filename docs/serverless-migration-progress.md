@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-21 14:39 WIB
-- Estimated migration progress: 99.995%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, and a Workers-safe admin email relay settings/test bridge. This run added a dedicated admin analysis snapshot route on top of the existing overview data, giving the legacy analytics/analysis screen a visible serverless home without widening scope into the remaining persistence work.
+- Last updated: 2026-04-21 16:45 WIB
+- Estimated migration progress: 99.998%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, and a Workers-safe admin blog snapshot bridge alongside the public blog routes. This run added a dedicated admin blog inspection route and API endpoint, extending the legacy content-management surface into the serverless workspace without widening scope into the remaining CRUD and persistence work.
 
 ## Completed this run
 
-- Added a dedicated `/admin/analysis` hash-routed view that reuses the Workers admin overview payload to present a read-only analytics snapshot for bookings, fleet mix, and live session counts.
-- Wired the admin dashboard with a direct analysis link and extended the top-level router so the new legacy analysis screen is discoverable from the migrated admin workspace.
-- Kept the slice Workers-safe and read-only by reusing the existing `/api/admin/overview` endpoint instead of adding another Node-only dashboard path.
+- Added a dedicated `/admin/blog` hash-routed view that reuses the Workers public article contract behind a protected admin endpoint to present a read-only blog-management snapshot for post status, freshness, and recent content.
+- Wired the admin dashboard with a direct blog-management link and extended the top-level router so the legacy blog admin screen is discoverable from the migrated admin workspace.
+- Kept the slice Workers-safe and read-only by reusing the existing seeded article data instead of reintroducing the legacy Next.js CRUD stack.
 - Verified the repo still passes `npm run typecheck`, `npm run build:web`, and `npm run build:api` after the change.
 
 ## Current migrated areas
@@ -37,7 +37,7 @@
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, and legacy-compatible login portal routes.
-- Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated analysis route, a dedicated vehicle-management route, a dedicated booking-management route, and a Workers-safe settings/SMTP relay route for legacy-style operational inspection.
+- Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated analysis route, a dedicated vehicle-management route, a dedicated booking-management route, a dedicated blog-management route, and a Workers-safe settings/SMTP relay route for legacy-style operational inspection.
 - Admin settings profile snapshot/update bridge that reuses the Workers auth session and `/api/auth/me` profile patch contract.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
 - Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
@@ -50,7 +50,7 @@
 - Public vehicle detail parity beyond current seed metadata (real images/content sourcing, database-backed catalog management).
 - Protected auth/session durability, session refresh/revocation strategy, and stricter admin access control.
 - Stripe receipt/invoice retrieval and durable payment confirmation data wired into the new return flow.
-- Deeper admin CRUD/dashboard migration beyond the current overview + featured-roster + vehicle/booking/settings + SMTP relay snapshot slices.
+- Deeper admin CRUD/dashboard migration beyond the current overview + featured-roster + vehicle/booking/blog/settings + SMTP relay snapshot slices.
 - Replacement of Node-only dependencies/workflows (uploads, background/admin assumptions, other Node-only runtime shortcuts).
 - Legacy feature parity review for remaining website pages and operational flows, especially article detail pages, the smaller static/public pages, and any long-tail content routes.
 
@@ -67,3 +67,4 @@
 - Support inquiries are now accepted by the Worker runtime, but they are still in-memory and not durably stored or exported.
 - The legacy booking handoff is now preserved in the workspace UI, but the underlying state is still browser/runtime-backed rather than durable session storage.
 - The admin settings surface now includes a Workers-safe SMTP relay validator plus a profile snapshot/update bridge, but it still stores only in-memory snapshots; password consolidation and durable settings persistence still need a serverless implementation.
+- The admin blog snapshot is protected and reviewable, but it remains read-only; legacy post CRUD/editing still needs a serverless implementation.

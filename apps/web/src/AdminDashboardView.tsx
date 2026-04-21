@@ -204,6 +204,9 @@ export default function AdminDashboardView() {
           <a className="secondary-link" href="#/admin/bookings">
             Booking management
           </a>
+          <a className="secondary-link" href="#/admin/blog">
+            Blog management
+          </a>
           <a className="secondary-link" href="#/admin/settings">
             Settings snapshot
           </a>
