@@ -207,6 +207,9 @@ export default function AdminDashboardView() {
           <a className="secondary-link" href="#/admin/blog">
             Blog management
           </a>
+          <a className="secondary-link" href="#/admin/hero-section">
+            Hero section
+          </a>
           <a className="secondary-link" href="#/admin/settings">
             Settings snapshot
           </a>

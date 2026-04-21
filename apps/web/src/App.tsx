@@ -23,6 +23,7 @@ import AdminAnalysisView from './AdminAnalysisView';
 import AdminDashboardView from './AdminDashboardView';
 import AdminBookingsView from './AdminBookingsView';
 import AdminBlogView from './AdminBlogView';
+import AdminHeroSectionView from './AdminHeroSectionView';
 import AdminSettingsView from './AdminSettingsView';
 import AdminVehiclesView from './AdminVehiclesView';
 import AuthWorkspace from './AuthWorkspace';
@@ -931,6 +932,10 @@ export default function App() {
 
   if (routeState.pathname === '/admin/analysis') {
     return <AdminAnalysisView />;
+  }
+
+  if (routeState.pathname === '/admin/hero-section') {
+    return <AdminHeroSectionView />;
   }
 
   if (routeState.pathname === '/admin/settings') {

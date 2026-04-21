@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import { zValidator } from '@hono/zod-validator';
 import { buildBlogArticleResponse, buildBlogArticlesResponse, buildBlogRssXml } from './blogArticles';
+import { buildHeroSectionResponse, buildHeroSectionsResponse } from './heroSections';
 import {
   authLoginRequestSchema,
   authLogoutResponseSchema,
@@ -1318,6 +1319,21 @@ app.get('/api/admin/blog', (c) => {
   });
 });
 
+app.get('/api/admin/hero-section', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to view hero section management.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Hero section management access requires an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+  return c.json(buildHeroSectionsResponse());
+});
+
 app.post('/api/public/contact', zValidator('json', contactInquirySchema), (c) => {
   const payload = c.req.valid('json');
   const now = new Date();
@@ -1392,6 +1408,10 @@ app.get('/api/public/vehicles/:id', (c) => {
       },
     }),
   );
+});
+
+app.get('/api/public/hero-section', (c) => {
+  return c.json(buildHeroSectionResponse());
 });
 
 app.get('/api/public/articles', (c) => {
