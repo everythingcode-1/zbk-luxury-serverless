@@ -81,6 +81,8 @@ export const authProfileUpdateRequestSchema = z.object({
   displayName: z.string().min(2).max(80).optional(),
   email: z.string().email().optional(),
   phone: z.string().trim().min(5).max(30).optional(),
+  currentPassword: z.string().min(8).max(255).optional(),
+  newPassword: z.string().min(8).max(255).optional(),
 });
 
 export type AuthProfileUpdateRequest = z.infer<typeof authProfileUpdateRequestSchema>;

@@ -626,12 +626,23 @@ function updateAuthAccountProfile(session: AuthSession, payload: AuthProfileUpda
     throw new Error('Email already exists.');
   }
 
+  const passwordChangeRequested = Boolean(payload.currentPassword || payload.newPassword);
+  if (passwordChangeRequested && (!payload.currentPassword || !payload.newPassword)) {
+    throw new Error('Both the current and new password are required to change the password.');
+  }
+
+  if (payload.currentPassword && payload.currentPassword !== account.password) {
+    throw new Error('Current password is incorrect.');
+  }
+
   const nextDisplayName = payload.displayName?.trim() || account.displayName;
   const nextPhone = payload.phone?.trim();
+  const nextPassword = payload.newPassword?.trim() || account.password;
   const nextAccount: AuthAccount = {
     ...account,
     email: nextEmail,
     displayName: nextDisplayName,
+    password: nextPassword,
     ...(nextPhone ? { phone: nextPhone } : {}),
   };
 

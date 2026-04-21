@@ -27,6 +27,12 @@ type ProfileFormState = {
   phone: string;
 };
 
+type PasswordFormState = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
 function formatDateTime(value: string | null | undefined) {
   if (!value) return '—';
 
@@ -118,6 +124,25 @@ function buildProfilePayload(form: ProfileFormState) {
   return payload;
 }
 
+function buildPasswordPayload(form: PasswordFormState) {
+  const currentPassword = form.currentPassword.trim();
+  const newPassword = form.newPassword.trim();
+  const confirmPassword = form.confirmPassword.trim();
+
+  if (!currentPassword || !newPassword) {
+    throw new Error('Enter both your current password and a new password to update the account password.');
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new Error('New passwords do not match.');
+  }
+
+  return {
+    currentPassword,
+    newPassword,
+  };
+}
+
 export default function AdminSettingsView() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -137,13 +162,20 @@ export default function AdminSettingsView() {
     displayName: '',
     phone: '',
   });
+  const [passwordForm, setPasswordForm] = useState<PasswordFormState>({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [isLoadingOverview, setIsLoadingOverview] = useState(true);
   const [isLoadingRelay, setIsLoadingRelay] = useState(true);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [isSavingRelay, setIsSavingRelay] = useState(false);
   const [isTestingRelay, setIsTestingRelay] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
   const [relayMessage, setRelayMessage] = useState<string | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
 
@@ -197,6 +229,14 @@ export default function AdminSettingsView() {
       phone: '',
     });
   }, [session]);
+
+  useEffect(() => {
+    setPasswordForm({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+  }, [session?.token]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -345,6 +385,56 @@ export default function AdminSettingsView() {
     }
   }
 
+  async function persistPasswordSettings() {
+    if (!session || !isAdmin) {
+      return;
+    }
+
+    try {
+      setIsSavingPassword(true);
+      setPasswordMessage(null);
+      setError(null);
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'PATCH',
+        signal: new AbortController().signal,
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(buildPasswordPayload(passwordForm)),
+      });
+      const payload: unknown = await response.json();
+
+      if (!response.ok) {
+        const responseMessage =
+          typeof payload === 'object' && payload && 'message' in payload
+            ? String((payload as { message?: string }).message || '')
+            : '';
+        throw new Error(responseMessage || 'Unable to update the admin password.');
+      }
+
+      const responsePayload = authProfileUpdateResponseSchema.parse(payload);
+      setSession(responsePayload.data.session);
+      window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(responsePayload.data.session));
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+      setPasswordMessage(responsePayload.message || 'Admin password updated.');
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
+      setPasswordMessage(null);
+      setError(err instanceof Error ? err.message : 'Unable to update the admin password.');
+    } finally {
+      setIsSavingPassword(false);
+    }
+  }
+
   async function persistRelaySettings(testOnly = false) {
     if (!session || !isAdmin) {
       return;
@@ -417,7 +507,7 @@ export default function AdminSettingsView() {
         <p className="eyebrow">ZBK Luxury Serverless</p>
         <h1>Admin settings now include a Workers-safe SMTP relay bridge.</h1>
         <p>
-          This slice migrates the legacy email settings panel into the serverless app. The new route keeps the admin
+          This slice migrates the legacy admin settings bridge into the serverless app. The new route keeps the admin
           snapshot visible, lets reviewers edit relay configuration, and records a validation result without depending
           on the legacy Nodemailer runtime.
         </p>
@@ -461,6 +551,7 @@ export default function AdminSettingsView() {
 
       {error ? <div className="alert error">{error}</div> : null}
       {profileMessage ? <div className="alert success">{profileMessage}</div> : null}
+      {passwordMessage ? <div className="alert success">{passwordMessage}</div> : null}
       {relayMessage ? <div className="alert success">{relayMessage}</div> : null}
 
       <section className="card-grid admin-dashboard__summary-grid">
@@ -585,6 +676,78 @@ export default function AdminSettingsView() {
           )}
         </article>
       </section>
+
+      <article className="card" style={{ marginTop: 20 }}>
+        <div className="section-title-row">
+          <div>
+            <h2>Password update handoff</h2>
+            <p className="muted">
+              The migrated settings page now mirrors the legacy password tab by updating the active Workers auth account
+              without leaving the admin workspace.
+            </p>
+          </div>
+          <span className={`pill ${session?.user.role === 'ADMIN' ? '' : 'pill--muted'}`}>{session?.user.role ?? 'SIGNED_OUT'}</span>
+        </div>
+
+        {session ? (
+          <div className="admin-settings-form">
+            <div className="admin-session-grid">
+              <label>
+                Current password
+                <input
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(event) => setPasswordForm((current) => ({ ...current, currentPassword: event.target.value }))}
+                  placeholder="Current account password"
+                />
+              </label>
+              <label>
+                New password
+                <input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(event) => setPasswordForm((current) => ({ ...current, newPassword: event.target.value }))}
+                  placeholder="New secure password"
+                />
+              </label>
+            </div>
+
+            <div className="admin-session-grid">
+              <label>
+                Confirm new password
+                <input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) => setPasswordForm((current) => ({ ...current, confirmPassword: event.target.value }))}
+                  placeholder="Repeat the new password"
+                />
+              </label>
+              <div>
+                <p className="muted">Security note</p>
+                <p className="muted">
+                  Password changes stay local to the Workers auth account store and keep the current session active.
+                </p>
+                <ul className="detail-list">
+                  <li>Matches the legacy password change tab inside admin settings.</li>
+                  <li>Refreshes the browser session snapshot without forcing a relogin.</li>
+                  <li>Use the auth workspace to test login/logout after changing credentials.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="auth-session-panel__cta" style={{ marginTop: 20, alignItems: 'center' }}>
+              <button className="primary-button primary-button--inline" type="button" onClick={() => void persistPasswordSettings()} disabled={isSavingPassword}>
+                {isSavingPassword ? 'Updating…' : 'Update password'}
+              </button>
+              <a className="secondary-link" href="#/auth">
+                Open auth workspace
+              </a>
+            </div>
+          </div>
+        ) : (
+          <p className="muted">Sign in from the auth workspace to change the active password snapshot.</p>
+        )}
+      </article>
 
       <section className="card" style={{ marginTop: 20 }}>
         <div className="section-title-row">
@@ -718,16 +881,16 @@ export default function AdminSettingsView() {
       <section className="card" style={{ marginTop: 20 }}>
         <div className="section-title-row">
           <div>
-            <h2>Remaining legacy settings work</h2>
-            <p className="muted">This route is a migration bridge, not the final durable admin console.</p>
+            <h2>Still pending after this slice</h2>
+            <p className="muted">The settings bridge is better aligned with the legacy page, but durability still needs work.</p>
           </div>
         </div>
 
         <div className="service-pills service-pills--tight">
-          <span className="pill pill--muted">Password update</span>
-          <span className="pill pill--muted">Email change handoff</span>
           <span className="pill pill--muted">Durable settings persistence</span>
           <span className="pill pill--muted">Server-side settings history</span>
+          <span className="pill pill--muted">Email change handoff</span>
+          <span className="pill pill--muted">General company settings</span>
         </div>
       </section>
     </main>
