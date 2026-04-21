@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getVehicleCapacityBand,
   getVehicleCapacityBandLabel,
@@ -17,6 +17,10 @@ type VehiclesResponse = {
     categories: string[];
     source: string;
   };
+};
+
+type FleetViewProps = {
+  searchParams: URLSearchParams;
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
@@ -157,7 +161,20 @@ function sortVehiclesByCarouselOrder(left: Vehicle, right: Vehicle) {
   return left.id.localeCompare(right.id);
 }
 
-export default function FleetView() {
+function buildFleetHash(searchQuery: string, vehicleId: string) {
+  const params = new URLSearchParams(searchQuery);
+
+  if (vehicleId) {
+    params.set('vehicleId', vehicleId);
+  } else {
+    params.delete('vehicleId');
+  }
+
+  const nextQuery = params.toString();
+  return nextQuery ? `#/fleet?${nextQuery}` : '#/fleet';
+}
+
+export default function FleetView({ searchParams }: FleetViewProps) {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [vehicleCategories, setVehicleCategories] = useState<string[]>([]);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
@@ -165,7 +182,7 @@ export default function FleetView() {
   const [selectedCategory, setSelectedCategory] = useState<'ALL' | string>('ALL');
   const [selectedCapacityBand, setSelectedCapacityBand] = useState<VehicleCapacityBand | 'ALL'>('ALL');
   const [luxuryOnly, setLuxuryOnly] = useState(false);
-  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+  const [selectedVehicleId, setSelectedVehicleId] = useState(() => searchParams.get('vehicleId') || '');
   const [selectedVehicleDetail, setSelectedVehicleDetail] = useState<VehicleDetailResponse | null>(null);
   const [isLoadingVehicleDetail, setIsLoadingVehicleDetail] = useState(false);
   const [vehicleDetailError, setVehicleDetailError] = useState<string | null>(null);
@@ -240,18 +257,49 @@ export default function FleetView() {
     [selectedVehicleId, visibleVehicles],
   );
 
+  const routeSearchQuery = searchParams.toString();
+
+  const updateFleetRoute = useCallback(
+    (vehicleId: string) => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+
+      window.location.hash = buildFleetHash(routeSearchQuery, vehicleId);
+    },
+    [routeSearchQuery],
+  );
+
   useEffect(() => {
+    const queryVehicleId = searchParams.get('vehicleId') || '';
+    if (queryVehicleId && queryVehicleId !== selectedVehicleId) {
+      setSelectedVehicleId(queryVehicleId);
+    }
+  }, [searchParams, selectedVehicleId]);
+
+  useEffect(() => {
+    const queryVehicleId = searchParams.get('vehicleId') || '';
+
     if (!visibleVehicles.length) {
-      setSelectedVehicleId('');
+      if (!isLoadingVehicles && selectedVehicleId) {
+        setSelectedVehicleId('');
+        if (queryVehicleId) {
+          updateFleetRoute('');
+        }
+      }
       setSelectedVehicleDetail(null);
       setVehicleDetailError(null);
       return;
     }
 
     if (!visibleVehicles.some((vehicle) => vehicle.id === selectedVehicleId)) {
-      setSelectedVehicleId(visibleVehicles[0].id);
+      const nextVehicleId = visibleVehicles[0].id;
+      setSelectedVehicleId(nextVehicleId);
+      if (queryVehicleId || selectedVehicleId) {
+        updateFleetRoute(nextVehicleId);
+      }
     }
-  }, [selectedVehicleId, visibleVehicles]);
+  }, [isLoadingVehicles, searchParams, selectedVehicleId, updateFleetRoute, visibleVehicles]);
 
   useEffect(() => {
     if (!selectedVehicleId) {
@@ -437,7 +485,10 @@ export default function FleetView() {
                 key={vehicle.id}
                 type="button"
                 className={`vehicle-card ${vehicle.id === selectedVehicleId ? 'vehicle-card--active' : ''}`}
-                onClick={() => setSelectedVehicleId(vehicle.id)}
+                onClick={() => {
+                  setSelectedVehicleId(vehicle.id);
+                  updateFleetRoute(vehicle.id);
+                }}
               >
                 <div className="vehicle-card__header">
                   <div>
@@ -537,6 +588,11 @@ export default function FleetView() {
               <p className="muted">
                 Loaded from {selectedVehicleDetail?.meta.source || 'the live catalog seed'}
                 {selectedVehicleDetail?.meta.featuredFeature ? ` • featured: ${selectedVehicleDetail.meta.featuredFeature}` : ''}
+              </p>
+              <p className="muted" style={{ marginTop: 0 }}>
+                {routeSearchQuery.includes('vehicleId=')
+                  ? 'This fleet selection is synced to the hash URL so the current vehicle can be shared and reopened.'
+                  : 'Picking a vehicle updates the hash URL so the fleet view stays deep-linkable.'}
               </p>
 
               <ul className="detail-list">

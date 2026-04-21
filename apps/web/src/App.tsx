@@ -883,7 +883,7 @@ export default function App() {
   }
 
   if (routeState.pathname === '/fleet') {
-    return <FleetView />;
+    return <FleetView searchParams={routeState.searchParams} />;
   }
 
   if (routeState.pathname === '/services') {

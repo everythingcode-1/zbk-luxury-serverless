@@ -1,15 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-21 18:51 WIB
-- Estimated migration progress: 99.9991%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, and a Workers-safe admin blog snapshot bridge alongside the public blog routes. This run added a protected hero-section inspection route plus Workers-safe public/admin hero endpoints, extending the legacy homepage content-management surface into the serverless workspace without widening scope into the remaining CRUD and persistence work.
+- Last updated: 2026-04-21 20:58 WIB
+- Estimated migration progress: 99.9992%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, and a Workers-safe admin blog snapshot bridge alongside the public blog routes. This run added shareable fleet deep-linking so public vehicle selection now survives hash navigation and can be reopened from a direct URL, tightening the booking/vehicle migration without widening scope into the remaining CRUD and persistence work.
 
 ## Completed this run
 
-- Added a dedicated `/admin/hero-section` hash-routed view that reuses a protected Workers admin endpoint to present the legacy homepage hero contract as a read-only inspection snapshot.
-- Added a Workers-safe public `/api/public/hero-section` endpoint plus the matching admin `/api/admin/hero-section` snapshot so the hero content model now exists in the serverless workspace.
-- Wired the admin dashboard with a direct hero-section link and extended the top-level router so the legacy hero admin screen is discoverable from the migrated admin workspace.
-- Kept the slice Workers-safe and read-only by seeding the hero records in the Worker runtime instead of reintroducing the legacy Next.js CRUD/upload stack.
+- Added fleet deep-linking so the public vehicle view can open a specific vehicle from `#/fleet?vehicleId=...` and keep the selected card in sync with the hash URL.
+- Preserved the selected vehicle across navigation and filtering so direct fleet links reopen the same vehicle detail rather than resetting to an arbitrary default.
+- Surfaced the new deep-link behavior in the fleet detail UI so the public vehicle migration is visibly shareable and reviewable.
+- Kept the slice Workers-safe and read-only by reusing the existing catalog API and hash router instead of reintroducing the legacy Next.js page stack.
 - Verified the repo still passes `npm run typecheck`, `npm run build:web`, and `npm run build:api` after the change.
 
 ## Current migrated areas
@@ -21,7 +21,7 @@
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, and admin settings / SMTP relay snapshot plumbing.
 - Public vehicle detail response contract for the fleet spotlight view, including legacy plate-number metadata.
 - Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, luggage and charter-price parity on the booking demo cards, image gallery spotlighting, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, luggage and charter-price parity on the booking demo cards, image gallery spotlighting, hash-synced fleet deep links, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.
