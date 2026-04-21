@@ -38,7 +38,9 @@ import MyBookingsView from './MyBookingsView';
 import ServicesView from './ServicesView';
 import HowToBookView from './HowToBookView';
 import AboutView from './AboutView';
+import HomepageLegacyHighlights from './HomepageLegacyHighlights';
 import LoginPortalView from './LoginPortalView';
+import PageSeo from './PageSeo';
 import { getLegacyBookingVehicleId, parseLegacyBookingData } from './legacyBookingData';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8787';
@@ -122,6 +124,39 @@ const initialLookupForm: BookingLookupFormState = {
 
 const initialHistoryForm: BookingHistoryFormState = {
   email: '',
+};
+
+const homepageSeo = {
+  title: 'ZBK Limousine Tours - Premium Limousine Service in Singapore | Serverless Booking',
+  description:
+    'Browse the premium ZBK limousine service in Singapore, compare luxury vehicles, and continue the booking flow in the React/Vite + Cloudflare Workers workspace.',
+  canonicalUrl: 'https://www.zbktransportservices.com',
+  keywords: [
+    'limousine service Singapore',
+    'limo rental Singapore',
+    'airport transfer Singapore',
+    'corporate limousine Singapore',
+    'ZBK Limousine Tours',
+    'Toyota Alphard rental',
+    'chauffeur service Singapore',
+    'luxury transport Singapore',
+  ],
+  jsonLd: {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    url: 'https://www.zbktransportservices.com',
+    name: 'ZBK Limousine Tours',
+    alternateName: 'ZBK Transport Services',
+    description:
+      'Premium limousine service in Singapore with a serverless booking experience powered by React, Vite, and Cloudflare Workers.',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+65 9747 6453',
+      contactType: 'customer service',
+      email: 'zbklimo@gmail.com',
+      availableLanguage: ['English', 'Indonesian'],
+    },
+  },
 };
 
 function buildBookingFormFromLegacyData(draft: ReturnType<typeof parseLegacyBookingData>): BookingFormState {
@@ -1024,6 +1059,7 @@ export default function App() {
 
   return (
     <main className="page">
+      <PageSeo {...homepageSeo} />
       <section className="hero">
         <p className="eyebrow">ZBK Luxury Serverless</p>
         <h1>Public vehicles + booking draft flow sudah bergerak ke Workers.</h1>
@@ -1063,6 +1099,8 @@ export default function App() {
           </a>
         </div>
       </section>
+
+      <HomepageLegacyHighlights />
 
       {workspacePrefillMessage ? <div className="alert success">{workspacePrefillMessage}</div> : null}
 

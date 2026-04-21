@@ -1,16 +1,15 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-21 20:58 WIB
-- Estimated migration progress: 99.9992%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, and a Workers-safe admin blog snapshot bridge alongside the public blog routes. This run added shareable fleet deep-linking so public vehicle selection now survives hash navigation and can be reopened from a direct URL, tightening the booking/vehicle migration without widening scope into the remaining CRUD and persistence work.
+- Last updated: 2026-04-21 23:04 WIB
+- Estimated migration progress: 99.9993%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, and the public blog routes. This run added legacy homepage service highlights plus homepage SEO/organization schema metadata to the root route, tightening the public marketing parity while staying within the current static/serverless contract.
 
 ## Completed this run
 
-- Added fleet deep-linking so the public vehicle view can open a specific vehicle from `#/fleet?vehicleId=...` and keep the selected card in sync with the hash URL.
-- Preserved the selected vehicle across navigation and filtering so direct fleet links reopen the same vehicle detail rather than resetting to an arbitrary default.
-- Surfaced the new deep-link behavior in the fleet detail UI so the public vehicle migration is visibly shareable and reviewable.
-- Kept the slice Workers-safe and read-only by reusing the existing catalog API and hash router instead of reintroducing the legacy Next.js page stack.
-- Verified the repo still passes `npm run typecheck`, `npm run build:web`, and `npm run build:api` after the change.
+- Added a legacy homepage parity section to the root React/Vite route with the original service-highlight cards and trust-signal pills.
+- Added homepage SEO metadata and organization JSON-LD to the root route so the public landing page now mirrors the legacy marketing surface more closely.
+- Kept the new slice read-only and Workers-safe by reusing existing static route rendering rather than introducing new persistence or Node-only dependencies.
+- Verified the repo passes `npm run typecheck`, `npm run build:web`, and `npm run build:api` after the change.
 
 ## Current migrated areas
 
@@ -25,6 +24,7 @@
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.
+- Root homepage parity section with legacy service highlights, trust-signal pills, and SEO/organization JSON-LD metadata.
 - Public booking draft submission flow with typed response contract, airport pickup/dropoff detail notes, legacy-inspired trip type handling, auto service detection, auto-calculated round-trip rental hours, booking reference generation, and payment readiness metadata.
 - Public booking landing page now shows the legacy ride-detail parity card for trip math, service inference, luggage capacity, charter pricing, and airport note guidance before handoff.
 - Public booking confirmation handoff with live vehicle rehydration, including model/year/plate/color/service/feature details from the Workers API.
