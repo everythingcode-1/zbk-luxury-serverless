@@ -42,6 +42,12 @@ export default function LoginPortalView() {
         </a>
       </div>
 
+      <div className="service-pills service-pills--tight">
+        <a className="secondary-link" href="#/admin-test">
+          Open admin auth test console
+        </a>
+      </div>
+
       <p className="muted auth-workspace__note">
         This route is a small parity bridge for the old login portal while the new Workers session model keeps the actual auth flow in one shared workspace.
       </p>

@@ -25,6 +25,7 @@ import AdminBookingsView from './AdminBookingsView';
 import AdminBlogView from './AdminBlogView';
 import AdminHeroSectionView from './AdminHeroSectionView';
 import AdminSettingsView from './AdminSettingsView';
+import AdminTestView from './AdminTestView';
 import AdminVehiclesView from './AdminVehiclesView';
 import AuthWorkspace from './AuthWorkspace';
 import BookingLandingView from './BookingLandingView';
@@ -1004,6 +1005,10 @@ export default function App() {
         workspaceDescription="Pre-filled admin access mirrors the legacy login portal and launches the Workers auth workspace with the admin demo account."
       />
     );
+  }
+
+  if (routeState.pathname === '/admin-test') {
+    return <AdminTestView />;
   }
 
   if (routeState.pathname === '/login/customer') {
