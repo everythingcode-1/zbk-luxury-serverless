@@ -1,14 +1,14 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-26 22:21 WIB
-- Estimated migration progress: 99.9994%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, and the public blog routes. This run added a legacy booking-demo parity shell plus route-level SEO metadata and footer/CTA treatment, tightening the public booking surface while staying within the current static/serverless contract.
+- Last updated: 2026-04-27 00:27 WIB
+- Estimated migration progress: 99.9996%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, and the public blog routes. This run added a Workers-safe admin vehicle catalog edit snapshot with a dedicated API route and editable roster panel, moving the legacy vehicle-management surface beyond inspection-only parity while still staying inside the current seed-backed contract.
 
 ## Completed this run
 
-- Added a legacy booking-demo parity shell to the React/Vite booking demo route, including the old-style public navigation prompt, footer treatment, and booking CTA copy.
-- Added route-level SEO metadata for the booking demo page so the hash-routed public booking surface has standalone title/description/canonical coverage.
-- Kept the new slice read-only and Workers-safe by reusing existing static route rendering rather than introducing new persistence or Node-only dependencies.
+- Added a Workers-safe admin vehicle catalog endpoint (`GET /api/admin/vehicles`) plus a guarded update endpoint (`PATCH /api/admin/vehicles/:id`) backed by the shared vehicle update schema.
+- Converted the admin vehicle management screen into an editable roster with a quick-edit panel for status, location, carousel order, luxury flag, minimum hours, and description.
+- Kept public fleet data in sync with admin updates by mutating the existing Workers seed catalog in place, so the admin edit slice is visible across the serverless workspace.
 - Verified the repo passes `npm run typecheck`, `npm run build:web`, and `npm run build:api` after the change.
 
 ## Current migrated areas
@@ -17,7 +17,7 @@
 - Shared vehicle/quote schemas and pricing logic.
 - Shared ride-detail helpers for trip type, airport detection, auto service inference, and round-trip hour calculation.
 - Shared vehicle capacity-band helpers and filter contract.
-- Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, and admin settings / SMTP relay snapshot plumbing.
+- Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, admin settings / SMTP relay snapshot plumbing, and admin vehicle catalog edit payloads.
 - Public vehicle detail response contract for the fleet spotlight view, including legacy plate-number metadata.
 - Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
 - Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, luggage and charter-price parity on the booking demo cards, image gallery spotlighting, hash-synced fleet deep links, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, legacy order badges, and a legacy booking-demo parity shell.
@@ -44,6 +44,7 @@
 - Public how-to-book support page bridge with legacy FAQ coverage and structured data for search parity.
 - Public blog landing page, article-detail route, and Workers-backed article JSON/RSS feed for the legacy content surface.
 - Legacy booking handoff bridge that now preserves selected vehicle and draft metadata when returning to the main booking workspace.
+- Admin vehicle management quick-edit slice with live catalog refresh and in-place Workers seed updates.
 
 ## Remaining major areas
 
@@ -64,8 +65,9 @@
 - Webhook verification is Workers-safe, but it falls back to a dev bypass when `STRIPE_WEBHOOK_SECRET` is unset.
 - The return pages now reflect webhook-confirmed/failed states, but they still do not persist authoritative paid state outside the Worker runtime.
 - Actual hosted checkout creation still depends on `STRIPE_SECRET_KEY` being configured in the deployed Worker environment.
-- Vehicle catalog still comes from curated Worker seed data; category/capacity/filter contracts are migrated, but the source is not yet database-backed or admin-editable.
+- Vehicle catalog still comes from curated Worker seed data; the new admin edit path mutates that catalog in memory, but it is not yet database-backed or admin-editable across restarts.
 - Support inquiries are now accepted by the Worker runtime, but they are still in-memory and not durably stored or exported.
 - The legacy booking handoff is now preserved in the workspace UI, but the underlying state is still browser/runtime-backed rather than durable session storage.
 - The admin settings surface now includes a Workers-safe SMTP relay validator plus a profile snapshot/update bridge, but it still stores only in-memory snapshots; password consolidation and durable settings persistence still need a serverless implementation.
 - The admin hero and blog snapshots are protected and reviewable, but they remain read-only; legacy hero/post CRUD and upload flows still need a serverless implementation.
+- The admin vehicle edit snapshot is intentionally narrow and still does not cover the full legacy add/delete CRUD surface.

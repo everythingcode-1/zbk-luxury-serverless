@@ -29,6 +29,10 @@ import {
   buildVehicleQuote,
   bookingHistoryQuerySchema,
   bookingHistoryResponseSchema,
+  adminVehicleCatalogResponseSchema,
+  adminVehicleUpdateRequestSchema,
+  type AdminVehicleCatalogResponse,
+  type AdminVehicleUpdateRequest,
   bookingLookupQuerySchema,
   contactInquiryResponseSchema,
   contactInquirySchema,
@@ -831,7 +835,7 @@ function getStripeWebhookPaymentUpdate(eventType: string) {
   }
 }
 
-const vehicleCatalog: Vehicle[] = [
+let vehicleCatalog: Vehicle[] = [
   vehicleSchema.parse({
     id: 'alphard-executive-lounge',
     name: 'Toyota Alphard Executive Lounge',
@@ -929,6 +933,60 @@ const vehicleCatalog: Vehicle[] = [
     },
   }),
 ];
+
+function summarizeVehicleCatalog(vehicles: Vehicle[]) {
+  return vehicles.reduce(
+    (acc, vehicle) => {
+      acc.totalVehicles += 1;
+      acc.availableVehicles += vehicle.status === 'AVAILABLE' ? 1 : 0;
+      acc.luxuryVehicles += vehicle.isLuxury ? 1 : 0;
+      acc.maintenanceVehicles += vehicle.status === 'MAINTENANCE' ? 1 : 0;
+      acc.featuredVehicles += vehicle.carouselOrder != null ? 1 : 0;
+      return acc;
+    },
+    {
+      totalVehicles: 0,
+      availableVehicles: 0,
+      luxuryVehicles: 0,
+      maintenanceVehicles: 0,
+      featuredVehicles: 0,
+    },
+  );
+}
+
+function buildAdminVehicleCatalogResponse(message: string): AdminVehicleCatalogResponse {
+  return adminVehicleCatalogResponseSchema.parse({
+    message,
+    data: {
+      updatedAt: new Date().toISOString(),
+      summary: summarizeVehicleCatalog(vehicleCatalog),
+      vehicles: sortVehiclesForDisplay(vehicleCatalog),
+    },
+  });
+}
+
+function updateVehicleCatalogEntry(vehicleId: string, patch: AdminVehicleUpdateRequest) {
+  const normalizedVehicleId = vehicleId.trim();
+  const index = vehicleCatalog.findIndex((vehicle) => vehicle.id === normalizedVehicleId);
+
+  if (index === -1) {
+    return null;
+  }
+
+  const currentVehicle = vehicleCatalog[index];
+  const nextVehicle = vehicleSchema.parse({
+    ...currentVehicle,
+    ...(patch.status ? { status: patch.status } : {}),
+    ...(patch.location ? { location: patch.location.trim() } : {}),
+    ...(patch.carouselOrder !== undefined ? { carouselOrder: patch.carouselOrder ?? undefined } : {}),
+    ...(patch.isLuxury !== undefined ? { isLuxury: patch.isLuxury } : {}),
+    ...(patch.description !== undefined ? { description: patch.description.trim() || undefined } : {}),
+    ...(patch.minimumHours !== undefined ? { minimumHours: patch.minimumHours ?? undefined } : {}),
+  });
+
+  vehicleCatalog = vehicleCatalog.map((vehicle, vehicleIndex) => (vehicleIndex === index ? nextVehicle : vehicle));
+  return nextVehicle;
+}
 
 function buildFeaturedVehicles() {
   return sortVehiclesForDisplay(vehicleCatalog).slice(0, 4);
@@ -1281,6 +1339,51 @@ app.get('/api/admin/overview', (c) => {
   }
 
   return c.json(buildAdminDashboardPayload(session));
+});
+
+app.get('/api/admin/vehicles', (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to view the vehicle catalog.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Vehicle management access requires an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+  return c.json(buildAdminVehicleCatalogResponse('Loaded the editable fleet snapshot from the Workers seed catalog.'));
+});
+
+app.patch('/api/admin/vehicles/:id', zValidator('json', adminVehicleUpdateRequestSchema), (c) => {
+  const session = getActiveAuthSession(getAuthTokenFromRequest(c.req.raw));
+
+  if (!session) {
+    return c.json({ message: 'Sign in as an admin to update vehicles.' }, 401);
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return c.json({ message: 'Vehicle updates require an ADMIN session.' }, 403);
+  }
+
+  setAuthSessionCookie(c, session.token);
+
+  const updatedVehicle = updateVehicleCatalogEntry(c.req.param('id'), c.req.valid('json'));
+  if (!updatedVehicle) {
+    return c.json({ message: 'Vehicle not found' }, 404);
+  }
+
+  return c.json(
+    adminVehicleCatalogResponseSchema.parse({
+      message: `Saved ${updatedVehicle.name} in the Workers vehicle catalog.`,
+      data: {
+        updatedAt: new Date().toISOString(),
+        summary: summarizeVehicleCatalog(vehicleCatalog),
+        vehicles: sortVehiclesForDisplay(vehicleCatalog),
+      },
+    }),
+  );
 });
 
 app.get('/api/admin/bookings', (c) => {

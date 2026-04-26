@@ -97,6 +97,38 @@ export const vehicleDetailResponseSchema = z.object({
 
 export type VehicleDetailResponse = z.infer<typeof vehicleDetailResponseSchema>;
 
+export const adminVehicleCatalogSummarySchema = z.object({
+  totalVehicles: z.number().int().nonnegative(),
+  availableVehicles: z.number().int().nonnegative(),
+  luxuryVehicles: z.number().int().nonnegative(),
+  maintenanceVehicles: z.number().int().nonnegative(),
+  featuredVehicles: z.number().int().nonnegative(),
+});
+
+export type AdminVehicleCatalogSummary = z.infer<typeof adminVehicleCatalogSummarySchema>;
+
+export const adminVehicleUpdateRequestSchema = z.object({
+  status: vehicleStatusSchema.optional(),
+  location: z.string().trim().min(2).max(120).optional(),
+  carouselOrder: z.coerce.number().int().positive().nullable().optional(),
+  isLuxury: z.coerce.boolean().optional(),
+  description: z.string().trim().max(500).optional(),
+  minimumHours: z.coerce.number().int().positive().nullable().optional(),
+});
+
+export type AdminVehicleUpdateRequest = z.infer<typeof adminVehicleUpdateRequestSchema>;
+
+export const adminVehicleCatalogResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    updatedAt: z.string(),
+    summary: adminVehicleCatalogSummarySchema,
+    vehicles: z.array(vehicleSchema),
+  }),
+});
+
+export type AdminVehicleCatalogResponse = z.infer<typeof adminVehicleCatalogResponseSchema>;
+
 export const vehiclesFilterSchema = z.object({
   status: z.string().optional(),
   serviceType: serviceTypeSchema.optional(),
