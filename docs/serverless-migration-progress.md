@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-21 23:04 WIB
-- Estimated migration progress: 99.9993%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, and the public blog routes. This run added legacy homepage service highlights plus homepage SEO/organization schema metadata to the root route, tightening the public marketing parity while staying within the current static/serverless contract.
+- Last updated: 2026-04-26 22:21 WIB
+- Estimated migration progress: 99.9994%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, and the public blog routes. This run added a legacy booking-demo parity shell plus route-level SEO metadata and footer/CTA treatment, tightening the public booking surface while staying within the current static/serverless contract.
 
 ## Completed this run
 
-- Added a legacy homepage parity section to the root React/Vite route with the original service-highlight cards and trust-signal pills.
-- Added homepage SEO metadata and organization JSON-LD to the root route so the public landing page now mirrors the legacy marketing surface more closely.
+- Added a legacy booking-demo parity shell to the React/Vite booking demo route, including the old-style public navigation prompt, footer treatment, and booking CTA copy.
+- Added route-level SEO metadata for the booking demo page so the hash-routed public booking surface has standalone title/description/canonical coverage.
 - Kept the new slice read-only and Workers-safe by reusing existing static route rendering rather than introducing new persistence or Node-only dependencies.
 - Verified the repo passes `npm run typecheck`, `npm run build:web`, and `npm run build:api` after the change.
 
@@ -20,7 +20,7 @@
 - Shared auth/session schemas for login, registration, session lookup, logout, route hints, capability lists, protected customer booking history, admin overview reporting, and admin settings / SMTP relay snapshot plumbing.
 - Public vehicle detail response contract for the fleet spotlight view, including legacy plate-number metadata.
 - Public vehicle catalog endpoints with seed data, explicit carousel ordering, richer legacy-inspired metadata, category/luxury/capacity filtering, and hash-routed fleet / booking landing / booking confirmation / booking demo / how-to-book / my-bookings / contact / services routes built on top of the live fleet data.
-- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, luggage and charter-price parity on the booking demo cards, image gallery spotlighting, hash-synced fleet deep links, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, and legacy order badges.
+- Public vehicle selection UI with category browsing, capacity-band filtering, richer detail highlights, legacy-inspired vehicle-card parity, live supported-service/minimum-booking-window metadata, luggage and charter-price parity on the booking demo cards, image gallery spotlighting, hash-synced fleet deep links, deep-linkable fleet-to-booking handoff, route-level fleet SEO/structured data, legacy order badges, and a legacy booking-demo parity shell.
 - Public booking quote request flow.
 - Public services page bridge with legacy-inspired marketing content and booking CTAs.
 - Public about/company profile page bridge with legacy-inspired story, values, and booking CTAs.

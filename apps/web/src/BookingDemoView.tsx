@@ -1,9 +1,25 @@
 import type { Vehicle } from '@zbk/shared';
 
+import PageSeo from './PageSeo';
+
 type BookingDemoViewProps = {
   isLoadingVehicles: boolean;
   vehicles: Vehicle[];
   vehicleCategories: string[];
+};
+
+const bookingDemoSeo = {
+  title: 'Booking Demo - Legacy Booking Flow on React/Vite | ZBK Luxury',
+  description:
+    'Explore the migrated booking demo route with public fleet previews, a 3-step booking guide, and direct handoff back into the serverless booking workspace.',
+  canonicalUrl: 'https://www.zbktransportservices.com/booking-demo',
+  keywords: [
+    'booking demo Singapore',
+    'luxury car booking demo',
+    'ZBK booking flow',
+    'React Vite booking page',
+    'Cloudflare Workers booking workspace',
+  ],
 };
 
 function formatPrice(vehicle: Vehicle) {
@@ -103,30 +119,57 @@ export default function BookingDemoView({ isLoadingVehicles, vehicles, vehicleCa
   const previewVehicles = vehicles.slice(0, 4);
 
   return (
-    <main className="page">
-      <section className="hero">
-        <p className="eyebrow">ZBK Luxury Serverless</p>
-        <h1>Booking demo route now lives in the React/Vite app.</h1>
-        <p>
-          This hash-routed page mirrors the legacy booking-demo experience with a public fleet preview,
-          a 3-step booking guide, and direct links back into the migrated booking workspace.
-        </p>
-        <div className="service-pills">
-          <span className="pill">{isLoadingVehicles ? 'Loading fleet…' : `${vehicles.length} vehicles`}</span>
-          <span className="pill pill--muted">{vehicleCategories.length || 0} categories</span>
-          <a className="secondary-link" href="#/how-to-book" style={{ minWidth: 0 }}>
-            How to book
-          </a>
-          <a className="secondary-link" href="#/fleet" style={{ minWidth: 0 }}>
-            Open public fleet
-          </a>
-          <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
-            Back to booking workspace
-          </a>
-        </div>
-      </section>
+    <>
+      <PageSeo {...bookingDemoSeo} />
+      <main className="page">
+        <section className="card" style={{ marginBottom: 20 }}>
+          <div className="section-title-row">
+            <div>
+              <p className="eyebrow">Legacy booking-demo parity</p>
+              <h2>Public booking shell</h2>
+            </div>
+            <span className="pill pill--muted">Next.js page → React/Vite</span>
+          </div>
+          <div className="service-pills">
+            <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
+              Home
+            </a>
+            <a className="secondary-link" href="#/fleet" style={{ minWidth: 0 }}>
+              Fleet
+            </a>
+            <a className="secondary-link" href="#/services" style={{ minWidth: 0 }}>
+              Services
+            </a>
+            <a className="secondary-link" href="#/contact" style={{ minWidth: 0 }}>
+              Contact
+            </a>
+            <span className="pill">Click "Book now" on any vehicle to start the booking process</span>
+          </div>
+        </section>
 
-      <section className="card-grid">
+        <section className="hero">
+          <p className="eyebrow">ZBK Luxury Serverless</p>
+          <h1>Booking demo route now lives in the React/Vite app.</h1>
+          <p>
+            This hash-routed page mirrors the legacy booking-demo experience with a public fleet preview,
+            a 3-step booking guide, and direct links back into the migrated booking workspace.
+          </p>
+          <div className="service-pills">
+            <span className="pill">{isLoadingVehicles ? 'Loading fleet…' : `${vehicles.length} vehicles`}</span>
+            <span className="pill pill--muted">{vehicleCategories.length || 0} categories</span>
+            <a className="secondary-link" href="#/how-to-book" style={{ minWidth: 0 }}>
+              How to book
+            </a>
+            <a className="secondary-link" href="#/fleet" style={{ minWidth: 0 }}>
+              Open public fleet
+            </a>
+            <a className="secondary-link" href="#/" style={{ minWidth: 0 }}>
+              Back to booking workspace
+            </a>
+          </div>
+        </section>
+
+        <section className="card-grid">
         <article className="card">
           <p className="eyebrow">Step 1</p>
           <h2>Enter ride details</h2>
@@ -219,6 +262,17 @@ export default function BookingDemoView({ isLoadingVehicles, vehicles, vehicleCa
           </div>
         </section>
       ) : null}
+
+      <footer className="card" style={{ marginTop: 20, marginBottom: 0 }}>
+        <p className="eyebrow" style={{ marginTop: 0 }}>
+          Legacy booking-demo footer
+        </p>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          The React/Vite booking demo keeps the old public booking entry visible while the serverless workspace handles
+          the actual draft, quote, and checkout handoff.
+        </p>
+      </footer>
     </main>
+  </>
   );
 }
