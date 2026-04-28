@@ -40,9 +40,23 @@ export default function LoginPortalView() {
           </p>
           <span className="secondary-link">Open customer workspace</span>
         </a>
+
+        <a className="auth-portal__card" href="#/admin-direct">
+          <div className="auth-portal__card-header">
+            <span className="pill">Legacy access</span>
+            <strong>Direct admin bridge</strong>
+          </div>
+          <p className="muted">
+            Mirrors the old admin-direct page so the login requirement bypass remains visible while the serverless dashboard does the real work.
+          </p>
+          <span className="secondary-link">Open direct admin bridge</span>
+        </a>
       </div>
 
       <div className="service-pills service-pills--tight">
+        <a className="secondary-link" href="#/admin-simple">
+          Open legacy success page
+        </a>
         <a className="secondary-link" href="#/admin-test">
           Open admin auth test console
         </a>

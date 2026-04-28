@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-28 20:09 WIB
-- Estimated migration progress: 99.9998%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, the public blog routes, and dedicated legacy-style auth debug bridges that exercise browser storage plus the Workers `/api/auth/me`, `/api/auth/login`, and `/health` paths. This run adds visible compatibility routes for the old auth debug pages without expanding into durable persistence yet.
+- Last updated: 2026-04-28 20:10 WIB
+- Estimated migration progress: 99.99984%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, the public blog routes, and dedicated legacy-style auth debug and admin-access bridges that exercise browser storage plus the Workers `/api/auth/me`, `/api/auth/login`, and `/health` paths. This run adds visible compatibility routes for the old direct/simple admin entry pages without expanding into durable persistence yet.
 
 ## Completed this run
 
-- Added dedicated hash-routed `/test-login` and `/test-auth` bridges in the Vite app so the old Next.js auth debug pages now exercise the live Workers health check, cookie-backed auth transport, and demo sign-in flows.
-- Reused the new auth debug bridge from the login portal and admin auth test console so reviewers can reach the compatibility pages from the migrated auth surfaces.
+- Added dedicated hash-routed `/admin-direct` and `/admin-simple` bridges in the Vite app so the old Next.js admin access pages now have serverless-safe landing spots alongside the migrated dashboard.
+- Reused the new admin access bridges from the login portal so reviewers can reach the compatibility pages from the migrated auth surfaces.
 - Kept the slice narrow and reviewable while verifying the repo still passes `npm run typecheck`, `npm run build:web`, and `npm run build:api`.
 
 ## Current migrated areas
