@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-27 02:32 WIB
-- Estimated migration progress: 99.9997%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, the public blog routes, and now a legacy-style admin auth test console that verifies browser storage plus the Workers /api/auth/me path. This run adds a visible admin/auth compatibility bridge without expanding into durable persistence yet.
+- Last updated: 2026-04-28 20:09 WIB
+- Estimated migration progress: 99.9998%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, the public blog routes, and dedicated legacy-style auth debug bridges that exercise browser storage plus the Workers `/api/auth/me`, `/api/auth/login`, and `/health` paths. This run adds visible compatibility routes for the old auth debug pages without expanding into durable persistence yet.
 
 ## Completed this run
 
-- Added a legacy-style `/admin-test` route that inspects browser storage, normalizes the Workers auth session, and calls `/api/auth/me` so the admin auth transport can be debugged from one screen.
-- Added discoverability links to the new admin auth test console from both the login portal and the admin dashboard.
+- Added dedicated hash-routed `/test-login` and `/test-auth` bridges in the Vite app so the old Next.js auth debug pages now exercise the live Workers health check, cookie-backed auth transport, and demo sign-in flows.
+- Reused the new auth debug bridge from the login portal and admin auth test console so reviewers can reach the compatibility pages from the migrated auth surfaces.
 - Kept the slice narrow and reviewable while verifying the repo still passes `npm run typecheck`, `npm run build:web`, and `npm run build:api`.
 
 ## Current migrated areas
@@ -36,7 +36,7 @@
 - Workers-safe receipt snapshot endpoint plus receipt rendering in the payment return view.
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
-- Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, legacy-compatible login portal routes, and the new admin auth test console.
+- Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, legacy-compatible login portal routes, the new admin auth test console, and dedicated `/test-login` / `/test-auth` debug bridges.
 - Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated analysis route, a dedicated hero-section route, a dedicated vehicle-management route, a dedicated booking-management route, a dedicated blog-management route, and a Workers-safe settings/SMTP relay route for legacy-style operational inspection.
 - Admin settings profile snapshot/update bridge that reuses the Workers auth session and `/api/auth/me` profile patch contract.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.

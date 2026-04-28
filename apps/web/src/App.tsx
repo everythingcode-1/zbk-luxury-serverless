@@ -41,6 +41,7 @@ import HowToBookView from './HowToBookView';
 import AboutView from './AboutView';
 import HomepageLegacyHighlights from './HomepageLegacyHighlights';
 import LoginPortalView from './LoginPortalView';
+import AuthDebugView from './AuthDebugView';
 import PageSeo from './PageSeo';
 import { getLegacyBookingVehicleId, parseLegacyBookingData } from './legacyBookingData';
 
@@ -992,6 +993,14 @@ export default function App() {
 
   if (routeState.pathname === '/login') {
     return <LoginPortalView />;
+  }
+
+  if (routeState.pathname === '/test-login') {
+    return <AuthDebugView variant="login" />;
+  }
+
+  if (routeState.pathname === '/test-auth') {
+    return <AuthDebugView variant="auth" />;
   }
 
   if (routeState.pathname === '/login/admin') {

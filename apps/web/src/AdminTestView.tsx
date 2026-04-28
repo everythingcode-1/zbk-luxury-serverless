@@ -120,6 +120,9 @@ export default function AdminTestView() {
           <a className="secondary-link" href="#/admin">
             Open admin dashboard
           </a>
+          <a className="secondary-link" href="#/test-login">
+            Open legacy login debug bridge
+          </a>
           <button className="secondary-button admin-dashboard__refresh-button" type="button" onClick={() => void refreshSnapshot()}>
             {loading ? 'Refreshing…' : 'Refresh auth snapshot'}
           </button>

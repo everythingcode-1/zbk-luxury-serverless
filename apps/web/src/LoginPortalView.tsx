@@ -46,6 +46,12 @@ export default function LoginPortalView() {
         <a className="secondary-link" href="#/admin-test">
           Open admin auth test console
         </a>
+        <a className="secondary-link" href="#/test-login">
+          Open legacy login debug bridge
+        </a>
+        <a className="secondary-link" href="#/test-auth">
+          Open legacy auth debug bridge
+        </a>
       </div>
 
       <p className="muted auth-workspace__note">
