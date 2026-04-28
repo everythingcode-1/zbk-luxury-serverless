@@ -8,6 +8,7 @@ type PageSeoProps = {
   canonicalUrl?: string;
   keywords?: string[];
   jsonLd?: JsonLdValue;
+  noIndex?: boolean;
 };
 
 function setManagedMeta(
@@ -82,7 +83,7 @@ function setManagedLink(documentRef: Document, rel: string, href: string | undef
   };
 }
 
-export default function PageSeo({ title, description, canonicalUrl, keywords, jsonLd }: PageSeoProps) {
+export default function PageSeo({ title, description, canonicalUrl, keywords, jsonLd, noIndex }: PageSeoProps) {
   useEffect(() => {
     const cleanupFns: Array<() => void> = [];
     const previousTitle = document.title;
@@ -96,12 +97,18 @@ export default function PageSeo({ title, description, canonicalUrl, keywords, js
       setManagedMeta(document, 'meta[name="description"]', { name: 'description' }, description),
       setManagedMeta(document, 'meta[name="keywords"]', { name: 'keywords' }, keywords?.join(', ')),
       setManagedLink(document, 'canonical', canonicalUrl),
+      setManagedMeta(
+        document,
+        'meta[name="robots"]',
+        { name: 'robots' },
+        noIndex ? 'noindex, nofollow' : undefined,
+      ),
     );
 
     return () => {
       cleanupFns.reverse().forEach((cleanup) => cleanup());
     };
-  }, [canonicalUrl, description, keywords, title]);
+  }, [canonicalUrl, description, keywords, noIndex, title]);
 
   if (!jsonLd) {
     return null;

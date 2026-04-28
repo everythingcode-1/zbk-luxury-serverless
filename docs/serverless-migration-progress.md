@@ -1,13 +1,13 @@
 # Serverless Migration Progress
 
-- Last updated: 2026-04-28 20:10 WIB
-- Estimated migration progress: 99.99984%
-- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, the public blog routes, and dedicated legacy-style auth debug and admin-access bridges that exercise browser storage plus the Workers `/api/auth/me`, `/api/auth/login`, and `/health` paths. This run adds visible compatibility routes for the old direct/simple admin entry pages without expanding into durable persistence yet.
+- Last updated: 2026-04-29 00:18 WIB
+- Estimated migration progress: 99.99986%
+- Justification: the serverless stack now includes the public booking/fleet flows, auth/session bridge, Stripe return/webhook slices, admin overview, vehicle management, booking management, admin analysis, admin settings, a Workers-safe admin blog snapshot bridge, the public blog routes, and dedicated legacy-style auth debug and admin-access bridges that exercise browser storage plus the Workers `/api/auth/me`, `/api/auth/login`, and `/health` paths. This run adds private-route noindex metadata and a robots.txt crawl hint so the migrated admin/auth surfaces stay out of search indexing while remaining reviewable.
 
 ## Completed this run
 
-- Added dedicated hash-routed `/admin-direct` and `/admin-simple` bridges in the Vite app so the old Next.js admin access pages now have serverless-safe landing spots alongside the migrated dashboard.
-- Reused the new admin access bridges from the login portal so reviewers can reach the compatibility pages from the migrated auth surfaces.
+- Added `noIndex` support to the shared `PageSeo` helper and applied it to the internal admin/auth routes so the migrated private surfaces emit crawl-safe metadata.
+- Added a `robots.txt` asset for the Vite app with explicit disallow rules for the legacy admin and debug paths.
 - Kept the slice narrow and reviewable while verifying the repo still passes `npm run typecheck`, `npm run build:web`, and `npm run build:api`.
 
 ## Current migrated areas
@@ -37,6 +37,7 @@
 - Stripe webhook intake with signature verification support, payment trail tracking, and booking/payment confirmation bookkeeping in the Worker runtime snapshot.
 - Basic Worker health endpoint and Stripe webhook placeholder routes.
 - Workers-safe auth endpoints with cookie-backed auth-token transport plus a small React/Vite auth workspace exercising login/register/me/logout, profile updates, route-aware session surfacing, authenticated booking history, legacy-compatible login portal routes, the new admin auth test console, and dedicated `/test-login` / `/test-auth` debug bridges.
+- Crawl-safe noindex metadata and robots hints for the internal admin/auth/debug routes.
 - Serverless admin overview endpoint and hash-routed admin dashboard that now includes featured vehicle roster snapshots, booking-value analytics, a dedicated analysis route, a dedicated hero-section route, a dedicated vehicle-management route, a dedicated booking-management route, a dedicated blog-management route, and a Workers-safe settings/SMTP relay route for legacy-style operational inspection.
 - Admin settings profile snapshot/update bridge that reuses the Workers auth session and `/api/auth/me` profile patch contract.
 - Public contact/support page bridge with a Workers-backed support inquiry submission flow and legacy showroom-map / metadata parity.
@@ -68,5 +69,6 @@
 - Support inquiries are now accepted by the Worker runtime, but they are still in-memory and not durably stored or exported.
 - The legacy booking handoff is now preserved in the workspace UI, but the underlying state is still browser/runtime-backed rather than durable session storage.
 - The admin settings surface now includes a Workers-safe SMTP relay validator plus a profile snapshot/update bridge, but it still stores only in-memory snapshots; password consolidation and durable settings persistence still need a serverless implementation.
+- The private-route crawl protections are still best-effort for a hash-routed SPA; `noindex` meta is the primary safeguard, while `robots.txt` mainly preserves the legacy migration intent.
 - The admin hero and blog snapshots are protected and reviewable, but they remain read-only; legacy hero/post CRUD and upload flows still need a serverless implementation.
 - The admin vehicle edit snapshot is intentionally narrow and still does not cover the full legacy add/delete CRUD surface.

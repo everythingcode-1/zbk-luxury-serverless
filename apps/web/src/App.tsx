@@ -162,6 +162,12 @@ const homepageSeo = {
   },
 };
 
+const privateRouteSeo = {
+  title: 'Private workspace | ZBK Luxury Serverless',
+  description: 'Internal admin and auth debug route for the serverless migration.',
+  noIndex: true,
+};
+
 function buildBookingFormFromLegacyData(draft: ReturnType<typeof parseLegacyBookingData>): BookingFormState {
   const tripType =
     draft?.tripType?.toLowerCase().includes('round') || draft?.returnDate || draft?.returnTime ? 'ROUND_TRIP' : 'ONE_WAY';
@@ -965,39 +971,84 @@ export default function App() {
   }
 
   if (routeState.pathname === '/admin') {
-    return <AdminDashboardView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminDashboardView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin-direct') {
-    return <AdminAccessView variant="direct" />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminAccessView variant="direct" />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin-simple') {
-    return <AdminAccessView variant="simple" />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminAccessView variant="simple" />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin/analysis') {
-    return <AdminAnalysisView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminAnalysisView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin/hero-section') {
-    return <AdminHeroSectionView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminHeroSectionView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin/settings') {
-    return <AdminSettingsView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminSettingsView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin/vehicles') {
-    return <AdminVehiclesView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminVehiclesView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin/bookings') {
-    return <AdminBookingsView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminBookingsView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/admin/blog') {
-    return <AdminBlogView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminBlogView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/login') {
@@ -1005,41 +1056,62 @@ export default function App() {
   }
 
   if (routeState.pathname === '/test-login') {
-    return <AuthDebugView variant="login" />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AuthDebugView variant="login" />
+      </>
+    );
   }
 
   if (routeState.pathname === '/test-auth') {
-    return <AuthDebugView variant="auth" />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AuthDebugView variant="auth" />
+      </>
+    );
   }
 
   if (routeState.pathname === '/login/admin') {
     return (
-      <AuthWorkspace
-        initialRole="ADMIN"
-        initialEmail="admin@zbk.local"
-        initialPassword="Admin123!"
-        initialDisplayName="Operations Admin"
-        workspaceTitle="Admin login workspace"
-        workspaceDescription="Pre-filled admin access mirrors the legacy login portal and launches the Workers auth workspace with the admin demo account."
-      />
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AuthWorkspace
+          initialRole="ADMIN"
+          initialEmail="admin@zbk.local"
+          initialPassword="Admin123!"
+          initialDisplayName="Operations Admin"
+          workspaceTitle="Admin login workspace"
+          workspaceDescription="Pre-filled admin access mirrors the legacy login portal and launches the Workers auth workspace with the admin demo account."
+        />
+      </>
     );
   }
 
   if (routeState.pathname === '/admin-test') {
-    return <AdminTestView />;
+    return (
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AdminTestView />
+      </>
+    );
   }
 
   if (routeState.pathname === '/login/customer') {
     return (
-      <AuthWorkspace
-        initialRole="CUSTOMER"
-        initialEmail="customer@zbk.local"
-        initialPassword="Customer123!"
-        initialDisplayName="Demo Customer"
-        initialPhone="+62 812 3456 7890"
-        workspaceTitle="Customer login workspace"
-        workspaceDescription="Customer access now routes through the same Workers auth workspace so the legacy portal can land on the migrated booking-history flow."
-      />
+      <>
+        <PageSeo {...privateRouteSeo} />
+        <AuthWorkspace
+          initialRole="CUSTOMER"
+          initialEmail="customer@zbk.local"
+          initialPassword="Customer123!"
+          initialDisplayName="Demo Customer"
+          initialPhone="+62 812 3456 7890"
+          workspaceTitle="Customer login workspace"
+          workspaceDescription="Customer access now routes through the same Workers auth workspace so the legacy portal can land on the migrated booking-history flow."
+        />
+      </>
     );
   }
 

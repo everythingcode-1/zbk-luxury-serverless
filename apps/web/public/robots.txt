@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin-direct
+Disallow: /admin-simple
+Disallow: /admin-test
+Disallow: /admin/analysis
+Disallow: /admin/blog
+Disallow: /admin/bookings
+Disallow: /admin/hero-section
+Disallow: /admin/settings
+Disallow: /admin/vehicles
+Disallow: /login/admin
+Disallow: /login/customer
+Disallow: /test-login
+Disallow: /test-auth
+Disallow: /private/
